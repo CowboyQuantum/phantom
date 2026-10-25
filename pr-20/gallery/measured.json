@@ -1,0 +1,151 @@
+{
+ "meta": {
+  "commit": "3eb2301",
+  "date": "2026-10-25",
+  "numpy": "2.5.4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10"
+ },
+ "models": [
+  {
+   "model": "charge.ci.ConstantInteractionParams.mean_occupation",
+   "points": 10000,
+   "us_per_point": 1.517,
+   "what": "thermal occupation per gate point"
+  },
+  {
+   "model": "charge.hubbard.HubbardParams.mean_occupation",
+   "points": 10000,
+   "us_per_point": 10.24,
+   "what": "16x16 diagonalisation per gate point"
+  },
+  {
+   "model": "readout.sensor.SensorSETParams.current_a",
+   "points": 100000,
+   "us_per_point": 0.125,
+   "what": "sensor current per point"
+  },
+  {
+   "model": "readout.noise.TelegraphNoise.trace",
+   "points": 100000,
+   "us_per_point": 0.674,
+   "what": "one fluctuator per sample"
+  },
+  {
+   "model": "readout.noise.OneOverFNoise.trace",
+   "points": 10000,
+   "us_per_point": 16.227,
+   "what": "24 fluctuators per sample"
+  },
+  {
+   "model": "readout.measure.SensedDoubleDot.sweep_a (noisy)",
+   "points": 10000,
+   "us_per_point": 18.357,
+   "what": "occupation + sensor + three noise traces per point"
+  },
+  {
+   "model": "readout.lockin.lockin_sweep_a_per_v",
+   "points": 2500,
+   "us_per_point": 147.904,
+   "what": "8 evaluations per point, noisy"
+  },
+  {
+   "model": "readout.lockin.lockin_sweep_dynamic_a_per_v",
+   "points": 2500,
+   "us_per_point": 156.557,
+   "what": "8 evaluations + rate dynamics per point, noisy"
+  },
+  {
+   "model": "readout.loading.latched_occupation",
+   "points": 100000,
+   "us_per_point": 0.928,
+   "what": "per scan step"
+  }
+ ],
+ "protocols": {
+  "coulomb-oscillations-single-dot": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 1201,
+   "run_ms_per_point": 0.00187
+  },
+  "diamonds-single-dot": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 64521,
+   "run_ms_per_point": 0.0001
+  },
+  "noise-psd": {
+   "compile_s": 0.008,
+   "model_evals_per_point": 1.0,
+   "points": 30000,
+   "run_ms_per_point": 0.01869
+  },
+  "noise-time-trace": {
+   "compile_s": 0.0005,
+   "model_evals_per_point": 1.0,
+   "points": 30000,
+   "run_ms_per_point": 0.01917
+  },
+  "pinch-off-barrier": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 3e-05
+  },
+  "plunger-vs-barrier-map": {
+   "compile_s": 0.0001,
+   "model_evals_per_point": 1.0,
+   "points": 28800,
+   "run_ms_per_point": 0.00277
+  },
+  "sensor-coulomb-peak": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 0.00166
+  },
+  "stability-coarse-2dot": {
+   "compile_s": 0.0003,
+   "model_evals_per_point": 1.0,
+   "points": 40000,
+   "run_ms_per_point": 0.0186
+  },
+  "stability-fine-2dot": {
+   "compile_s": 0.0006,
+   "model_evals_per_point": 1.0,
+   "points": 22500,
+   "run_ms_per_point": 0.01908
+  },
+  "stability-lockin-common": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.16314
+  },
+  "stability-lockin-detuning": {
+   "compile_s": 0.0006,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.15971
+  },
+  "stability-lockin-p1": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.15959
+  },
+  "stability-lockin-p2": {
+   "compile_s": 0.0005,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.16094
+  },
+  "turn-on-single-gate": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 8e-05
+  }
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "coulomb-oscillations-single-dot": "ae77000f064763fd3e2708530b95a3e8182ef76cee02b19940d5e9c60d58d1c7",
+ "diamonds-single-dot": "b08ffc7cde3fad5c60dc8d5a4faaecd3442d6a9a3db56e14a3703285047eeb57",
+ "noise-psd": "e27e6c1296dccc8104e202c984eb36d3f563bd1b467513cbbdeceeee2165766d",
+ "noise-time-trace": "84d46b4e41efdf0a77596e7fec892718a530b1e67b9ac1057508b987399af0ea",
+ "pinch-off-barrier": "a5b596c4574ccc0c11fb6d3e15d9d5b940c5ec8dfb321bd350f303782442a95c",
+ "plunger-vs-barrier-map": "89ca617089438be372da0adbdac6c1e57a4a45925fe3af1fe74e59fb9b5fc5cb",
+ "sensor-coulomb-peak": "8b9038343c48b8598ece4f64d0c5afbd96741c13cfb03b0608acf97441777f53",
+ "stability-coarse-2dot": "dc9d6d93107a243d639b0fbd5576abbaf0daf14698e4fe8bbd9fcf624ab38495",
+ "stability-fine-2dot": "0171b6efa567d4f1167c619dd64bb672a3cec50bec34489680cee68564de0449",
+ "stability-lockin-common": "b0ebaa9947654321cb918426bd172be8a02f34b8348e10855dc56b0085ce66ad",
+ "stability-lockin-detuning": "a480facb4d845e60d1f4b10459709cddf11d455b40a7b55ada4b63d9010cef6d",
+ "stability-lockin-p1": "a396a5647e26cab4a069e94f4fdf985baf8bd33945ff54e9c0791d324e8b7211",
+ "stability-lockin-p2": "f4a474cd8749ea4a8bd8532a4ba9f79e6d4479f091baeeefc80c0a9e56b8f938",
+ "turn-on-single-gate": "b9e5a1e942929bf0c37a06edeeb9411bd9bf74d1fbfd723e6b57b57606871a50"
+}

@@ -1,0 +1,1027 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../STATUS/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Development plan - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phantom-development-plan-roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Development plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-two-tiers-adr-0001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Two tiers (ADR 0001)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-layers-adr-0004-each-imports-only-downward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Layers (ADR 0004) — each imports only downward
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-what-a-consumer-gets-adr-0003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. What a consumer gets (ADR 0003)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-the-defect-and-material-catalog-adr-0006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. The defect and material catalog (ADR 0006)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-validation-test-ladder-reference-library-gallery-adr-0007-0008-0009-0005-superseded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Validation: test ladder, reference library, gallery (ADR 0007, 0008, 0009; 0005 superseded)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-roadmap-operational-detail-in-docssteps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Roadmap — operational detail in docs/steps/
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-open-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Open decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-two-tiers-adr-0001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Two tiers (ADR 0001)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-layers-adr-0004-each-imports-only-downward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Layers (ADR 0004) — each imports only downward
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-what-a-consumer-gets-adr-0003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. What a consumer gets (ADR 0003)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-the-defect-and-material-catalog-adr-0006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. The defect and material catalog (ADR 0006)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-validation-test-ladder-reference-library-gallery-adr-0007-0008-0009-0005-superseded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Validation: test ladder, reference library, gallery (ADR 0007, 0008, 0009; 0005 superseded)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-roadmap-operational-detail-in-docssteps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Roadmap — operational detail in docs/steps/
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-open-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Open decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="phantom-development-plan-roadmap">phantom — Development Plan &amp; Roadmap</h1>
+<p><strong>Status:</strong> v0.1, for review · <strong>Owner:</strong> Captain · <strong>Date:</strong> 2026-10-24
+<strong>Scope:</strong> the physics of a gate-defined spin-qubit device as a library: from gate layout and material
+stack to charge, readout and spin, with disorder and fabrication defects drawn from a catalog. Consumers:
+qdt (as a simulated backend), agent evaluation, hosted training scenarios, device-physics studies.</p>
+<h2 id="1-purpose">1. Purpose</h2>
+<p>Real tune-up is hard because of what is not known about a device: its disorder, its defects, its valley
+splittings. No model predicts a particular device's tune-up at runtime, and this one does not try. phantom
+produces <strong>device instances</strong> that behave like real devices of their class — the right kinds of faults at
+the right rates, the right sweep-rate dependence, the right readout behaviour — and runs them cheaply enough
+to be swept ten thousand times by a tuning loop. Its claims are statistical (ADR 0002).</p>
+<h2 id="2-two-tiers-adr-0001">2. Two tiers (ADR 0001)</h2>
+<ul>
+<li><strong>Compile once.</strong> Expensive physics runs once per device instance: electrostatics for a layout and stack,
+  screening, disorder placement, valley-splitting draws. Output: a <em>compiled device</em> — parameter fields and
+  functions the runtime consumes (lever-arm fields, Hubbard parameters as functions of gate voltage, tunnel
+  rates, sensor coupling, noise spectra).</li>
+<li><strong>Run cheap.</strong> The runtime layers evaluate a compiled device at a gate point in well under a millisecond:
+  charge ground state, rates, sensor signal, noise samples, spin dynamics for a few qubits.
+A tune-up never waits on a solver; a scenario is compiled before it is served.</li>
+</ul>
+<h2 id="3-layers-adr-0004-each-imports-only-downward">3. Layers (ADR 0004) — each imports only downward</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Owns</th>
+<th>Runtime-capable form</th>
+<th>Offline form</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>layout</code></td>
+<td>Gate polygons, stack (2DEG depth, dielectrics), material class (SiGe, MOS)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>electrostatics</code></td>
+<td>V(r; gate vector) and its basis per gate</td>
+<td>Closed-form polygonal-gate potentials over a 2DEG (Davies–Larkin–Stern)</td>
+<td>FEM Poisson, Thomas–Fermi screening, via a wrapped external solver</td>
+</tr>
+<tr>
+<td><code>disorder</code></td>
+<td>Static potential perturbations and their generators, from the catalog</td>
+<td>Precomputed perturbation fields</td>
+<td>Placement draws</td>
+</tr>
+<tr>
+<td><code>valley</code></td>
+<td>Valley splitting per dot (Si)</td>
+<td>A draw from a distribution for the material and dot size</td>
+<td>— (atomistic is out of scope)</td>
+</tr>
+<tr>
+<td><code>charge</code></td>
+<td>Dots, barriers, few-electron Hubbard/CI, parameter functions t(V), U, V_ij</td>
+<td>Diagonalize small matrices per gate point</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>readout</code></td>
+<td>Lead tunnel rates, rate equations, latching, charge sensor (SET) response, RF reflectometry, noise processes (fluctuators, 1/f, telegraph, drift)</td>
+<td>All cheap</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>spin</code></td>
+<td>Zeeman with gate-dependent g, exchange J(ε, t_c), spin–orbit/EDSR, hyperfine, T₁, T₂*, Pauli spin blockade</td>
+<td>Lindblad for ≤3 qubits; Monte Carlo over noise</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>optimum</code></td>
+<td>For a compiled device: the best achievable operating point, lattice, sensor sensitivity, and (with spin) readout fidelity and coherence</td>
+<td>Cheap</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>compile</code></td>
+<td>Turns layout + material + a catalog draw + seed into a compiled device</td>
+<td>—</td>
+<td>Minutes per instance</td>
+</tr>
+</tbody>
+</table>
+<p><code>qdt-sim</code>'s <code>DoubleDotModel</code> and noise models are the seed of <code>charge</code> and <code>readout</code> (Step 1 migrates them).</p>
+<h2 id="4-what-a-consumer-gets-adr-0003">4. What a consumer gets (ADR 0003)</h2>
+<ul>
+<li><code>compile(layout, material, draw, seed) -&gt; Device</code> — a compiled, serialisable device instance with a
+  <code>model_version</code>.</li>
+<li><code>Device.at(gate_vector) -&gt; State</code> (charge configuration, rates, sensor signal); <code>Device.measure(...)</code>
+  for readout and spin outcomes; noise advanced by explicit time steps.</li>
+<li><code>Device.truth</code> — the hidden parameters, and <code>optimum(Device)</code> — the best achievable results. Consumers
+  that must hide truth from a user (a tuning loop, a product) simply do not hand it over.</li>
+<li>Reproducibility: parameters + seed + version → identical output.</li>
+<li>No instruments, no measurement vocabulary, no users: the adapter that turns a <code>Device</code> into a qdt stand
+  lives in qdt and pins a phantom release.</li>
+</ul>
+<h2 id="5-the-defect-and-material-catalog-adr-0006">5. The defect and material catalog (ADR 0006)</h2>
+<p><code>docs/catalog/</code> is data a human fills in: each entry names a defect or material trait, the layer it
+perturbs, the parameter and its distribution, a severity knob, the signature it leaves in a tune-up, and a
+source. <code>disorder</code> and <code>compile</code> read it. The catalog is the part only an experienced tuner can write; its
+entries are filed as issues for that reason.</p>
+<h2 id="6-validation-test-ladder-reference-library-gallery-adr-0007-0008-0009-0005-superseded">6. Validation: test ladder, reference library, gallery (ADR 0007, 0008, 0009; 0005 superseded)</h2>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>What</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>Analytic limits and invariants: a single dot's Coulomb diamonds, two-dot honeycomb geometry, lever arms from a known capacitance matrix, detailed balance in rate equations, Lindblad trace preservation</td>
+<td>CI</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>Reproductions of items in <code>docs/references/</code> (confirmed by a human): valley-splitting distributions, charge-noise spectra, PSB fidelity vs. valley splitting, exchange vs. detuning</td>
+<td>CI, marked <code>literature(id, item)</code></td>
+</tr>
+<tr>
+<td>Gallery</td>
+<td>Measurement protocols (turn-on, pinch-off, diamonds, stability maps, sensor peaks, noise traces and spectra, later spin readout) rendered with a fixed seed; a human signs each off on its data hash; each carries a time and compute budget</td>
+<td>CI renders and publishes; <code>docs/gallery/</code>; sign-off per protocol gates step exit</td>
+</tr>
+</tbody>
+</table>
+<p>No comparison with internal device statistics for now (ADR 0007). Quantities without a published standard are marked <code>calibration: none</code>.</p>
+<h2 id="7-roadmap-operational-detail-in-docssteps">7. Roadmap — operational detail in <code>docs/steps/</code></h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Name</th>
+<th>Exit in one line</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Bootstrap</td>
+<td>Repo, CI, layer skeletons, catalog template, first ADRs</td>
+<td><code>steps/00-bootstrap.md</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Charge and readout core</td>
+<td><code>qdt-sim</code>'s model and noise migrated; parameter functions; reproducibility contract proven</td>
+<td><code>steps/01-charge-readout-core.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Layout and closed-form electrostatics</td>
+<td>A layout + stack gives V(r) and lever-arm fields in microseconds; two-dot lattice emerges from a layout</td>
+<td><code>steps/02-layout-electrostatics.md</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Disorder and the fault models</td>
+<td>Catalog draws perturb the potential; unintentional dots, leaky barriers, switchers, drift appear for physical reasons</td>
+<td><code>steps/03-disorder-faults.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Readout physics</td>
+<td>Lead rates, latching, sweep-rate dependence, sensor and RF response, 1/f and telegraph noise from fluctuator ensembles</td>
+<td><code>steps/04-readout.md</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Valley</td>
+<td>Statistical valley splitting per dot; PSB consequences</td>
+<td><code>steps/05-valley.md</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Spin</td>
+<td>Few-qubit dynamics under pulses; readout fidelity, T₁, T₂*</td>
+<td><code>steps/06-spin.md</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Compile and optimum</td>
+<td>Offline FEM electrostatics wrapped; <code>compile()</code>; <code>optimum()</code> for every layer</td>
+<td><code>steps/07-compile-optimum.md</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>qdt cutover</td>
+<td><code>qdt-sim</code> becomes an adapter pinning phantom; qdt's golden files regenerated once</td>
+<td><code>steps/08-qdt-cutover.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>Steps 1–4 give faithful faults and are the body of the work; 5–6 extend to spin; 7 closes the loop; 8 is
+coordinated with qdt. 1 and 2 can start together.</p>
+<h2 id="8-open-decisions">8. Open decisions</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Which external electrostatics solver to wrap at Step 7</td>
+<td>Open; closed-form first</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Hubbard vs. full CI as the default charge solver</td>
+<td>Open; Hubbard first, CI where PSB needs orbitals</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Serialisation of a compiled device (format, size)</td>
+<td>Open; must be versioned and diffable</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Catalog file format and schema (YAML proposed)</td>
+<td>Open; ADR 0006 proposes</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Whether holes (Ge) join the material classes</td>
+<td>Open; electrons in Si first</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-success-criteria">9. Success criteria</h2>
+<ol>
+<li>A tune-up loop runs against a phantom at ≥ 10⁴ gate points per second per core.</li>
+<li>The fault catalog's entries each produce their signature in a stability diagram, with a P0 or P1 test.</li>
+<li>Reproducibility holds across platforms in CI.</li>
+<li>qdt's adapter is under 300 lines and contains no physics.</li>
+<li>A P1 suite of at least five published results reproduces within stated tolerance.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
