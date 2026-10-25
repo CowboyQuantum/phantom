@@ -1,0 +1,86 @@
+name: pages
+# ADR 0012: every pull request publishes its own preview of the docs and the rendered gallery under
+# /pr-<n>/ on the Pages site; the main branch publishes the root. Review and sign-off happen on the
+# preview, before merging. The site is served from the gh-pages branch.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: pages-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: uv run python scripts/gallery.py --out build/gallery --reference-platform --allow-mismatch
+      - run: uv run mkdocs build
+      - run: mkdir -p site/gallery/rendered && cp -r build/gallery/. site/gallery/rendered/
+      - uses: actions/upload-artifact@v4
+        with: { name: site, path: site, retention-days: 7 }
+
+  preview:   # pull requests: /pr-<n>/ on the site, with a sticky comment carrying the link
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: site, path: site }
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+          commit_message: "preview pr-${{ github.event.pull_request.number }} @ ${{ github.event.pull_request.head.sha }}"
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          base="https://${REPO%%/*}.github.io/${REPO##*/}/pr-$PR"
+          body=$(printf '<!-- pages-preview -->\n**Preview** (ADR 0012) for \`%s\`: [docs](%s/) · [rendered gallery](%s/gallery/rendered/index.html) · [models and runtimes](%s/MODELS/)\n\nPublishes a minute or two after each push; removed when this pull request closes.' "${SHA:0:7}" "$base" "$base" "$base")
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --jq '.[] | select(.body | startswith("<!-- pages-preview -->")) | .id' | head -1)
+          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; else gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$body" >/dev/null; fi
+
+  publish:   # main: the root of the site
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: site, path: site }
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          keep_files: true
+          commit_message: "main @ ${{ github.sha }}"
+
+  cleanup:   # pull request closed or merged: remove its preview
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: gh-pages }
+        continue-on-error: true
+      - env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -d "pr-$PR" ]; then
+            git config user.name github-actions && git config user.email github-actions@github.com
+            git rm -r -q "pr-$PR" && git commit -q -m "remove preview pr-$PR" && git push
+          else
+            echo "no preview directory pr-$PR"
+          fi

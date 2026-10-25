@@ -4,7 +4,7 @@
 
 **Current step:** 1 — Charge and readout core → `docs/steps/01-charge-readout-core.md`, issue #16. Step 2 (issue #17)
 runs together with it. Milestone: "Steps 1-2: charge, readout, layout, electrostatics".
-**Branch:** `step-1/charge-readout-core` (PR #19 open, part of #16).
+**Branch:** `step-1/pages-previews` (PR pending, part of #16); PR #19 merged.
 **Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
@@ -31,13 +31,12 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- PR #19 (part of #16, does not close it): awaiting the owner's review of the fourteen rendered protocols (gallery
-  report published as a private artifact page from this machine; CI artifact `gallery-ubuntu-latest`).
+- PR #19 merged (Step 1 core, tooling, fourteen protocols, model map, runtime ledger). Sign-offs still pending.
+- PR for per-PR Pages previews (ADR 0012) from `step-1/pages-previews`.
 
 ## Known gaps
-- GitHub Pages is enabled (source: GitHub Actions) at https://cowboyquantum.github.io/phantom/. Enabling it added a
-  default `jekyll-gh-pages.yml` workflow to `main`, removed on this branch so only the mkdocs `pages` job in `ci.yml`
-  deploys. Until PR #19 merges, the site shows the Jekyll render of the repository files, not the docs.
+- Pages: ADR 0012 moves publishing to the `gh-pages` branch with per-PR previews at `/pr-<n>/`; the repository's
+  Pages source must be set to that branch (root) once it exists, by the owner if the session is not permitted.
 - No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
   `docs/gallery/signoff/<id>.yaml` at the owner's instruction (ADR 0008).
 - The two reference entries are `proposed`; no P1 test exists yet. The owner confirms or replaces them.

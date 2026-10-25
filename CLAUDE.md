@@ -36,7 +36,8 @@ could ask "why?" about; comment on the issue; commit.
    `proposed`, only a human sets `confirmed`. (ADR 0007)
 9. **The gallery is signed by a human.** Every protocol in `docs/gallery/protocols/` has a `budget`; CI
    renders it and checks its array hash against `docs/gallery/signoff/`; a session writes a sign-off only
-   when the human says so. No rendered image is committed. (ADR 0008, 0009)
+   when the human says so. No rendered image is committed; every PR publishes a preview at `/pr-<n>/` on the
+   Pages site and review happens there. (ADR 0008, 0009, 0012)
 
 ## Discipline
 - **Two-rung ladder** (ADR 0007): P0 analytic limits and invariants in CI; P1 reproductions of

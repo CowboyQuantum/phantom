@@ -1,6 +1,6 @@
 # 0008 — A gallery of measurement protocols, rendered by CI, signed off per protocol by a human
 
-**Status:** Accepted
+**Status:** Accepted (publishing amended by 0012: previews per pull request)
 **Date:** 2026-10-25
 **Step:** all, from Step 1
 

@@ -5,8 +5,10 @@ as physics (gates, ranges, resolution, readout channel, time base, seed). CI ren
 every PR; nothing rendered is stored in git. A human signs each protocol off; a step is settled only when
 all protocols its layers touch are signed.
 
-**View it.** On a PR: the `gallery` workflow artifact (PNGs, `index.html`, `budget.json`). On `main`:
-the docs site on GitHub Pages, "Gallery" in the nav, then [the rendered gallery](rendered/index.html). Locally:
+**View it.** On a pull request: the preview link in the sticky comment on the PR, which points at
+`https://cowboyquantum.github.io/phantom/pr-<n>/gallery/rendered/index.html` (ADR 0012); it updates a minute
+or two after each push and is removed when the PR closes. On `main`: the docs site, "Gallery" in the nav, then
+[the rendered gallery](rendered/index.html). The CI artifact `gallery-ubuntu-latest` holds the same files. Locally:
 
 ```
 uv run python scripts/gallery.py          # renders to build/gallery/ (gitignored)
