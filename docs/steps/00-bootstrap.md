@@ -29,4 +29,4 @@ Repo exists; CI green on an empty P0 suite; layer skeletons with docstrings; cat
 - plan §8 #4 catalog format
 
 ## Status
-IN PROGRESS
+DONE
