@@ -1,0 +1,23 @@
+id: stability-lockin-common
+name: Chopped-gate stability map, common-mode chop on P1 and P2
+step: 1
+description: As stability-lockin-p1 with the 1 mV square wave applied to P1 and P2 together (common mode). Both dots' lines respond; the interdot transition, along which the total charge is constant, responds weakly because common-mode pulsing moves along it. Same lead-rate landscape, default noise draw.
+layers: [charge, readout]
+runner: step1:stability_lockin
+instance:
+  model: sensed-double-dot-lead-rates
+  seed: 0
+  noise: default
+  lead_rates: {rate0_hz: [1.0e+3, 1.0e+3], weights_per_v: [[125.0, 20.0, 0.0], [20.0, 125.0, 0.0]]}
+sweep:
+  - {gate: P1, from: -0.05, to: 0.15, points: 200, unit: V}
+  - {gate: P2, from: -0.05, to: 0.15, points: 200, unit: V}
+readout: {channel: sensor_lockin, unit: A/V, lockin: {direction: {P1: 1.0, P2: 1.0}, amplitude_v: 1.0e-3, frequency_hz: 1000.0, cycles: 4}}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: lockin_a_per_v, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "dI/dV (A/V)", cmap: RdBu_r, robust: true, title: "demodulated signal, common mode"}
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: log10_rate_hz, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "log10 lead rate (Hz)", cmap: viridis, title: "lead rate of the faster dot"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.5, points: 40000, model_evals_per_point: 8, solver_calls: 0}
+must_show: []
