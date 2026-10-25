@@ -20,8 +20,7 @@ packages = ["src/phantom"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["literature: reproduces a published result (P1); internal: compares with device statistics not in this repo (P2)"]
-addopts = "-m 'not internal'"
+markers = ["literature(id, item): reproduces an item of a confirmed reference entry in docs/references (P1, ADR 0007)"]
 
 [tool.ruff]
 line-length = 100

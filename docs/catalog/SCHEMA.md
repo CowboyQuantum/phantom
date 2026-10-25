@@ -12,10 +12,11 @@ One YAML file per entry under `docs/catalog/entries/`, named `<id>.yaml`. Fields
 | `parameters` | list of `{name, unit, distribution, defaults}`; distributions name their family and parameters |
 | `severity` | how the knob scales the distribution (e.g. "multiplies density", "widens spread") |
 | `signature` | what a tuner sees: free text, plus `in: [stability, diamonds, sensor, psb, coherence]` |
-| `rate` | how often a device of this class shows it, as an order of magnitude with a source, or `unknown` |
+| `rate` | how often a device of this class shows it, as an order of magnitude citing a reference id, or `unknown` |
 | `tier` | `runtime` (a generator in `disorder`/`readout`) or `offline` (needs `compile`) |
-| `sources` | citations (DOI or arXiv); textbooks allowed; never internal data |
+| `sources` | ids from `docs/references/entries/` (ADR 0007); never free text, never internal data |
 | `status` | `draft` → `reviewed` (human) → `runtime` / `offline` (generator exists) / `rejected` |
+| `calibration` | `reference` (a `provides` item backs the distribution) or `none` (no published standard; nothing downstream may call it realistic) |
 | `notes` | anything else, including what the model deliberately ignores |
 
 Rules: no real device, wafer or site values; published values cite their paper; a session may write a

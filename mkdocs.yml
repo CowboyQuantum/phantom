@@ -6,5 +6,7 @@ nav:
   - Steps: steps/README.md
   - ADRs: adr/README.md
   - Catalog: catalog/README.md
+  - References: references/README.md
+  - Gallery: gallery/README.md
 plugins: [search]
 theme: {name: material}

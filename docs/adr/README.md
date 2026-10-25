@@ -8,5 +8,8 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0002 | Statistical realism, never prediction of a particular device | Accepted |
 | 0003 | Dependency-free library with a reproducibility contract; qdt's adapter lives in qdt | Accepted |
 | 0004 | Nine layers that import only downward; `compile` imports all | Accepted |
-| 0005 | Test ladder P0 / P1 / P2 | Accepted |
+| 0005 | Test ladder P0 / P1 / P2 | Superseded by 0007 |
 | 0006 | The defect and material catalog is data a human fills in | Proposed |
+| 0007 | Published results only; every claim names an entry in the reference library | Accepted |
+| 0008 | Gallery of measurement protocols, rendered by CI, signed off per protocol by a human | Accepted |
+| 0009 | Every gallery protocol carries a time and compute budget, measured in CI | Accepted |

@@ -14,11 +14,11 @@ The offline tier: FEM electrostatics for real stacks and overlapping gates throu
 - closed-form and FEM agree for a shallow single-layer layout within tolerance
 - `optimum` is attained by a brute-force search on a small device
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - none
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - a compiled device round-trips through serialisation and reproduces its diagrams

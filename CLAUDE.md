@@ -23,16 +23,24 @@ an ADR for any decision a future session could ask "why?" about; comment on the 
 4. **Compile once, run cheap:** anything slower than ~1 ms per gate point belongs in `compile`, which
    produces parameters the runtime layers consume. Runtime layers never call a solver. (ADR 0001)
 5. Every physical quantity carries its unit in the name or the docstring; parameters are dataclasses with
-   documented ranges and a literature source where one exists.
+   documented ranges and a reference id where one exists.
 6. Provenance: no real device, wafer, site, person or proprietary parameter values. Published values cite
-   their paper; internal statistics (P2) never enter this repo. (ADR 0005)
+   their reference entry; internal device statistics never enter this repo and are not a check. (ADR 0005, 0007)
 7. Nothing in this repo knows what a user, score, challenge, agent or instrument is. Scenarios here are
-   *physics draws*; what is done with them is a consumer's business.
+   *physics draws*; gallery protocols are *sweeps*, not tuning steps. What is done with them is a consumer's business.
+8. **Published results are the only standard.** Every claim of agreement with physics names an id in
+   `docs/references/`; a `literature` test loads its curve from there; a session writes entries as
+   `proposed`, only a human sets `confirmed`. (ADR 0007)
+9. **The gallery is signed by a human.** Every protocol in `docs/gallery/protocols/` has a `budget`; CI
+   renders it and checks its array hash against `docs/gallery/signoff/`; a session writes a sign-off only
+   when the human says so. No rendered image is committed. (ADR 0008, 0009)
 
 ## Discipline
-- **Test ladder P0/P1/P2** (ADR 0005): P0 analytic limits and invariants in CI; P1 reproductions of
-  published results, in CI, marked `literature`; P2 comparisons with device statistics, internal, marked
-  `internal`, never an exit criterion here.
+- **Two-rung ladder** (ADR 0007): P0 analytic limits and invariants in CI; P1 reproductions of
+  `confirmed` reference items, in CI, marked `literature(id, item)`. No P2. A quantity with no published
+  standard is `calibration: none` and is never called realistic.
+- **Step exit** = P0 and P1 green **and** every gallery protocol the step's layers touch signed off.
+- **Budgets** (ADR 0009): counts exact, wall time within 3× in CI; raising a budget is explained in the PR.
 - **Statistical realism, not prediction** (ADR 0002): a phantom behaves like a device of its class; its
   disorder is a draw. Never claim to predict a particular device.
 - **The defect catalog is data** (`docs/catalog/`, ADR 0006): a human fills it; code reads it.
@@ -43,8 +51,9 @@ an ADR for any decision a future session could ask "why?" about; comment on the 
 ```
 uv sync --all-extras                      # dev install
 uv run pytest                             # P0 + P1 (what CI runs)
-uv run pytest -m internal                 # P2, with the internal statistics mounted
-bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + lock + lint
+bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + references + lock + lint
+uv run python scripts/gallery.py          # render protocols to build/gallery/ and verify sign-offs (Step 1+)
+uv run mkdocs serve                       # browse docs and the rendered gallery
 ```
 
 ## Where to look
@@ -54,4 +63,6 @@ bash scripts/check_all.sh                 # layer imports + no-qdt + provenance 
 | The current step's spec | `docs/steps/<NN-name>.md` (index: `docs/steps/README.md`) |
 | Why it is built this way | `docs/adr/` |
 | The defect and material catalog | `docs/catalog/` |
+| The papers that are the standard | `docs/references/` (schema in `SCHEMA.md`) |
+| The protocols, sign-offs and budgets | `docs/gallery/` |
 | How qdt consumes phantom | ADR 0003 |

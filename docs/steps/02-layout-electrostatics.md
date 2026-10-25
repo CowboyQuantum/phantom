@@ -15,11 +15,11 @@ A gate layout and a material stack give V(r; gate vector) in microseconds; dots 
 - lever arms from the basis equal the capacitance-matrix values for a textbook two-dot layout
 - a two-dot layout yields a honeycomb whose geometry matches Step 1's CI model within tolerance
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - lever arms and charging energies for a published single-layer SiGe layout within the paper's stated range
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - a layout file is the only input needed to produce a stability diagram

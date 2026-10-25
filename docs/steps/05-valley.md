@@ -12,11 +12,11 @@ Valley splitting per dot as a statistical draw for the material and dot size, wi
 ## P0 tests (CI: analytic limits and invariants)
 - the distribution's mean and spread scale with Ge concentration and dot size as the theory states
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - a published valley-splitting distribution for a stated heterostructure reproduces within tolerance
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - PSB readout quality varies between draws for physical reasons

@@ -53,12 +53,14 @@ perturbs, the parameter and its distribution, a severity knob, the signature it 
 source. `disorder` and `compile` read it. The catalog is the part only an experienced tuner can write; its
 entries are filed as issues for that reason.
 
-## 6. Test ladder (ADR 0005)
+## 6. Validation: test ladder, reference library, gallery (ADR 0007, 0008, 0009; 0005 superseded)
 | Level | What | Where |
 |---|---|---|
 | P0 | Analytic limits and invariants: a single dot's Coulomb diamonds, two-dot honeycomb geometry, lever arms from a known capacitance matrix, detailed balance in rate equations, Lindblad trace preservation | CI |
-| P1 | Reproductions of published results, cited: valley-splitting distributions, charge-noise spectra, PSB fidelity vs. valley splitting, exchange vs. detuning | CI, marked `literature` |
-| P2 | Comparison with real device statistics (fault rates, sensor behaviour, tune-up time distributions) | Internal, marked `internal`; never an exit criterion |
+| P1 | Reproductions of items in `docs/references/` (confirmed by a human): valley-splitting distributions, charge-noise spectra, PSB fidelity vs. valley splitting, exchange vs. detuning | CI, marked `literature(id, item)` |
+| Gallery | Measurement protocols (turn-on, pinch-off, diamonds, stability maps, sensor peaks, noise traces and spectra, later spin readout) rendered with a fixed seed; a human signs each off on its data hash; each carries a time and compute budget | CI renders and publishes; `docs/gallery/`; sign-off per protocol gates step exit |
+
+No comparison with internal device statistics for now (ADR 0007). Quantities without a published standard are marked `calibration: none`.
 
 ## 7. Roadmap — operational detail in `docs/steps/`
 | Step | Name | Exit in one line | Detail |
