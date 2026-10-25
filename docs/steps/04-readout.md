@@ -14,12 +14,12 @@ Dynamics, not just ground states: lead tunnel rates, rate equations, latching an
 - latching appears above a sweep-rate threshold predicted from the rates
 - sensor peak position shifts by the capacitive coupling times the charge change
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - a published charge-noise spectrum (amplitude at 1 Hz, slope) for the material class
 - a published latching signature in a stability diagram
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - sweep-rate and direction change the measured diagram the way they do on a real device

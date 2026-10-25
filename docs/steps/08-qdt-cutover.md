@@ -12,11 +12,11 @@ qdt's `qdt-sim` becomes an adapter that pins a phantom release and contains no p
 ## P0 tests (CI: analytic limits and invariants)
 - phantom's API surface is covered by a contract test that qdt's adapter also runs
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - none
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - qdt CI green against the pinned phantom with `qdt-sim` under 300 lines

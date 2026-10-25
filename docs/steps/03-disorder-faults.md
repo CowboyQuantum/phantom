@@ -14,11 +14,11 @@ Catalog entries become generators that perturb the compiled potential and parame
 - each generator's perturbation has the documented sign, scale and spatial extent
 - a draw with zero severity reproduces the clean device bit for bit
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - the density of unintentional dots per unit length vs. interface charge density matches a published MOS/SiGe comparison within an order of magnitude
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - every catalog entry marked `runtime` has a generator and a P0 test showing its signature in a stability diagram

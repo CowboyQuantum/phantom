@@ -1,6 +1,6 @@
 # 0005 — Test ladder P0 (analytic limits), P1 (published results), P2 (device statistics, internal)
 
-**Status:** Accepted
+**Status:** Superseded by 0007 (P2 removed; P0 and P1 stand)
 **Date:** 2026-10-24
 **Step:** all
 

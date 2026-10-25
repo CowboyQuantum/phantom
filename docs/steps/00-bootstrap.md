@@ -14,11 +14,11 @@ Repo exists; CI green on an empty P0 suite; layer skeletons with docstrings; cat
 ## P0 tests (CI: analytic limits and invariants)
 - workspace installs; checks and an empty pytest pass in CI
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - none
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- none (no models in this step)
 
 ## Exit criteria
 - CI green on `main`

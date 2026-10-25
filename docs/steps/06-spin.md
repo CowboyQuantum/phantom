@@ -12,11 +12,11 @@ Few-qubit spin dynamics under pulses: gate-dependent g, exchange J(ε, t_c), spi
 ## P0 tests (CI: analytic limits and invariants)
 - trace preservation and positivity; Rabi and Ramsey in the noiseless limit are analytic
 
-## P1 tests (CI, `literature`: published results, cited)
+## P1 tests (CI, `literature`: reproduce an item of a `confirmed` reference entry; ADR 0007)
 - published J(ε) curve; a published T₂* vs. charge-noise relation
 
-## P2 (internal, never an exit criterion)
-- comparisons with device statistics, when available
+## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
+- to be listed before the step starts; each carries a `budget` (ADR 0009)
 
 ## Exit criteria
 - a two-qubit exchange gate's fidelity depends on the compiled device's noise and valley draws
