@@ -42,6 +42,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | id | sweep | readout | must show |
 |---|---|---|---|
 | `stability-coarse-2dot` | (P1, P2), wide | sensor_conductance or charge_state | honeycomb; transitions stop toward (0,0); lines of both dots visible with different slopes |
+| `stability-coarse-2dot-layout` | as above, but every parameter except the sensor's per-electron coupling derived from a layout file; the sensor gate set on its flank first | sensor_conductance | the same honeycomb, with period e/C_gate and slopes from the derived cross lever arms (Step 2) |
 | `stability-fine-2dot` | (P1, P2) around one pair of triple points | sensor_conductance | interdot line; broadening grows with t_c; the two triple points |
 | `stability-lockin-p1` | (P1, P2) with a 0.5 mV square wave on P1 | sensor_lockin, plus the lead-rate map | dot-1 lines as signed lines; where the lead rate is below the chop frequency the charge cannot follow and lines latch or vanish; where it is far above, lines are lifetime-broadened and fainter |
 | `stability-lockin-p2` | same with the chop on P2 | sensor_lockin, plus N1 present | dot-2 lines strong, dot-1 lines weak |

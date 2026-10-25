@@ -1,0 +1,21 @@
+id: potential-map-layout
+name: Electron potential energy under the gates of a layout
+step: 2
+description: The electron potential energy in the plane of the two-dimensional electron gas, from the closed-form solid-angle potential of every gate at the operating point, with the gate outlines drawn over it. The textbook two-dot layout, Si/SiGe stack. Two wells under the plungers with the middle barrier between them, the sensor well under SG at positive y, and the channel edges where the barriers pinch.
+layers: [layout, electrostatics]
+runner: step2:potential_map_layout
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  grid_pitch_nm: 2.0
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6}
+sweep:
+  - {axis: x, unit: nm, points: 153}
+  - {axis: y, unit: nm, points: 226}
+readout: {channel: potential_energy, unit: meV}
+render: {kind: map, x: x_nm, y: y_nm, z: u_mev, xlabel: "x (nm)", ylabel: "y (nm)", zlabel: "U (meV)", cmap: viridis_r, overlay: gate_outlines_nm}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.001, points: 34578, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

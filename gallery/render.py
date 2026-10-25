@@ -46,6 +46,10 @@ def render_protocol(r: Result, path: pathlib.Path) -> None:
                 limits = {"vmin": float(lo), "vmax": float(hi)}
             m = ax.pcolormesh(x, y, z.T, shading="auto", cmap=panel.get("cmap", "viridis"), rasterized=True, **limits)
             fig.colorbar(m, ax=ax, label=panel.get("zlabel", panel["z"]))
+            if panel.get("overlay"):
+                poly = r.arrays[panel["overlay"]]  # NaN-separated polyline (m, 2)
+                ax.plot(poly[:, 0], poly[:, 1], color="white", lw=0.8, alpha=0.9)
+                ax.set_aspect("equal")
         else:
             raise ValueError(f"unknown render kind {kind!r}")
         ax.set_xlabel(panel.get("xlabel", panel["x"]))

@@ -16,3 +16,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0010 | Bit-for-bit reproducibility per platform; across platforms within 1e-12; ubuntu-latest is the reference | Accepted |
 | 0011 | A running map of how the models fit together lives in the docs and is kept current | Accepted |
 | 0012 | Every pull request publishes a preview of the docs and the rendered gallery; main publishes the root | Accepted |
+| 0013 | Closed-form electrostatics: solid-angle potentials, effective depth, dots as harmonic minima | Accepted |
