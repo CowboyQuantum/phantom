@@ -26,7 +26,7 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   with `readout.loading` (rate-limited loading, latching); four chopped-gate maps `stability-lockin-p1/-p2/-common/
   -detuning` through `lockin_sweep_dynamic_a_per_v` with a `LeadRateLandscape` (latching below the chop
   frequency, lifetime broadening far above it; three limit tests). `docs/MODELS.md` measurement-flow diagram and
-  generated module graph (`scripts/model_graph.py --check` in `check_all`), ADR 0011.
+  generated module graph and the runtime ledger (per-model micro-benchmarks and per-protocol costs recorded in `docs/gallery/measured.json` by `gallery.py --record`; `scripts/model_graph.py --check` in `check_all`), ADR 0011.
 - CI: `gallery` (ubuntu, the reference, ADR 0010) and `gallery-windows` (compares its arrays to the reference within
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 

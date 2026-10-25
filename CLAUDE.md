@@ -11,7 +11,8 @@ issue, stop and say so.
 **During** — one branch per issue: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise; conventional commits scoped by layer
 (`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`.
 **End** — `uv run pytest` and `bash scripts/check_all.sh` green; rewrite `docs/STATUS.md` (never append);
-`docs/MODELS.md` updated if a model was added or rewired (ADR 0011); an ADR for any decision a future session
+`docs/MODELS.md` updated if a model was added or rewired, and `scripts/gallery.py --record` re-run if a model or
+protocol changed (ADR 0011); an ADR for any decision a future session
 could ask "why?" about; comment on the issue; commit.
 
 ## Hard rules (CI enforces; see `scripts/`)

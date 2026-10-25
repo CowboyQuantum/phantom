@@ -42,6 +42,7 @@ def main() -> int:
     ap.add_argument("--reference-platform", action="store_true", help="this run is the reference (exact hash)")
     ap.add_argument("--rtol", type=float, default=CROSS_PLATFORM_RTOL)
     ap.add_argument("--allow-mismatch", action="store_true", help="report but do not fail on a sign-off mismatch")
+    ap.add_argument("--record", action="store_true", help="write docs/gallery/measured.json (protocol costs + model benchmarks) for docs/MODELS.md")
     args = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -74,6 +75,11 @@ def main() -> int:
             print(f"    sign-off: array hash {r.sha256[:16]}… differs from signed {str(r.signoff.get('array_sha256'))[:16]}…")
     write_outputs(results, args.out, render=not args.no_render)
     print(f"gallery: wrote {args.out} ({len(results)} protocols){'; FAIL' if failed else ''}")
+    if args.record:
+        from gallery.runner import record_measured
+
+        path = record_measured(results)
+        print(f"gallery: recorded in {path.relative_to(ROOT)}; run scripts/model_graph.py to refresh docs/MODELS.md")
     return 1 if failed else 0
 
 

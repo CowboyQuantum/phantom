@@ -1,9 +1,11 @@
 # How the models fit together (ADR 0011)
 
-Two diagrams, kept current with every change to a model. The first is drawn by hand and says how a
-measurement is produced from a gate vector: which model feeds which, in the order the physics happens.
-Whoever adds or rewires a model updates it in the same pull request. The second is generated from the
-imports in `src/phantom` by `scripts/model_graph.py` and checked in CI, so it can never be stale.
+Two diagrams and a runtime ledger, kept current with every change to a model. The first diagram is
+drawn by hand and says how a measurement is produced from a gate vector: which model feeds which, in the
+order the physics happens. Whoever adds or rewires a model updates it in the same pull request. The
+second is generated from the imports in `src/phantom` by `scripts/model_graph.py` and checked in CI, so
+it can never be stale. The ledger records what each model and each protocol costs to run: declared
+budgets from the protocol files, and the last measurement recorded by `scripts/gallery.py --record`.
 
 ## Measurement flow (hand-maintained)
 
@@ -108,3 +110,42 @@ flowchart LR
 | `readout.sensor` | A charge sensor: a single-electron transistor (SET) read in sequential tunnelling. |
 | `readout.transport` | Channel turn-on and barrier pinch-off: the direct-current shapes of the electrical-health protocols. |
 <!-- module-graph:end -->
+
+## Runtimes (generated from `docs/gallery/measured.json` and the protocol files; do not edit by hand)
+
+<!-- runtimes:start -->
+Last recorded on 2026-10-25 at commit `3eb2301` on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by `scripts/gallery.py --record`. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact `gallery-ubuntu-latest` (ADR 0010).
+
+### Per model (microseconds per point or sample)
+
+| model | what is timed | points | us per point |
+|---|---|---|---|
+| `charge.ci.ConstantInteractionParams.mean_occupation` | thermal occupation per gate point | 10,000 | 1.517 |
+| `charge.hubbard.HubbardParams.mean_occupation` | 16x16 diagonalisation per gate point | 10,000 | 10.24 |
+| `readout.sensor.SensorSETParams.current_a` | sensor current per point | 100,000 | 0.125 |
+| `readout.noise.TelegraphNoise.trace` | one fluctuator per sample | 100,000 | 0.674 |
+| `readout.noise.OneOverFNoise.trace` | 24 fluctuators per sample | 10,000 | 16.227 |
+| `readout.measure.SensedDoubleDot.sweep_a (noisy)` | occupation + sensor + three noise traces per point | 10,000 | 18.357 |
+| `readout.lockin.lockin_sweep_a_per_v` | 8 evaluations per point, noisy | 2,500 | 147.904 |
+| `readout.lockin.lockin_sweep_dynamic_a_per_v` | 8 evaluations + rate dynamics per point, noisy | 2,500 | 156.557 |
+| `readout.loading.latched_occupation` | per scan step | 100,000 | 0.928 |
+
+### Per protocol (declared budget beside the last measurement)
+
+| protocol | points | compile budget s / measured | run budget ms per point / measured | evaluations per point |
+|---|---|---|---|---|
+| `coulomb-oscillations-single-dot` | 1,201 | 0.5 / 0.0 | 0.05 / 0.00187 | 1 |
+| `diamonds-single-dot` | 64,521 | 0.5 / 0.0 | 0.02 / 0.0001 | 1 |
+| `noise-psd` | 30,000 | 0.5 / 0.008 | 0.1 / 0.01869 | 1 |
+| `noise-time-trace` | 30,000 | 0.5 / 0.0005 | 0.1 / 0.01917 | 1 |
+| `pinch-off-barrier` | 601 | 0.5 / 0.0 | 0.02 / 3e-05 | 1 |
+| `plunger-vs-barrier-map` | 28,800 | 0.5 / 0.0001 | 0.05 / 0.00277 | 1 |
+| `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00166 | 1 |
+| `stability-coarse-2dot` | 40,000 | 0.5 / 0.0003 | 0.1 / 0.0186 | 1 |
+| `stability-fine-2dot` | 22,500 | 0.5 / 0.0006 | 0.1 / 0.01908 | 1 |
+| `stability-lockin-common` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.16314 | 8 |
+| `stability-lockin-detuning` | 40,000 | 0.5 / 0.0006 | 0.5 / 0.15971 | 8 |
+| `stability-lockin-p1` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.15959 | 8 |
+| `stability-lockin-p2` | 40,000 | 0.5 / 0.0005 | 0.5 / 0.16094 | 8 |
+| `turn-on-single-gate` | 601 | 0.5 / 0.0 | 0.02 / 8e-05 | 1 |
+<!-- runtimes:end -->

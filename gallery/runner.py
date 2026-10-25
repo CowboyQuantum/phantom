@@ -19,6 +19,8 @@ import yaml
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROTOCOLS_DIR = ROOT / "docs/gallery/protocols"
 SIGNOFF_DIR = ROOT / "docs/gallery/signoff"
+MEASURED = ROOT / "docs/gallery/measured.json"
+"""Last recorded protocol costs and model benchmarks (ADR 0011), written by `scripts/gallery.py --record`."""
 CI_TIME_FACTOR = 3.0
 """Wall time may exceed its budget by this factor on shared CI runners (ADR 0009); `--strict` uses 1."""
 CROSS_PLATFORM_RTOL = 1e-12
@@ -291,3 +293,34 @@ def write_outputs(results: list[Result], out: pathlib.Path, render: bool) -> Non
         for r in results:
             render_protocol(r, out / f"{r.protocol.id}.png")
         render_index(results, rows, meta, out / "index.html")
+
+
+def record_measured(results: list[Result]) -> pathlib.Path:
+    """Write `docs/gallery/measured.json`: per-protocol measured cost from this run and per-model
+    micro-benchmarks, with the commit, platform and date. Machine-dependent by nature; the reference
+    platform's numbers are in the CI artifact."""
+    import datetime
+
+    from gallery.bench import run as bench
+
+    data = {
+        "meta": {
+            "commit": git_commit(),
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "date": datetime.date.today().isoformat(),
+        },
+        "protocols": {
+            r.protocol.id: {
+                "points": r.points,
+                "compile_s": round(r.compile_s, 4),
+                "run_ms_per_point": round(1e3 * r.run_s / max(r.points, 1), 5),
+                "model_evals_per_point": r.counts["model_evals"] / max(r.points, 1),
+            }
+            for r in results
+        },
+        "models": bench(),
+    }
+    MEASURED.write_text(json.dumps(data, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return MEASURED

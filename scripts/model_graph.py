@@ -18,6 +18,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src/phantom"
 DOC = ROOT / "docs/MODELS.md"
 START, END = "<!-- module-graph:start -->", "<!-- module-graph:end -->"
+RT_START, RT_END = "<!-- runtimes:start -->", "<!-- runtimes:end -->"
+PROTOCOLS = ROOT / "docs/gallery/protocols"
+MEASURED = ROOT / "docs/gallery/measured.json"
 LAYERS = ["layout", "electrostatics", "disorder", "valley", "charge", "readout", "spin", "optimum", "compile"]
 
 
@@ -74,17 +77,57 @@ def render(nodes: dict[str, str], edges: set[tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
+def render_runtimes() -> str:
+    """Declared budgets per protocol (from the protocol files) beside the last recorded measurement, and
+    the per-model micro-benchmarks, from docs/gallery/measured.json."""
+    import json
+
+    import yaml
+
+    empty = {"meta": {}, "protocols": {}, "models": []}
+    measured = json.loads(MEASURED.read_text(encoding="utf-8")) if MEASURED.is_file() else empty
+    meta = measured.get("meta", {})
+    lines = []
+    if meta:
+        lines.append(
+            f"Last recorded on {meta.get('date')} at commit `{meta.get('commit')}` on {meta.get('platform')} "
+            f"(python {meta.get('python')}, numpy {meta.get('numpy')}), by `scripts/gallery.py --record`. "
+            "Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI "
+            "artifact `gallery-ubuntu-latest` (ADR 0010)."
+        )
+    else:
+        lines.append("No measurement recorded yet: run `scripts/gallery.py --record`.")
+    lines += ["", "### Per model (microseconds per point or sample)", "", "| model | what is timed | points | us per point |", "|---|---|---|---|"]
+    for m in measured.get("models", []):
+        lines.append(f"| `{m['model']}` | {m['what']} | {m['points']:,} | {m['us_per_point']} |")
+    lines += ["", "### Per protocol (declared budget beside the last measurement)", "",
+              "| protocol | points | compile budget s / measured | run budget ms per point / measured | evaluations per point |",
+              "|---|---|---|---|---|"]
+    for path in sorted(PROTOCOLS.glob("*.yaml")):
+        p = yaml.safe_load(path.read_text(encoding="utf-8"))
+        b = p["budget"]
+        m = measured.get("protocols", {}).get(p["id"], {})
+        comp = f"{b['compile']['wall_s']} / {m.get('compile_s', 'not recorded')}"
+        runs = f"{b['run']['wall_ms_per_point']} / {m.get('run_ms_per_point', 'not recorded')}"
+        lines.append(f"| `{p['id']}` | {b['run']['points']:,} | {comp} | {runs} | {b['run']['model_evals_per_point']} |")
+    return "\n".join(lines)
+
+
 def main(argv: list[str]) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     nodes, edges = scan()
     text = DOC.read_text(encoding="utf-8")
-    if START not in text or END not in text:
-        print(f"model_graph: {DOC.relative_to(ROOT)} lacks the {START} / {END} markers")
-        return 1
+    for a, b in ((START, END), (RT_START, RT_END)):
+        if a not in text or b not in text:
+            print(f"model_graph: {DOC.relative_to(ROOT)} lacks the {a} / {b} markers")
+            return 1
     head, rest = text.split(START, 1)
     _, tail = rest.split(END, 1)
     new = f"{head}{START}\n{render(nodes, edges)}\n{END}{tail}"
+    head, rest = new.split(RT_START, 1)
+    _, tail = rest.split(RT_END, 1)
+    new = f"{head}{RT_START}\n{render_runtimes()}\n{RT_END}{tail}"
     if new == text:
         print(f"model_graph: OK ({len(nodes)} modules, {len(edges)} edges)")
         return 0

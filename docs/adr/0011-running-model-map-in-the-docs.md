@@ -20,6 +20,12 @@ drift from the code.
   table in the same PR. `check_all.sh` runs `scripts/model_graph.py --check`, so the generated graph
   can never be stale; the hand-drawn one is reviewed like any other doc.
 - The page is in the mkdocs nav as "Models" and renders the Mermaid diagrams on the docs site.
+- **Runtimes are recorded on the same page.** `scripts/gallery.py --record` writes
+  `docs/gallery/measured.json`: the measured cost of every protocol in that run and a per-model
+  micro-benchmark (microseconds per point for each runtime model), with commit, platform and date.
+  `scripts/model_graph.py` renders it into the page beside the declared budgets, and `--check` keeps the
+  table in sync with the file. A session re-records when it changes a model or a protocol. The numbers are
+  from the recording machine; the reference platform's numbers stay in the CI artifact (ADR 0010).
 
 ## Consequences
 - Easier: a newcomer, or the owner reviewing a gallery picture, can trace which models produced it.
