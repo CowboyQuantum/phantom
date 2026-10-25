@@ -1,0 +1,13 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  p0-p1:
+    strategy:
+      matrix: { os: [ubuntu-latest, windows-latest] }   # reproducibility across platforms (ADR 0003)
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: bash scripts/check_all.sh
+      - run: uv run pytest -q

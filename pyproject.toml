@@ -1,0 +1,31 @@
+[project]
+name = "phantom"
+version = "0.1.0"
+description = "A stand-in spin-qubit device: gate-defined quantum dot physics with disorder and fabrication defects"
+requires-python = ">=3.11,<3.14"
+dependencies = ["numpy>=1.26,<3", "scipy>=1.11,<2"]
+
+[project.optional-dependencies]
+fem = []        # TODO Step 7: an external electrostatics solver wrapped, never written here (ADR 0001)
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff", "mypy", "mkdocs-material", "mkdocstrings[python]", "pyyaml"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/phantom"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["literature: reproduces a published result (P1); internal: compares with device statistics not in this repo (P2)"]
+addopts = "-m 'not internal'"
+
+[tool.ruff]
+line-length = 100
+[tool.ruff.lint]
+extend-select = ["I"]
+[tool.ruff.lint.isort]
+known-first-party = ["phantom"]

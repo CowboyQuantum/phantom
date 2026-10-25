@@ -1,0 +1,3 @@
+# Terms that must not appear (CLAUDE.md rule 6). Add real device, wafer, site or person names here.
+stand-chicago
+wafer-

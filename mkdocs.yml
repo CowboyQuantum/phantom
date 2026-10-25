@@ -1,0 +1,10 @@
+site_name: phantom
+nav:
+  - Home: index.md
+  - Development plan: DEVELOPMENT_PLAN.md
+  - Status: STATUS.md
+  - Steps: steps/README.md
+  - ADRs: adr/README.md
+  - Catalog: catalog/README.md
+plugins: [search]
+theme: {name: material}
