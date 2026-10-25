@@ -48,4 +48,4 @@ Full roster with later steps: `docs/gallery/PROTOCOLS.md`. Each carries a `budge
 - plan §8 #2 Hubbard vs. CI default
 
 ## Status
-NOT STARTED
+IN PROGRESS

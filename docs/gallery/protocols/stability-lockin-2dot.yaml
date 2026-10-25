@@ -1,0 +1,16 @@
+id: stability-lockin-2dot
+name: Charge-stability map read with a chopped plunger (hardware derivative)
+step: 1
+description: The coarse stability region read through the sensor_lockin channel, a 2 mV square wave at 1 kHz on P1 with four cycles per point, demodulated. Transitions appear as signed lines; slow drift cancels; noise near 1 kHz survives.
+layers: [charge, readout]
+runner: step1:stability_lockin_2dot
+instance: {model: sensed-double-dot, seed: 0, noise: default}
+sweep:
+  - {gate: P1, from: -0.05, to: 0.25, points: 100, unit: V}
+  - {gate: P2, from: -0.05, to: 0.25, points: 100, unit: V}
+readout: {channel: sensor_lockin, unit: A/V, lockin: {gate: P1, amplitude_v: 2.0e-3, frequency_hz: 1000.0, cycles: 4}}
+render: {kind: map, x: v_p1_v, y: v_p2_v, z: lockin_a_per_v, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "dI/dP1 (A/V)", cmap: RdBu_r}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.5, points: 10000, model_evals_per_point: 8, solver_calls: 0}
+must_show: []

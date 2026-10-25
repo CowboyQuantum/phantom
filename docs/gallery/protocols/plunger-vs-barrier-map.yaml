@@ -1,0 +1,19 @@
+id: plunger-vs-barrier-map
+name: Plunger against interdot barrier
+step: 1
+description: Sensor current against P1 (crossing the interdot transition) and the interdot barrier gate, with the two-site Hubbard model giving the occupation. The interdot step broadens as the barrier opens (tunnel coupling rises exponentially); transition lines tilt with the lever arm of the barrier. Noise-free.
+layers: [charge, readout]
+runner: step1:plunger_vs_barrier_map
+instance: {model: sensed-double-dot-hubbard, seed: 0, noise: none, barrier: {t0_ev: 1.0e-4, v_ref_v: 0.0, v_scale_v: 0.05}, barrier_lever_arms_ev_per_v: [0.01, 0.01]}
+sweep:
+  - {gate: P1, half_span_v: 0.02, points: 200, unit: V}
+  - {gate: B, from: -0.3, to: 0.1, points: 100, unit: V}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: v_b_v, z: current_a, xlabel: "P1 (V)", ylabel: "interdot barrier (V)", zlabel: "sensor current (A)", title: sensor}
+    - {kind: map, x: v_p1_v, y: v_b_v, z: n1, xlabel: "P1 (V)", ylabel: "interdot barrier (V)", zlabel: "N1 (electrons)", title: "dot 1 occupation", cmap: magma}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.05, points: 20000, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

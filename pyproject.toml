@@ -10,6 +10,10 @@ fem = []        # TODO Step 7: an external electrostatics solver wrapped, never 
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff", "mypy", "mkdocs-material", "mkdocstrings[python]", "pyyaml"]
+gallery = ["matplotlib>=3.8,<4", "pyyaml"]   # renders docs/gallery protocols (ADR 0008); never a runtime dependency
+
+[tool.uv]
+default-groups = ["dev", "gallery"]
 
 [build-system]
 requires = ["hatchling"]

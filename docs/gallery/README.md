@@ -6,7 +6,7 @@ every PR; nothing rendered is stored in git. A human signs each protocol off; a 
 all protocols its layers touch are signed.
 
 **View it.** On a PR: the `gallery` workflow artifact (PNGs, `index.html`, `budget.json`). On `main`:
-the docs site on GitHub Pages, "Gallery" in the nav. Locally:
+the docs site on GitHub Pages, "Gallery" in the nav, then [the rendered gallery](rendered/index.html). Locally:
 
 ```
 uv run python scripts/gallery.py          # renders to build/gallery/ (gitignored)

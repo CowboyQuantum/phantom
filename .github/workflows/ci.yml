@@ -1,5 +1,7 @@
 name: ci
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   p0-p1:
     strategy:
@@ -11,3 +13,56 @@ jobs:
       - run: uv sync --all-extras
       - run: bash scripts/check_all.sh
       - run: uv run pytest -q
+
+  gallery:   # ADR 0008/0009: render every protocol, check sign-offs and budgets, publish the artifact
+    strategy:
+      matrix: { os: [ubuntu-latest, windows-latest] }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: uv run python scripts/gallery.py --out build/gallery
+      - uses: actions/upload-artifact@v4
+        with: { name: "gallery-${{ matrix.os }}", path: build/gallery, retention-days: 30 }
+
+  gallery-hashes-agree:   # rule 3: the swept arrays hash identically on both platforms
+    needs: gallery
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: "gallery-*", path: artifacts }
+      - run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          files = sorted(pathlib.Path("artifacts").glob("*/hashes.json"))
+          sets = [json.loads(f.read_text()) for f in files]
+          print("compared:", [str(f.parent.name) for f in files])
+          bad = [k for k in sets[0] if any(s.get(k) != sets[0][k] for s in sets[1:])]
+          for k in bad: print("MISMATCH", k, [s.get(k, "")[:16] for s in sets])
+          sys.exit(1 if bad or len(sets) < 2 else 0)
+          PY
+
+  pages:   # docs site plus the rendered gallery, from main only
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [p0-p1, gallery]
+    runs-on: ubuntu-latest
+    continue-on-error: true   # until the owner enables Pages (Settings > Pages > Source: GitHub Actions); then remove
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: uv run mkdocs build
+      - uses: actions/download-artifact@v4
+        with: { name: gallery-ubuntu-latest, path: site/gallery/rendered }
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+      - id: deployment
+        uses: actions/deploy-pages@v4
