@@ -55,6 +55,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 |---|---|---|---|
 | `noise-time-trace` | t at a fixed sensor flank, seconds to minutes | sensor_conductance | white noise, telegraph switching, slow drift, each visible |
 | `noise-psd` | derived from the trace | PSD | 1/f slope and amplitude at 1 Hz; white floor; Lorentzian bumps from fluctuators |
+| `charge-noise-sensor-referred` | PSD at the sensor flank, divided by the flank slope and by the sensor's lever arm to a dot gate | equivalent gate-voltage noise (V/√Hz) and energy noise (eV/√Hz) vs. f | the charge-noise amplitude at 1 Hz and the 1/f exponent, in gate-referred units that can be compared with published values and with the qubit-side `charge-noise-spectroscopy-cpmg`; the same disorder draw must give both |
 | `drift-repeated-cuts` | one P cut repeated over hours | transition position vs. t | slow drift and occasional jumps |
 | `stability-repeat-diff` | stability map twice, hours apart | difference | rigid shifts vs. local changes; which lines moved |
 | `switcher-histogram` | long trace | dwell-time histograms | two-level statistics; switching rates |
@@ -86,7 +87,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `rabi-chevron` | (f − f₀, τ) | spin_outcome | the chevron; Rabi frequency vs. drive |
 | `ramsey-fringes` | τ at fixed detuning | spin_outcome | fringes with a decaying envelope; T₂* |
 | `exchange-fingerprint` | (ε, τ) after a singlet is separated into (1,1) | singlet probability | the fingerprint: oscillations whose frequency J(ε)/h rises toward the (0,2) anticrossing and whose visibility decays with charge noise, fastest where dJ/dε is largest |
-| `exchange-house-cells` | (ε, B_interdot) or (P1, P2) at fixed τ near the (1,1)–(0,2) anticrossing — **axes to be confirmed by the owner** | singlet probability | the cell pattern of constant-J contours that the owner recognises as "house cells"; the symmetric-operation point where dJ/dε = 0 |
+| `exchange-house-cells` | (P1, P2) around the evolve coordinate, with J held at a high value by the interdot barrier, at fixed τ | singlet probability | the house-cell pattern: cells of constant singlet return bounded by the charge-transition lines of the honeycomb and by contours of constant J; the evolve point sits inside a cell; cell edges move with the barrier setting |
 | `exchange-vs-detuning` | J extracted from the fingerprint vs. ε | J | the J(ε) curve; its slope dJ/dε, which sets charge-noise sensitivity |
 | `exchange-vs-barrier` | J extracted vs. B_interdot at the symmetric point | J | exponential |
 | `charge-noise-spectroscopy-cpmg` | number of π pulses at fixed total τ, on a charge-sensitive qubit state (exchange or detuning) | coherence vs. filter frequency | S_ε(f) over the kHz–MHz decades, with the exponent of the 1/f^α law; must join the sensor `noise-psd` at low frequency with the same amplitude scaling |
