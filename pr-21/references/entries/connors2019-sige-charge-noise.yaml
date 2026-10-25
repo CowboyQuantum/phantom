@@ -1,0 +1,30 @@
+id: connors2019-sige-charge-noise
+title: Low-frequency charge noise in Si/SiGe quantum dots
+authors: [E. J. Connors, J. Nelson, H. Qiao, L. F. Edge, J. M. Nichol]
+year: 2019
+venue: Physical Review B 100, 165305
+doi: 10.1103/PhysRevB.100.165305
+layers: [readout, disorder]
+provides:
+  - label: charge-noise-psd-1hz
+    kind: value
+    quantity: charge_noise_amplitude_at_1hz_uev_per_sqrt_hz
+    conditions: Si/SiGe quantum dots, dilution-refrigerator temperatures, measured through a charge sensor
+    value: null
+    tolerance: null
+    notes: >
+      The paper reports the gate-referred (energy) charge-noise spectral density at 1 Hz and its 1/f^α
+      exponent across several dots and temperatures. The human reads the numbers and the exponent off
+      the paper and fills value and tolerance; a session must not. Backs the `noise-psd` and
+      `charge-noise-sensor-referred` protocols and the OneOverFNoise amplitude default.
+  - label: charge-noise-exponent
+    kind: range
+    quantity: one_over_f_exponent_alpha
+    conditions: as above, roughly 0.1 Hz to 100 Hz
+    value: null
+    tolerance: null
+status: proposed
+notes: >
+  Written by a session from memory on 2026-10-25 as the candidate standard for the 1/f charge-noise
+  amplitude in Si/SiGe. The human must confirm the DOI and the paper's content before status: confirmed.
+  If the human prefers a different charge-noise reference (for example one for Si MOS), replace this entry.
