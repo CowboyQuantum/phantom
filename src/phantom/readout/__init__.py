@@ -2,9 +2,11 @@
 
 Modules: `sensor` (SET sensor and single-dot transport current), `noise` (seeded processes with a time
 axis), `measure` (a CI double dot read by the sensor with noise), `lockin` (the `sensor_lockin`
-hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only).
+hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only), `loading` (rate-limited
+loading through a lead barrier in a raster scan; Step 4 replaces it with a master equation).
 """
 
+from phantom.readout.loading import LeadBarrier, latched_occupation
 from phantom.readout.lockin import LockinParams, lockin_sweep_a_per_v
 from phantom.readout.measure import SensedDoubleDot, raster_times_s
 from phantom.readout.noise import (
@@ -25,6 +27,7 @@ __all__ = [
     "MODEL_VERSION",
     "ChannelTurnOn",
     "Composite",
+    "LeadBarrier",
     "LockinParams",
     "NoNoise",
     "NoiseProcess",
@@ -33,6 +36,7 @@ __all__ = [
     "SensorSETParams",
     "TelegraphNoise",
     "WhiteNoise",
+    "latched_occupation",
     "lockin_sweep_a_per_v",
     "pinch_off_current_a",
     "raster_times_s",

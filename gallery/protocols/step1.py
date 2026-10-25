@@ -6,8 +6,16 @@ from __future__ import annotations
 import numpy as np
 
 from gallery.runner import Context, Protocol
-from phantom.charge import Barrier, HubbardParams
-from phantom.readout import LockinParams, SensedDoubleDot, lockin_sweep_a_per_v, raster_times_s
+from phantom.charge import Barrier, ConstantInteractionParams
+from phantom.readout import (
+    LeadBarrier,
+    LockinParams,
+    SensedDoubleDot,
+    SensorSETParams,
+    latched_occupation,
+    lockin_sweep_a_per_v,
+    raster_times_s,
+)
 from phantom.readout.transport import ChannelTurnOn, pinch_off_current_a
 
 
@@ -143,26 +151,45 @@ def stability_lockin_2dot(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
 
 
 def plunger_vs_barrier_map(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Dot 1 loads from its reservoir through the lead barrier BL; dot 2 has no reservoir of its own.
+    P1 is the fast axis (one row per barrier value, flyback between rows); BL is the slow axis."""
+    inst = p.instance
     with ctx.compile():
-        d = _device(p)
-        barrier = Barrier("B", **p.instance.get("barrier", {}))
-        lever = tuple(p.instance.get("barrier_lever_arms_ev_per_v", (0.01, 0.01)))
-        h = HubbardParams.from_ci(d.charge, barrier, "B", lever)
-        tp1, tp2 = d.charge.triple_points_ng()
-        c = d.charge.gate_voltages_for_ng((tp1 + tp2) / 2)
-    half = float(p.sweep[0]["half_span_v"])
-    p1 = np.linspace(c[0] - half, c[0] + half, int(p.sweep[0]["points"]))
-    vb = _axis(p.sweep[1])
-    v4 = np.zeros((len(p1), len(vb), 4))
-    v4[..., 0] = p1[:, None]
-    v4[..., 1] = c[1]
-    v4[..., 3] = vb[None, :]
-    with ctx.run(len(p1) * len(vb)):
-        n = h.mean_occupation(v4)
-        phi = d.sensor.potential(v4[..., :3], n)
-        i = d.sensor.current_a(phi)
-        ctx.count(model_evals=len(p1) * len(vb))
-    return {"v_p1_v": p1, "v_b_v": vb, "current_a": i, "n1": n[..., 0]}
+        base = SensedDoubleDot()
+        bl = inst.get("lead_barrier_lever_arms_af", [3.0, 0.5])
+        c_gate = np.concatenate([base.charge.c_gate_af, np.array(bl, dtype=float)[:, None]], axis=1)
+        charge = ConstantInteractionParams(
+            gate_names=base.charge.gate_names + ("BL",),
+            c_gate_af=c_gate,
+            temperature_k=base.charge.temperature_k,
+        )
+        alpha = np.concatenate([base.sensor.alpha_v_per_v, [float(inst.get("sensor_alpha_bl", 0.005))]])
+        sensor = SensorSETParams(**{**base.sensor.__dict__, "alpha_v_per_v": alpha})
+        lead = LeadBarrier("BL", **inst.get("lead_barrier", {}))
+        p2_v = float(inst.get("p2_ng", 0.9)) * charge.transition_period_v(1, "P2")
+        rng = np.random.default_rng(int(inst.get("seed", 0)))
+    p1 = _axis(p.sweep[0])
+    vbl = _axis(p.sweep[1])
+    dwell = float(p.readout.get("dt_s", 1e-3))
+    # scan order: for each barrier value (slow), sweep P1 (fast)
+    v = np.zeros((len(vbl), len(p1), 4))
+    v[..., 0] = p1[None, :]
+    v[..., 1] = p2_v
+    v[..., 3] = vbl[:, None]
+    flat = v.reshape(-1, 4)
+    with ctx.run(len(p1) * len(vbl)):
+        n_eq = charge.mean_occupation(flat)
+        n_meas = latched_occupation(n_eq, lead.rate_hz(flat[:, 3]), dwell, rng)
+        i = sensor.current_a(sensor.potential(flat, n_meas))
+        ctx.count(model_evals=len(p1) * len(vbl))
+    shape = (len(vbl), len(p1))
+    return {
+        "v_p1_v": p1,
+        "v_bl_v": vbl,
+        "current_a": i.reshape(shape).T,
+        "n1_measured": n_meas[:, 0].reshape(shape).T,
+        "n1_equilibrium": n_eq[:, 0].reshape(shape).T,
+    }
 
 
 # --- D: noise --------------------------------------------------------------------------------------
