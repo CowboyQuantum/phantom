@@ -7,6 +7,7 @@ import pathlib
 from typing import Any
 
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -34,7 +35,16 @@ def render_protocol(r: Result, path: pathlib.Path) -> None:
         elif kind == "map":
             y = r.arrays[panel["y"]]
             z = r.arrays[panel["z"]]
-            m = ax.pcolormesh(x, y, z.T, shading="auto", cmap=panel.get("cmap", "viridis"), rasterized=True)
+            limits = {}
+            if panel.get("robust"):
+                # clip the colour scale to the 1st–99th percentile so a few spikes do not hide the rest;
+                # symmetric about zero for a diverging map
+                lo, hi = np.percentile(z, [1, 99])
+                if "RdBu" in panel.get("cmap", "") or "coolwarm" in panel.get("cmap", ""):
+                    m_abs = max(abs(lo), abs(hi))
+                    lo, hi = -m_abs, m_abs
+                limits = {"vmin": float(lo), "vmax": float(hi)}
+            m = ax.pcolormesh(x, y, z.T, shading="auto", cmap=panel.get("cmap", "viridis"), rasterized=True, **limits)
             fig.colorbar(m, ax=ax, label=panel.get("zlabel", panel["z"]))
         else:
             raise ValueError(f"unknown render kind {kind!r}")

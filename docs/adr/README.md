@@ -14,3 +14,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0008 | Gallery of measurement protocols, rendered by CI, signed off per protocol by a human | Accepted |
 | 0009 | Every gallery protocol carries a time and compute budget, measured in CI | Accepted |
 | 0010 | Bit-for-bit reproducibility per platform; across platforms within 1e-12; ubuntu-latest is the reference | Accepted |
+| 0011 | A running map of how the models fit together lives in the docs and is kept current | Accepted |

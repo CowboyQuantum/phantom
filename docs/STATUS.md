@@ -20,14 +20,19 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 - `scripts/check_references.py` in `check_all.sh`; `tests/conftest.py` skips `literature` tests whose entry is
   not `confirmed`; two `proposed` entries (van der Wiel 2003 RMP; Connors 2019 PRB) awaiting the owner's check.
 - `gallery/` package + `scripts/gallery.py`: protocol YAML loader, counters and timing, canonical array hash,
-  sign-off check, budget ledger, PNG + `index.html`. Eleven Step 1 protocols in `docs/gallery/protocols/`, all
+  sign-off check, budget ledger, PNG + `index.html`. Fourteen Step 1 protocols in `docs/gallery/protocols/`, all
   within budget locally in `--strict` mode; all `unsigned`.
+- Owner-driven revisions: `plunger-vs-barrier-map` in the lead-barrier configuration (dot 1 alone has a reservoir)
+  with `readout.loading` (rate-limited loading, latching); four chopped-gate maps `stability-lockin-p1/-p2/-common/
+  -detuning` through `lockin_sweep_dynamic_a_per_v` with a `LeadRateLandscape` (latching below the chop
+  frequency, lifetime broadening far above it; three limit tests). `docs/MODELS.md` measurement-flow diagram and
+  generated module graph (`scripts/model_graph.py --check` in `check_all`), ADR 0011.
 - CI: `gallery` (ubuntu, the reference, ADR 0010) and `gallery-windows` (compares its arrays to the reference within
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- PR #19 (part of #16, does not close it): awaiting CI (first cross-platform hash comparison) and the owner's
-  review of the eleven rendered protocols in the `gallery-*` artifact.
+- PR #19 (part of #16, does not close it): awaiting the owner's review of the fourteen rendered protocols (gallery
+  report published as a private artifact page from this machine; CI artifact `gallery-ubuntu-latest`).
 
 ## Known gaps
 - **GitHub Pages is not enabled**; the session could not enable it (needs the owner: Settings → Pages → Source:

@@ -11,7 +11,8 @@ issue, stop and say so.
 **During** — one branch per issue: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise; conventional commits scoped by layer
 (`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`.
 **End** — `uv run pytest` and `bash scripts/check_all.sh` green; rewrite `docs/STATUS.md` (never append);
-an ADR for any decision a future session could ask "why?" about; comment on the issue; commit.
+`docs/MODELS.md` updated if a model was added or rewired (ADR 0011); an ADR for any decision a future session
+could ask "why?" about; comment on the issue; commit.
 
 ## Hard rules (CI enforces; see `scripts/`)
 1. `phantom` imports nothing from qdt, from any measurement software, or from any instrument SDK. Ever.
@@ -52,7 +53,7 @@ an ADR for any decision a future session could ask "why?" about; comment on the 
 ```
 uv sync --all-extras                      # dev install
 uv run pytest                             # P0 + P1 (what CI runs)
-bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + references + lock + lint
+bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + references + model graph + lock + lint
 uv run python scripts/gallery.py          # render protocols to build/gallery/ and verify sign-offs (Step 1+)
 uv run mkdocs serve                       # browse docs and the rendered gallery
 ```
@@ -64,6 +65,7 @@ uv run mkdocs serve                       # browse docs and the rendered gallery
 | The current step's spec | `docs/steps/<NN-name>.md` (index: `docs/steps/README.md`) |
 | Why it is built this way | `docs/adr/` |
 | The defect and material catalog | `docs/catalog/` |
+| How the models chain into a measurement | `docs/MODELS.md` (ADR 0011) |
 | The papers that are the standard | `docs/references/` (schema in `SCHEMA.md`) |
 | The protocols, sign-offs and budgets | `docs/gallery/` |
 | How qdt consumes phantom | ADR 0003 |

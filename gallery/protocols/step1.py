@@ -9,11 +9,12 @@ from gallery.runner import Context, Protocol
 from phantom.charge import Barrier, ConstantInteractionParams
 from phantom.readout import (
     LeadBarrier,
+    LeadRateLandscape,
     LockinParams,
     SensedDoubleDot,
     SensorSETParams,
     latched_occupation,
-    lockin_sweep_a_per_v,
+    lockin_sweep_dynamic_a_per_v,
     raster_times_s,
 )
 from phantom.readout.transport import ChannelTurnOn, pinch_off_current_a
@@ -137,17 +138,36 @@ def stability_fine_2dot(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     return {"v_p1_v": p1, "v_p2_v": p2, "current_a": i}
 
 
-def stability_lockin_2dot(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+def stability_lockin(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Chopped-gate stability map with tunnel-rate dynamics. The chop direction (P1, P2, common mode
+    or detuning) comes from the protocol's readout.lockin block; the lead-rate landscape from its
+    instance block. Scan order: P2 slow, P1 fast."""
+    inst = p.instance
     with ctx.compile():
         d = _device(p)
         lk = LockinParams(**p.readout["lockin"])
+        land = inst.get("lead_rates", {})
+        rates = LeadRateLandscape(
+            d.charge.gate_names,
+            rate0_hz=np.array(land.get("rate0_hz", [1e3, 1e3]), dtype=float),
+            weights_per_v=np.array(land.get("weights_per_v", [[125.0, 0.0, 0.0], [0.0, 125.0, 0.0]]), dtype=float),
+        )
+        rng = np.random.default_rng(int(inst.get("seed", 0)) + 101)
     p1, p2 = _axis(p.sweep[0]), _axis(p.sweep[1])
-    v = _grid3(p1, p2)
+    v = np.zeros((len(p2), len(p1), 3))
+    v[..., 0] = p1[None, :]
+    v[..., 1] = p2[:, None]
     with ctx.run(v.shape[0] * v.shape[1]):
-        t0 = None if p.instance.get("noise") == "none" else 0.0
-        g = lockin_sweep_a_per_v(d, v, lk, t0_s=t0)
+        t0 = None if inst.get("noise") == "none" else 0.0
+        out = lockin_sweep_dynamic_a_per_v(d, v, lk, rates, rng, t0_s=t0)
         ctx.count(model_evals=v.shape[0] * v.shape[1] * lk.evaluations_per_point)
-    return {"v_p1_v": p1, "v_p2_v": p2, "lockin_a_per_v": g}
+    return {
+        "v_p1_v": p1,
+        "v_p2_v": p2,
+        "lockin_a_per_v": out["signal_a_per_v"].T,
+        "log10_rate_hz": out["log10_rate_hz"].T,
+        "n1_present": out["n_present_mean"][..., 0].T,
+    }
 
 
 def plunger_vs_barrier_map(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:

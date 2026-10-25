@@ -87,16 +87,22 @@ class ConstantInteractionParams:
         u = 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
         return states, u
 
-    def occupation_probabilities(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """States (..., k, 2) and Boltzmann probabilities (..., k) at the model temperature."""
+    def occupation_probabilities(
+        self, v: np.ndarray, kt_ev: float | np.ndarray | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """States (..., k, 2) and Boltzmann probabilities (..., k) at the model temperature, or at the
+        energy width `kt_ev` (scalar or one per gate point) when given, e.g. a lifetime-broadened width."""
         states, u = self.energies(self.induced_charge(v))
-        kt = K_B_EV_PER_K * max(self.temperature_k, 1e-6)
+        if kt_ev is None:
+            kt = K_B_EV_PER_K * max(self.temperature_k, 1e-6)
+        else:
+            kt = np.maximum(np.asarray(kt_ev, dtype=float), 1e-12)[..., None]
         w = np.exp(-(u - u.min(axis=-1, keepdims=True)) / kt)
         return states, w / w.sum(axis=-1, keepdims=True)
 
-    def mean_occupation(self, v: np.ndarray) -> np.ndarray:
+    def mean_occupation(self, v: np.ndarray, kt_ev: float | np.ndarray | None = None) -> np.ndarray:
         """Thermal-average occupation ⟨N⟩ (..., 2) in electrons for gate voltages `v`."""
-        states, p = self.occupation_probabilities(v)
+        states, p = self.occupation_probabilities(v, kt_ev)
         return np.einsum("...k,...ki->...i", p, states)
 
     def ground_state_occupation(self, v: np.ndarray) -> np.ndarray:

@@ -6,8 +6,8 @@ hardware-derivative channel), `transport` (phenomenological turn-on and pinch-of
 loading through a lead barrier in a raster scan; Step 4 replaces it with a master equation).
 """
 
-from phantom.readout.loading import LeadBarrier, latched_occupation
-from phantom.readout.lockin import LockinParams, lockin_sweep_a_per_v
+from phantom.readout.loading import LeadBarrier, LeadRateLandscape, latched_occupation
+from phantom.readout.lockin import LockinParams, lockin_sweep_a_per_v, lockin_sweep_dynamic_a_per_v
 from phantom.readout.measure import SensedDoubleDot, raster_times_s
 from phantom.readout.noise import (
     Composite,
@@ -20,7 +20,7 @@ from phantom.readout.noise import (
 from phantom.readout.sensor import SensorSETParams
 from phantom.readout.transport import ChannelTurnOn, pinch_off_current_a
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
 
 __all__ = [
@@ -28,6 +28,7 @@ __all__ = [
     "ChannelTurnOn",
     "Composite",
     "LeadBarrier",
+    "LeadRateLandscape",
     "LockinParams",
     "NoNoise",
     "NoiseProcess",
@@ -38,6 +39,7 @@ __all__ = [
     "WhiteNoise",
     "latched_occupation",
     "lockin_sweep_a_per_v",
+    "lockin_sweep_dynamic_a_per_v",
     "pinch_off_current_a",
     "raster_times_s",
 ]
