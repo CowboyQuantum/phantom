@@ -1,0 +1,27 @@
+id: plunger-vs-barrier-map
+name: Plunger against the lead barrier of dot 1
+step: 1
+description: Sensor current against P1 (fast axis) and the barrier BL between dot 1 and its reservoir (slow axis). Dot 1 is the only dot connected to a bath; dot 2 exchanges electrons only through dot 1. P2 holds dot 2 near one electron. The dot-1 transition lines tilt with the lead barrier's lever arm, and as the barrier closes the tunnel rate falls below the inverse dwell time, so the dot can no longer load or unload during the row and the lines fade and latch (the charge is carried across the flyback). Noise-free; the loading model is a Step 1 placeholder for Step 4.
+layers: [charge, readout]
+runner: step1:plunger_vs_barrier_map
+instance:
+  model: sensed-double-dot-lead-loading
+  seed: 0
+  noise: none
+  lead_barrier_lever_arms_af: [2.0, 0.3]
+  sensor_alpha_bl: 0.005
+  lead_barrier: {rate0_hz: 1.0e+3, v_ref_v: -0.05, v_scale_v: 0.03}
+  p2_ng: 0.9
+sweep:
+  - {gate: P1, from: 0.0, to: 0.08, points: 240, unit: V}
+  - {gate: BL, from: -0.3, to: 0.1, points: 120, unit: V}
+readout: {channel: sensor_conductance, unit: A, dt_s: 1.0e-3}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: v_bl_v, z: current_a, xlabel: "P1 (V)", ylabel: "lead barrier BL (V)", zlabel: "sensor current (A)", title: sensor}
+    - {kind: map, x: v_p1_v, y: v_bl_v, z: n1_measured, xlabel: "P1 (V)", ylabel: "lead barrier BL (V)", zlabel: "N1 present (electrons)", title: "dot 1 charge actually present", cmap: magma}
+    - {kind: map, x: v_p1_v, y: v_bl_v, z: n1_equilibrium, xlabel: "P1 (V)", ylabel: "lead barrier BL (V)", zlabel: "N1 at equilibrium (electrons)", title: "dot 1 charge at equilibrium", cmap: magma}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.05, points: 28800, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
