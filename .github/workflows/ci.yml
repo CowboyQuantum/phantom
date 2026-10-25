@@ -1,9 +1,11 @@
 name: ci
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   p0-p1:
     strategy:
-      matrix: { os: [ubuntu-latest, windows-latest] }   # reproducibility across platforms (ADR 0003)
+      matrix: { os: [ubuntu-latest, windows-latest] }   # per-platform reproducibility (ADR 0003, 0010)
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -11,3 +13,49 @@ jobs:
       - run: uv sync --all-extras
       - run: bash scripts/check_all.sh
       - run: uv run pytest -q
+
+  gallery:   # the reference platform (ADR 0010): sign-off hashes are the ones computed here
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: uv run python scripts/gallery.py --out build/gallery --reference-platform
+      - uses: actions/upload-artifact@v4
+        with: { name: gallery-ubuntu-latest, path: build/gallery, retention-days: 30 }
+
+  gallery-windows:   # must agree with the reference within 1e-12 relative (ADR 0010)
+    needs: gallery
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - uses: actions/download-artifact@v4
+        with: { name: gallery-ubuntu-latest, path: reference }
+      - run: uv run python scripts/gallery.py --out build/gallery --reference reference
+      - uses: actions/upload-artifact@v4
+        with: { name: gallery-windows-latest, path: build/gallery, retention-days: 30 }
+
+  pages:   # docs site plus the rendered gallery, from main only
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [p0-p1, gallery]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
+      - run: uv run mkdocs build
+      - uses: actions/download-artifact@v4
+        with: { name: gallery-ubuntu-latest, path: site/gallery/rendered }
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+      - id: deployment
+        uses: actions/deploy-pages@v4

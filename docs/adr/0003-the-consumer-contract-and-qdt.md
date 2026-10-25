@@ -1,6 +1,6 @@
 # 0003 — phantom is a dependency-free library with a reproducibility contract; qdt consumes it through an adapter that lives in qdt
 
-**Status:** Accepted
+**Status:** Accepted (rule 3 amended by 0010)
 **Date:** 2026-10-24
 **Step:** 1, 8
 

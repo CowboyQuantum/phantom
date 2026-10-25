@@ -6,7 +6,7 @@ every PR; nothing rendered is stored in git. A human signs each protocol off; a 
 all protocols its layers touch are signed.
 
 **View it.** On a PR: the `gallery` workflow artifact (PNGs, `index.html`, `budget.json`). On `main`:
-the docs site on GitHub Pages, "Gallery" in the nav. Locally:
+the docs site on GitHub Pages, "Gallery" in the nav, then [the rendered gallery](rendered/index.html). Locally:
 
 ```
 uv run python scripts/gallery.py          # renders to build/gallery/ (gitignored)
@@ -41,7 +41,7 @@ The candidate roster for every step is `PROTOCOLS.md`; rows become protocol file
 | `signed_by`, `signed_on` | GitHub handle and date |
 | `notes` | what the review concluded the sweep must show, and what was changed to get there |
 
-CI recomputes `array_sha256` on both platforms and fails if it differs from a signed record. A protocol
+CI computes `array_sha256` on `ubuntu-latest`, the reference platform (ADR 0010), and fails if it differs from a signed record; the Windows job compares its arrays to the reference within 1e-12 relative. A protocol
 with no record renders and is labelled *unsigned*. A session writes a record only when the human says
 so, naming them; their approval of the PR is the signature.
 

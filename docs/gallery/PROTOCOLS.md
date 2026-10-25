@@ -34,7 +34,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `coulomb-oscillations-single-dot` | P with barriers set | current | periodic peaks; spacing from the addition energy; peak width from temperature and lead coupling |
 | `diamonds-single-dot` | (P, V_sd) | current or dI/dV | Coulomb diamonds; slopes equal the lever arms; height equals the addition energy |
 | `barrier-barrier-map` | (B1, B2) at fixed P | current | the region where a dot forms; diagonal Coulomb lines; pinch-off corners |
-| `plunger-vs-barrier-map` | (P, B) for a lead barrier and for the interdot barrier | current or sensor_conductance | charge-transition lines tilt with the barrier's lever arm; along the interdot barrier the interdot line broadens and the honeycomb cell changes shape; the operating window for a wanted tunnel coupling |
+| `plunger-vs-barrier-map` | (P1 fast, lead barrier BL of dot 1 slow); dot 1 is the only dot with a reservoir, dot 2 loads only through dot 1; P2 fixed | sensor_conductance, plus the charge present and the charge at equilibrium | the dot-1 transition lines tilt with the lead barrier's lever arm; as the barrier closes the tunnel rate drops below the inverse dwell time and the lines fade, latch along the row and carry across the flyback; the interdot-barrier variant is a separate protocol when Step 4 adds tunnel-coupling broadening (owner's configuration, 2026-10-25) |
 | `sensor-coulomb-peak` | S | sensor_conductance | one peak; the steep flank where the sensor is operated |
 | `sensor-compensation-map` | (S, P of a dot) | sensor_conductance | tilted peak lines broken at the dot's charge transitions; slope gives the compensation |
 
@@ -43,7 +43,10 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 |---|---|---|---|
 | `stability-coarse-2dot` | (P1, P2), wide | sensor_conductance or charge_state | honeycomb; transitions stop toward (0,0); lines of both dots visible with different slopes |
 | `stability-fine-2dot` | (P1, P2) around one pair of triple points | sensor_conductance | interdot line; broadening grows with t_c; the two triple points |
-| `stability-lockin-2dot` | (P1, P2) with a square-wave modulation on P1 (or on ε) | sensor_lockin | transitions as signed lines; line width set by the modulation amplitude; the sensor's slow drift removed; noise at the modulation frequency visible |
+| `stability-lockin-p1` | (P1, P2) with a 0.5 mV square wave on P1 | sensor_lockin, plus the lead-rate map | dot-1 lines as signed lines; where the lead rate is below the chop frequency the charge cannot follow and lines latch or vanish; where it is far above, lines are lifetime-broadened and fainter |
+| `stability-lockin-p2` | same with the chop on P2 | sensor_lockin, plus N1 present | dot-2 lines strong, dot-1 lines weak |
+| `stability-lockin-common` | same with the chop on P1 and P2 together | sensor_lockin | both dots' lead lines; the interdot line weak |
+| `stability-lockin-detuning` | same with the chop on P1 up and P2 down | sensor_lockin, plus N1 present | the interdot line strongest; lead lines of the two dots with opposite sign |
 | `interdot-detuning-cut` | ε across (1,0)–(0,1) at fixed P1+P2 | sensor_conductance | a step whose width gives t_c (and electron temperature at small t_c) |
 | `tunnel-coupling-vs-barrier` | detuning cut repeated vs. B_interdot | step width | exponential t_c(V_B) |
 | `detuning-cut-vs-temperature` | detuning cut vs. electron temperature | step width | thermal broadening floor; where t_c dominates |

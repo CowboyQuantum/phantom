@@ -2,38 +2,57 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** 1 — Charge and readout core → `docs/steps/01-charge-readout-core.md`, issue #16. Step 2 (issue #17,
-`docs/steps/02-layout-electrostatics.md`) runs together with it. Milestone: "Steps 1-2: charge, readout, layout, electrostatics".
-**Branch:** `step-0/validation-policy` (PR #18; merge before any Step 1 code). Then `step-1/charge-readout-core`.
-**Last session:** 2026-10-25 — Step 0 closed (PR #15 merged). Validation policy written: ADR 0007 (published results
-only, reference library), 0008 (gallery with per-protocol human sign-off, CI-rendered), 0009 (per-protocol time and
-compute budgets); protocol roster; Steps 1 and 2 opened with issues, labels and a milestone.
+**Current step:** 1 — Charge and readout core → `docs/steps/01-charge-readout-core.md`, issue #16. Step 2 (issue #17)
+runs together with it. Milestone: "Steps 1-2: charge, readout, layout, electrostatics".
+**Branch:** `step-1/charge-readout-core` (PR #19 open, part of #16).
+**Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
+noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
+sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
 
 ## Done
-- Step 0 in full (PR #15). Catalog issues #1–#14; labels `catalog`, `layer:<name>`, `roadmap`, `blocker`; milestone #1.
-- ADR 0007–0009 written; ADR 0005 superseded; P2 removed everywhere; CLAUDE.md rules 8 and 9.
-- `docs/references/` (README, SCHEMA, empty `entries/`, `data/`); `docs/gallery/` (README with protocol, sign-off and
-  budget schemas; `PROTOCOLS.md` roster of ~55 candidate protocols across Steps 1–6, owner-reviewed twice).
-- Step 1 lists eleven protocols and the tooling deliverables; Step 2 lists ten. `sensor_lockin` readout channel defined.
-- Branch naming settled in CLAUDE.md: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise.
+- `charge`: `ConstantInteractionParams` (qdt-sim's model migrated, plus exact lever arms, addition energies,
+  triple points), `Dot`, `Barrier`, `HubbardParams` (two-site spinful, t → 0 reproduces CI exactly; P0 tested).
+- `readout`: `SensorSETParams`, noise processes with `trace()` bit-identical to qdt-sim's `sample()` sequences,
+  `SensedDoubleDot` (sweeps with raster times and noise), `LockinParams` / `lockin_sweep_a_per_v`
+  (`sensor_lockin` channel), `transport` (phenomenological turn-on and pinch-off, `calibration: none`).
+- `tests/fixtures/qdt_sim_defaults.npz` (synthetic, from qdt commit ae6dd2c): maps, diamonds and noise sequences
+  reproduced to 1e-12 / bit for bit. 38 P0 tests green.
+- `scripts/check_references.py` in `check_all.sh`; `tests/conftest.py` skips `literature` tests whose entry is
+  not `confirmed`; two `proposed` entries (van der Wiel 2003 RMP; Connors 2019 PRB) awaiting the owner's check.
+- `gallery/` package + `scripts/gallery.py`: protocol YAML loader, counters and timing, canonical array hash,
+  sign-off check, budget ledger, PNG + `index.html`. Fourteen Step 1 protocols in `docs/gallery/protocols/`, all
+  within budget locally in `--strict` mode; all `unsigned`.
+- Owner-driven revisions: `plunger-vs-barrier-map` in the lead-barrier configuration (dot 1 alone has a reservoir)
+  with `readout.loading` (rate-limited loading, latching); four chopped-gate maps `stability-lockin-p1/-p2/-common/
+  -detuning` through `lockin_sweep_dynamic_a_per_v` with a `LeadRateLandscape` (latching below the chop
+  frequency, lifetime broadening far above it; three limit tests). `docs/MODELS.md` measurement-flow diagram and
+  generated module graph and the runtime ledger (per-model micro-benchmarks and per-protocol costs recorded in `docs/gallery/measured.json` by `gallery.py --record`; `scripts/model_graph.py --check` in `check_all`), ADR 0011.
+- CI: `gallery` (ubuntu, the reference, ADR 0010) and `gallery-windows` (compares its arrays to the reference within
+  1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- PR #18 from `step-0/validation-policy`: the four commits that PR #15 was merged without (ADRs, roster, schema changes,
-  step-file headings) plus the Step 2 protocol list and this file. Awaiting the owner's merge.
+- PR #19 (part of #16, does not close it): awaiting the owner's review of the fourteen rendered protocols (gallery
+  report published as a private artifact page from this machine; CI artifact `gallery-ubuntu-latest`).
 
 ## Known gaps
-- Tooling named by ADR 0007–0009 does not exist yet: `scripts/check_references.py`, `scripts/gallery.py`, the
-  `gallery` CI job, Pages deployment, the `gallery` dependency group. First work of Step 1.
-- `docs/references/entries/` is empty. Step 1 proposes the first entries; the owner confirms them.
-- `docs/catalog/entries/interface-fixed-charge.yaml` predates the schema change (free-text `sources`, no
-  `calibration`). Fix when the first reference entries exist.
-- The reference-library index table in `docs/references/README.md` is regenerated by `check_references.py`; empty until then.
-- `exchange-house-cells` axes were set by the owner (P1, P2 at the evolve coordinate, J held high); every other roster
-  row is still `proposed`.
+- GitHub Pages is enabled (source: GitHub Actions) at https://cowboyquantum.github.io/phantom/. Enabling it added a
+  default `jekyll-gh-pages.yml` workflow to `main`, removed on this branch so only the mkdocs `pages` job in `ci.yml`
+  deploys. Until PR #19 merges, the site shows the Jekyll render of the repository files, not the docs.
+- No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
+  `docs/gallery/signoff/<id>.yaml` at the owner's instruction (ADR 0008).
+- The two reference entries are `proposed`; no P1 test exists yet. The owner confirms or replaces them.
+- `turn-on-single-gate` and `pinch-off-barrier` are phenomenological shapes until Step 2.
+- Cross-platform bit identity failed on the first CI run of PR #19 (ten of eleven protocols; even pure `exp`/`tanh`
+  curves differ in the last bit between the Ubuntu and Windows numpy builds). ADR 0010 now makes `ubuntu-latest`
+  the reference platform for sign-off hashes and requires other platforms to agree within 1e-12 relative; the
+  `gallery-windows` job compares to the reference artifact. Rule 3 in CLAUDE.md amended accordingly.
+- `docs/catalog/entries/interface-fixed-charge.yaml` still has free-text sources and no `calibration` field
+  (warned, not failed, because it is `draft`).
+- Step 1 exit criteria still open: sign-offs; the benchmark is met locally (0.02 ms/point on
+  `stability-coarse-2dot`, budget 0.1) but not yet confirmed on CI.
 
 ## Next action
-After PR #18 merges: branch `step-1/charge-readout-core` from `main`; build the tooling first
-(`check_references.py` into `check_all.sh`; `gallery.py` with protocol loading, array hashing, sign-off check, budget
-ledger and mkdocs page; the `gallery` CI job with artifact upload and Pages from `main`); then migrate `qdt-sim`'s
-double-dot model into `charge` and its noise into `readout`, rendering `coulomb-oscillations-single-dot`,
-`diamonds-single-dot` and `stability-coarse-2dot` first for the owner's review. PR body `Closes #16`.
+When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
+on protocols from the review, then writes sign-offs as instructed. In parallel, start Step 2 on
+`step-2/layout-electrostatics` (issue #17): `layout` dataclasses, Davies–Larkin–Stern closed-form potential,
+lever arms derived from the layout, `potential-map-layout` and `potential-cut-along-channel` protocols first.

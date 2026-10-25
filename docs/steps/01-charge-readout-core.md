@@ -31,8 +31,9 @@ Migrate `qdt-sim`'s `DoubleDotModel` and noise models into `charge` and `readout
 - `diamonds-single-dot`: current vs. (plunger, bias); Coulomb diamonds with slopes from the lever arms
 - `stability-coarse-2dot`: charge state or sensor signal vs. (P1, P2), wide range; honeycomb
 - `stability-fine-2dot`: same, zoomed on one triple-point pair; interdot line with tunnel-coupling broadening
-- `stability-lockin-2dot`: same map with a chopped plunger, read through `sensor_lockin`; transitions as signed lines
-- `plunger-vs-barrier-map`: sensor signal vs. (plunger, barrier) for a lead barrier and for the interdot barrier; transition tilt and interdot broadening
+- `stability-lockin-p1`, `-p2`, `-common`, `-detuning`: the coarse region read through `sensor_lockin` with the chop on P1, on P2, on both (common mode) and in opposition (detuning); with lead-rate dynamics (`readout.loading.LeadRateLandscape`): latching where the rate is below the chop frequency, lifetime broadening where it is far above
+- `docs/MODELS.md` measurement-flow diagram and generated module graph (ADR 0011)
+- `plunger-vs-barrier-map`: sensor signal vs. (P1, lead barrier of dot 1), dot 1 the only dot with a reservoir; line tilt from the lever arm and latching as the barrier closes (minimal loading model in `readout.loading`, replaced in Step 4)
 - `sensor-coulomb-peak`: sensor conductance vs. sensor plunger; a peak and its slope
 - `noise-time-trace`: sensor signal vs. time at a fixed point; telegraph and drift visible
 - `noise-psd`: power spectral density of the trace; the 1/f slope and white floor
@@ -48,4 +49,4 @@ Full roster with later steps: `docs/gallery/PROTOCOLS.md`. Each carries a `budge
 - plan §8 #2 Hubbard vs. CI default
 
 ## Status
-NOT STARTED
+IN PROGRESS

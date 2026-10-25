@@ -4,9 +4,16 @@ nav:
   - Development plan: DEVELOPMENT_PLAN.md
   - Status: STATUS.md
   - Steps: steps/README.md
+  - Models: MODELS.md
   - ADRs: adr/README.md
   - Catalog: catalog/README.md
   - References: references/README.md
   - Gallery: gallery/README.md
 plugins: [search]
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 theme: {name: material}
