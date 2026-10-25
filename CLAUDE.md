@@ -19,7 +19,8 @@ an ADR for any decision a future session could ask "why?" about; comment on the 
 2. Layers import only downward: `layout` ← `electrostatics` ← `disorder` ← `valley` ← `charge` ←
    `readout` ← `spin` ← `optimum`; `compile` may import everything; nothing imports `compile`. (ADR 0004)
 3. **Reproducibility contract:** every model takes an explicit seed and carries a `model_version`; the same
-   parameters, seed and version give identical output, bit for bit, on every platform CI runs. (ADR 0003)
+   parameters, seed and version give identical output, bit for bit, on the same platform and numpy build, and
+   agree within 1e-12 relative across platforms; `ubuntu-latest` in CI is the reference for sign-off hashes. (ADR 0003, 0010)
 4. **Compile once, run cheap:** anything slower than ~1 ms per gate point belongs in `compile`, which
    produces parameters the runtime layers consume. Runtime layers never call a solver. (ADR 0001)
 5. Every physical quantity carries its unit in the name or the docstring; parameters are dataclasses with

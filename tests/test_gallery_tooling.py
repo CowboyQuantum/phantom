@@ -38,3 +38,17 @@ def test_cheap_protocols_run_with_declared_counts():
         assert r.budget_ok, r.budget_notes
         assert r.signoff_status == "unsigned"
         assert run_protocol(p, time_factor=1e9).sha256 == r.sha256
+
+
+def test_compare_arrays_tolerance_and_structure():
+    from gallery.runner import compare_arrays
+
+    a = {"x": np.linspace(0, 1, 100), "n": np.arange(4)}
+    b = {"x": a["x"] * (1 + 1e-15), "n": np.arange(4)}
+    ok, worst = compare_arrays(a, b, 1e-12)
+    assert ok and worst < 1e-12
+    c = {"x": a["x"] * (1 + 1e-9), "n": np.arange(4)}
+    ok, worst = compare_arrays(a, c, 1e-12)
+    assert not ok and 1e-10 < worst < 1e-8
+    assert compare_arrays(a, {"x": a["x"]}, 1e-12) == (False, float("inf"))
+    assert compare_arrays(a, {"x": a["x"], "n": np.arange(4) + 1}, 1e-12) == (False, float("inf"))

@@ -21,6 +21,10 @@ PROTOCOLS_DIR = ROOT / "docs/gallery/protocols"
 SIGNOFF_DIR = ROOT / "docs/gallery/signoff"
 CI_TIME_FACTOR = 3.0
 """Wall time may exceed its budget by this factor on shared CI runners (ADR 0009); `--strict` uses 1."""
+CROSS_PLATFORM_RTOL = 1e-12
+"""Arrays from another platform must agree with the reference platform's to this relative tolerance,
+measured per array as max|a − b| / max|a| (ADR 0010)."""
+REFERENCE_PLATFORM = "ubuntu-latest"
 
 
 @dataclass(frozen=True)
@@ -108,9 +112,44 @@ class Result:
     points: int
     counts: dict[str, int]
     signoff: dict[str, Any] | None
-    signoff_status: str  # signed | unsigned | MISMATCH
+    signoff_status: str  # signed | unsigned | MISMATCH | unverifiable-here
     budget_ok: bool
     budget_notes: list[str]
+    reference_sha256: str | None = None
+    reference_max_rel: float | None = None
+    reference_ok: bool | None = None  # None when no reference was given
+
+
+def compare_arrays(a: dict[str, np.ndarray], b: dict[str, np.ndarray], rtol: float = CROSS_PLATFORM_RTOL) -> tuple[bool, float]:
+    """Whether every array in `a` agrees with its counterpart in `b` within `rtol` (ADR 0010), and the
+    worst relative difference seen. Integer and boolean arrays must be equal exactly."""
+    if set(a) != set(b):
+        return False, float("inf")
+    worst = 0.0
+    for key, value in a.items():
+        x, y = np.asarray(value), np.asarray(b[key])
+        if x.shape != y.shape or x.dtype != y.dtype:
+            return False, float("inf")
+        if x.dtype.kind in "fc":
+            if not np.array_equal(np.isfinite(x), np.isfinite(y)):
+                return False, float("inf")
+            fx, fy = x[np.isfinite(x)], y[np.isfinite(y)]
+            if fx.size:
+                scale = max(float(np.max(np.abs(fx))), np.finfo(float).tiny)
+                worst = max(worst, float(np.max(np.abs(fx - fy))) / scale)
+        elif not np.array_equal(x, y):
+            return False, float("inf")
+    return worst <= rtol, worst
+
+
+def load_reference(reference_dir: pathlib.Path | None, pid: str) -> dict[str, np.ndarray] | None:
+    if reference_dir is None:
+        return None
+    path = reference_dir / f"{pid}.npz"
+    if not path.is_file():
+        return None
+    with np.load(path) as z:
+        return {k: z[k] for k in z.files}
 
 
 def canonical_hash(arrays: dict[str, np.ndarray]) -> str:
@@ -171,20 +210,39 @@ def check_budget(p: Protocol, ctx: Context, time_factor: float) -> tuple[bool, l
     return ok, notes
 
 
-def run_protocol(p: Protocol, time_factor: float = CI_TIME_FACTOR) -> Result:
+def run_protocol(
+    p: Protocol,
+    time_factor: float = CI_TIME_FACTOR,
+    reference_dir: pathlib.Path | None = None,
+    is_reference_platform: bool = True,
+    rtol: float = CROSS_PLATFORM_RTOL,
+) -> Result:
+    """Run `p`. On the reference platform the sign-off is checked by exact hash. Elsewhere, with
+    `reference_dir` holding the reference platform's `.npz` files, the arrays are compared within `rtol`
+    and the sign-off is judged by the reference hash; without a reference, a differing hash is
+    `unverifiable-here` (ADR 0010)."""
     ctx = Context()
     arrays = resolve_runner(p.runner)(ctx, p)
     arrays = {k: np.asarray(v) for k, v in arrays.items()}
     sha = canonical_hash(arrays)
     signoff = load_signoff(p.id)
+    reference = load_reference(reference_dir, p.id)
+    ref_sha = canonical_hash(reference) if reference is not None else None
+    ref_ok, ref_rel = (compare_arrays(arrays, reference, rtol) if reference is not None else (None, None))
+    judged_sha = ref_sha if reference is not None else sha
     if signoff is None:
         status = "unsigned"
-    elif signoff.get("array_sha256") == sha:
+    elif signoff.get("array_sha256") == judged_sha and (ref_ok is None or ref_ok):
         status = "signed"
+    elif not is_reference_platform and reference is None:
+        status = "unverifiable-here"
     else:
         status = "MISMATCH"
     ok, notes = check_budget(p, ctx, time_factor)
-    return Result(p, arrays, sha, ctx.compile_s, ctx.run_s, ctx.points, dict(ctx.counts), signoff, status, ok, notes)
+    return Result(
+        p, arrays, sha, ctx.compile_s, ctx.run_s, ctx.points, dict(ctx.counts), signoff, status, ok, notes,
+        reference_sha256=ref_sha, reference_max_rel=ref_rel, reference_ok=ref_ok,
+    )
 
 
 def git_commit() -> str:
@@ -213,6 +271,9 @@ def ledger_row(r: Result) -> dict[str, Any]:
         "budget_notes": r.budget_notes,
         "sha256": r.sha256,
         "signoff": r.signoff_status,
+        "reference_sha256": r.reference_sha256,
+        "reference_max_rel": r.reference_max_rel,
+        "reference_ok": r.reference_ok,
     }
 
 

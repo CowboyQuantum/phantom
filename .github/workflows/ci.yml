@@ -5,7 +5,7 @@ permissions:
 jobs:
   p0-p1:
     strategy:
-      matrix: { os: [ubuntu-latest, windows-latest] }   # reproducibility across platforms (ADR 0003)
+      matrix: { os: [ubuntu-latest, windows-latest] }   # per-platform reproducibility (ADR 0003, 0010)
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -14,34 +14,28 @@ jobs:
       - run: bash scripts/check_all.sh
       - run: uv run pytest -q
 
-  gallery:   # ADR 0008/0009: render every protocol, check sign-offs and budgets, publish the artifact
-    strategy:
-      matrix: { os: [ubuntu-latest, windows-latest] }
-    runs-on: ${{ matrix.os }}
+  gallery:   # the reference platform (ADR 0010): sign-off hashes are the ones computed here
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
       - run: uv sync --all-extras
-      - run: uv run python scripts/gallery.py --out build/gallery
+      - run: uv run python scripts/gallery.py --out build/gallery --reference-platform
       - uses: actions/upload-artifact@v4
-        with: { name: "gallery-${{ matrix.os }}", path: build/gallery, retention-days: 30 }
+        with: { name: gallery-ubuntu-latest, path: build/gallery, retention-days: 30 }
 
-  gallery-hashes-agree:   # rule 3: the swept arrays hash identically on both platforms
+  gallery-windows:   # must agree with the reference within 1e-12 relative (ADR 0010)
     needs: gallery
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --all-extras
       - uses: actions/download-artifact@v4
-        with: { pattern: "gallery-*", path: artifacts }
-      - run: |
-          python - <<'PY'
-          import json, pathlib, sys
-          files = sorted(pathlib.Path("artifacts").glob("*/hashes.json"))
-          sets = [json.loads(f.read_text()) for f in files]
-          print("compared:", [str(f.parent.name) for f in files])
-          bad = [k for k in sets[0] if any(s.get(k) != sets[0][k] for s in sets[1:])]
-          for k in bad: print("MISMATCH", k, [s.get(k, "")[:16] for s in sets])
-          sys.exit(1 if bad or len(sets) < 2 else 0)
-          PY
+        with: { name: gallery-ubuntu-latest, path: reference }
+      - run: uv run python scripts/gallery.py --out build/gallery --reference reference
+      - uses: actions/upload-artifact@v4
+        with: { name: gallery-windows-latest, path: build/gallery, retention-days: 30 }
 
   pages:   # docs site plus the rendered gallery, from main only
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
