@@ -35,8 +35,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   report published as a private artifact page from this machine; CI artifact `gallery-ubuntu-latest`).
 
 ## Known gaps
-- **GitHub Pages is not enabled**; the session could not enable it (needs the owner: Settings → Pages → Source:
-  GitHub Actions). The `pages` job has `continue-on-error: true` until then; remove it after enabling.
+- GitHub Pages is enabled (source: GitHub Actions) at https://cowboyquantum.github.io/phantom/. Enabling it added a
+  default `jekyll-gh-pages.yml` workflow to `main`, removed on this branch so only the mkdocs `pages` job in `ci.yml`
+  deploys. Until PR #19 merges, the site shows the Jekyll render of the repository files, not the docs.
 - No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
   `docs/gallery/signoff/<id>.yaml` at the owner's instruction (ADR 0008).
 - The two reference entries are `proposed`; no P1 test exists yet. The owner confirms or replaces them.
