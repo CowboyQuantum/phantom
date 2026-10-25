@@ -18,6 +18,8 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 ## A. Electrical health (layout, electrostatics) — Step 2
 | id | sweep | readout | must show |
 |---|---|---|---|
+| `potential-map-layout` | (x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid | potential energy (meV) | two wells and the barriers between them; the dot positions the layout implies |
+| `potential-cut-along-channel` | position along the dot-to-dot axis, repeated for several barrier voltages | potential energy (meV) | the barrier height falling as the gate opens; the well depths |
 | `gate-leakage-iv` | each gate vs. ground, wide V range | leakage current | ~0 inside the safe window; onset of leakage at the extremes; an open gate shows no accumulation anywhere |
 | `ohmic-iv` | V_sd, all gates accumulated | current | linear; series resistance |
 | `turn-on-global` | all gates together | current | threshold, then saturation; MOS vs. SiGe threshold scale |

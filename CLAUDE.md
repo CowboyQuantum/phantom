@@ -8,7 +8,7 @@ Why: `docs/adr/`. What next: `docs/STATUS.md`. The protocol is the one qdt uses 
 `gh issue view <n>` for the issue STATUS names; the `docs/steps/` file that issue links; the layer's
 docstring in `src/phantom/<layer>/__init__.py`. Restate the task in one sentence; if it differs from the
 issue, stop and say so.
-**During** — one branch per issue (`issue-<n>/<short-name>`); conventional commits scoped by layer
+**During** — one branch per issue: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise; conventional commits scoped by layer
 (`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`.
 **End** — `uv run pytest` and `bash scripts/check_all.sh` green; rewrite `docs/STATUS.md` (never append);
 an ADR for any decision a future session could ask "why?" about; comment on the issue; commit.
