@@ -13,6 +13,8 @@ uv run python scripts/gallery.py          # renders to build/gallery/ (gitignore
 uv run mkdocs serve                       # browse it
 ```
 
+The candidate roster for every step is `PROTOCOLS.md`; rows become protocol files when their step opens.
+
 ## Protocol file — `protocols/<id>.yaml`
 
 | Field | Meaning |
