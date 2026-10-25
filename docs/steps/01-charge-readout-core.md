@@ -7,7 +7,7 @@ Migrate `qdt-sim`'s `DoubleDotModel` and noise models into `charge` and `readout
 
 ## Deliverables
 - `charge`: `Dot`, `Barrier`, a two-dot constant-interaction model and a Hubbard model with t(V_barrier) exponential, U(dot size), V_ij; ground-state charge per gate point
-- `readout`: `SensorSET` conductance vs. gate with capacitive coupling to dots; noise processes (white, telegraph, 1/f, fluctuator ensemble) with explicit time stepping
+- `readout`: `SensorSET` conductance vs. gate with capacitive coupling to dots; noise processes (white, telegraph, 1/f, fluctuator ensemble) with explicit time stepping; a `sensor_lockin` channel: the demodulated sensor response to a square-wave modulation of a named gate (amplitude, frequency), so a hardware derivative map is a protocol, not a post-processing step
 - Reproducibility: seed + `model_version` → bit-identical arrays; a cross-platform CI job
 - `scripts/check_references.py` in `check_all.sh`; the first reference entries (`proposed`) for the quantities the P0/P1 rows below depend on (ADR 0007)
 - `scripts/gallery.py`: runs every protocol, writes arrays, PNGs, `budget.json` and a mkdocs page to `build/gallery/`; verifies sign-off hashes; `gallery` dependency group with matplotlib (ADR 0008, 0009)
@@ -27,13 +27,16 @@ Migrate `qdt-sim`'s `DoubleDotModel` and noise models into `charge` and `readout
 ## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
 - `turn-on-single-gate`: current vs. one plunger, others fixed; shows a threshold and saturation
 - `pinch-off-barrier`: current vs. one barrier gate; shows exponential pinch-off
+- `coulomb-oscillations-single-dot`: current vs. plunger with barriers set; periodic peaks spaced by the addition energy
 - `diamonds-single-dot`: current vs. (plunger, bias); Coulomb diamonds with slopes from the lever arms
 - `stability-coarse-2dot`: charge state or sensor signal vs. (P1, P2), wide range; honeycomb
 - `stability-fine-2dot`: same, zoomed on one triple-point pair; interdot line with tunnel-coupling broadening
+- `stability-lockin-2dot`: same map with a chopped plunger, read through `sensor_lockin`; transitions as signed lines
+- `plunger-vs-barrier-map`: sensor signal vs. (plunger, barrier) for a lead barrier and for the interdot barrier; transition tilt and interdot broadening
 - `sensor-coulomb-peak`: sensor conductance vs. sensor plunger; a peak and its slope
 - `noise-time-trace`: sensor signal vs. time at a fixed point; telegraph and drift visible
 - `noise-psd`: power spectral density of the trace; the 1/f slope and white floor
-Each carries a `budget`; each is unsigned until the owner has reviewed it in the PR artifact.
+Full roster with later steps: `docs/gallery/PROTOCOLS.md`. Each carries a `budget`; each is unsigned until the owner has reviewed it in the PR artifact.
 
 ## Exit criteria
 - qdt-sim's committed scenario outputs are reproduced by the migrated core (one-off check, before Step 8 regenerates them)

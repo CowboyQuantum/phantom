@@ -24,7 +24,7 @@ The candidate roster for every step is `PROTOCOLS.md`; rows become protocol file
 | `layers` | phantom layers exercised; the protocol is owed by the step that delivers them |
 | `instance` | which model and material class, and the `seed` that draws the instance (disorder is a draw) |
 | `sweep` | ordered axes: `{gate_or_time, from, to, points, unit}`; one axis is a trace, two a map |
-| `readout` | channel: `current`, `sensor_conductance`, `rf_response`, `charge_state`, with its unit |
+| `readout` | channel: `current`, `sensor_conductance`, `sensor_lockin` (demodulated response to a square-wave modulation of a named gate; amplitude and frequency are parameters), `rf_response`, `charge_state`, `spin_outcome`, with its unit |
 | `render` | plot kind and axes labels; cosmetic only, never compared |
 | `budget` | required, ADR 0009: `compile: {wall_s, solver_calls}`, `run: {wall_ms_per_point, points, model_evals_per_point, solver_calls: 0}` |
 | `must_show` | plain-language checklist a reviewer looks for; filled in during review |
