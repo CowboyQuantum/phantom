@@ -51,7 +51,7 @@ jobs:
           base="https://${REPO%%/*}.github.io/${REPO##*/}/pr-$PR"
           body=$(printf '<!-- pages-preview -->\n**Preview** (ADR 0012) for \`%s\`: [docs](%s/) · [rendered gallery](%s/gallery/rendered/index.html) · [models and runtimes](%s/MODELS/)\n\nPublishes a minute or two after each push; removed when this pull request closes.' "${SHA:0:7}" "$base" "$base" "$base")
           id=$(gh api "repos/$REPO/issues/$PR/comments" --jq '.[] | select(.body | startswith("<!-- pages-preview -->")) | .id' | head -1)
-          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; else gh pr comment "$PR" --body "$body"; fi
+          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; else gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$body" >/dev/null; fi
 
   publish:   # main: the root of the site
     if: github.event_name == 'push'
