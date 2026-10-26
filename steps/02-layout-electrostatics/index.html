@@ -587,13 +587,14 @@
 <li><code>potential-map-layout</code>: V(x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid; two wells and the barriers between them visible (rendering)</li>
 <li><code>potential-cut-along-channel</code>: V along the dot-to-dot axis for several barrier voltages; the barrier height falls as the gate opens (rendering)</li>
 <li><code>stability-coarse-2dot-layout</code>: the coarse map with nothing typed but the layout, the operating point and the sensor's per-electron coupling; the sensor gate is set on its flank first (rendering)</li>
-<li><code>gate-leakage-iv</code>: leakage current vs. each gate; ~0 in the safe window, onset at the extremes</li>
-<li><code>ohmic-iv</code>: current vs. source–drain bias with all gates accumulated; linear</li>
-<li><code>turn-on-global</code>: current vs. all gates swept together; threshold and saturation, MOS vs. SiGe scale</li>
+<li><code>gate-leakage-iv</code>: leakage current vs. each gate; ~0 in the safe window, onset at the extremes (rendering; proportional to gate area, phenomenological)</li>
+<li><code>ohmic-iv</code>: current vs. source–drain bias with all gates accumulated; linear (rendering; phenomenological)</li>
+<li><code>turn-on-global</code>: current vs. all gates swept together; threshold from the layout's channel barrier (rendering)</li>
 <li><code>pinch-off-crosstalk</code>: pinch-off voltage of one barrier vs. another gate's voltage; a straight line whose slope is the cross-capacitance ratio (rendering; step shape phenomenological)</li>
-<li><code>crosstalk-lines</code>: sensor signal vs. every gate pair; the full cross-capacitance matrix from the line slopes</li>
-<li><code>gate-hysteresis</code>: one gate up then down; the two traces overlap for a clean device (the loop appears in Step 3)</li>
-<li>still to do: <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>, <code>crosstalk-lines</code>, <code>gate-hysteresis</code>; re-rendering <code>turn-on-single-gate</code> and <code>pinch-off-barrier</code> from the layout
+<li><code>crosstalk-lines</code>: sensor signal vs. four gate pairs; the lever-arm matrix from the line slopes (rendering)</li>
+<li><code>gate-hysteresis</code>: one gate up then down; the two traces overlap for a clean device (rendering; the loop appears in Step 3)</li>
+<li><code>turn-on-single-gate-layout</code>: the Step 1 turn-on re-rendered from the layout's channel barrier (rendering)</li>
+<li>still to do: the P1 reproduction against a published layout (owner names the paper); sign-offs
 Full roster: <code>docs/gallery/PROTOCOLS.md</code>. Each carries a <code>budget</code>; each is unsigned until the owner has reviewed it in the PR artifact.</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>

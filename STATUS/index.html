@@ -616,7 +616,7 @@
 </blockquote>
 <p><strong>Current step:</strong> 1 (issue #16, awaiting sign-offs) and 2 (issue #17, in progress) together →
 <code>docs/steps/01-charge-readout-core.md</code>, <code>docs/steps/02-layout-electrostatics.md</code>. Milestone: "Steps 1-2".
-<strong>Branch:</strong> <code>step-2/layout-electrostatics</code> (first Step 2 PR, part of #17). PRs #19 and #20 merged; #21, #22 small follow-ups.
+<strong>Branch:</strong> <code>step-2/electrical-health</code> (second Step 2 PR, part of #17). PRs #19–#23 merged.
 <strong>Last session:</strong> 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; <code>check_references.py</code>; <code>gallery.py</code> with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.</p>
@@ -644,18 +644,23 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>First Step 2 PR: <code>layout</code> (Gate, Layer, Stack, MaterialClass, Layout JSON, <code>two_dot_layout</code>), <code>electrostatics</code>
+<li>Second Step 2 PR (<code>step-2/electrical-health</code>): <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>,
+  <code>turn-on-single-gate-layout</code>, <code>gate-hysteresis</code>, <code>crosstalk-lines</code> rendering; <code>readout.transport</code> gains
+  <code>channel_transmission_current_a</code>, <code>gate_leakage_current_a</code>, <code>ohmic_current_a</code>; <code>Gate.area_nm2</code>; 3 tests.</li>
+<li>Merged as PR #23, first Step 2 PR: <code>layout</code> (Gate, Layer, Stack, MaterialClass, Layout JSON, <code>two_dot_layout</code>), <code>electrostatics</code>
   (solid-angle closed form for any polygon, GateBasis, dots and barriers from the landscape, offline Schrödinger),
   <code>charge.derived.derive_double_dot</code>, ADR 0013, reference entry <code>davies1995-patterned-2deg</code> (proposed), four Step 2
   protocols rendering (potential map, channel cut, layout-derived stability map, pinch-off crosstalk), 8 new P0 tests.</li>
-<li>Step 1 sign-offs still pending; PR #21 (preview comment formatting) and #22 (README links) awaiting merge.</li>
+<li>Step 1 sign-offs still pending. PRs #21 and #22 merged.</li>
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>Step 2 still owes: <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>, <code>crosstalk-lines</code>, <code>gate-hysteresis</code>,
-  re-rendering turn-on and pinch-off from the layout, and the P1 reproduction against a published layout (its
-  reference entry does not exist yet; the owner names the paper).</li>
-<li>Pages source still points at <code>main</code>; must be <code>gh-pages</code> (root) for the docs root and the per-PR previews to be served.</li>
+<li>ADR 0014: cross-platform tolerance raised from 1e-12 to 1e-9 after the layout-derived stability maps differed by
+  2e-11 between platforms (derived chains amplify last-bit differences at sharp steps). Typed chains still agree to 3e-14.</li>
+<li>Step 2 still owes the P1 reproduction against a published layout (its reference entry does not exist yet; the
+  owner names the paper) and the owner's sign-offs of its protocols. <code>pinch-off-barrier</code> from the layout is
+  covered by <code>turn-on-single-gate-layout</code> (same sweep seen from the barrier side); say so if a separate picture is wanted.</li>
+<li>Pages source is <code>gh-pages</code> (root); the docs root and per-PR previews are served.</li>
 <li>Pages: ADR 0012 moves publishing to the <code>gh-pages</code> branch with per-PR previews at <code>/pr-&lt;n&gt;/</code>; the repository's
   Pages source must be set to that branch (root) once it exists, by the owner if the session is not permitted.</li>
 <li>No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
@@ -672,8 +677,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   <code>stability-coarse-2dot</code>, budget 0.1) but not yet confirmed on CI.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>Merge the first Step 2 PR after the owner reviews its four pictures on the preview; then the remaining Step 2
-protocols and the P1 row. In parallel, Step 1 sign-offs as the owner reviews.</p>
+<p>Owner reviews the Step 2 pictures on the preview of the second Step 2 PR and merges; names the published layout for
+the P1 row; signs off protocols from Steps 1 and 2 as reviewed. Then Step 3 (disorder and the fault models, issue to
+be filed) opens, which needs the catalog entries (#1–#14) the owner is writing.</p>
 <p>Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
 on protocols from the review, then writes sign-offs as instructed. In parallel, start Step 2 on
