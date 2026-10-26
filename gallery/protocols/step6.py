@@ -97,9 +97,10 @@ def exchange_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
 
 
 def exchange_fingerprint(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
-    """Singlet return against detuning and evolution time, averaged over the quasi-static detuning noise
-    of the device's draw: the oscillation frequency J(ε)/h rises toward the anticrossing and the
-    visibility decays fastest where dJ/dε is largest."""
+    """Singlet return against detuning (negative toward (2,0), positive toward (0,2)) and evolution
+    time, averaged over the quasi-static detuning noise of the device's draw: the oscillation frequency
+    J(ε)/h is lowest at the symmetric point, rises toward either anticrossing, and the visibility decays
+    fastest where dJ/dε is largest."""
     with ctx.compile():
         hub, v0, sigma_v = _pair(p)
         eac = _anticrossing_ev(hub)
