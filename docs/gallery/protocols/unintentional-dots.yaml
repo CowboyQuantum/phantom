@@ -20,5 +20,5 @@ render:
     - {kind: line, x: density_cm2, y: fraction_with_extra, xlabel: "interface charge density (cm^-2)", ylabel: "fraction of draws with an extra minimum", log_x: true, title: "fraction"}
 budget:
   compile: {wall_s: 1.0, solver_calls: 0}
-  run: {wall_ms_per_point: 400.0, points: 125, model_evals_per_point: 1, solver_calls: 0}
+  run: {wall_ms_per_point: 1000.0, points: 125, model_evals_per_point: 1, solver_calls: 0}
 must_show: []

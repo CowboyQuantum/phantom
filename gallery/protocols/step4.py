@@ -130,7 +130,7 @@ def lead_rate_time_trace(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
         for vb in settings:
             v = v0.copy()
             v[j_bl] = vb
-            d, rate_eq, bars = derive_dynamics(lay, v, basis, float(p.instance.get("temperature_k", 0.15)))
+            d, rate_eq, _ = derive_dynamics(lay, v, basis, float(p.instance.get("temperature_k", 0.15)))
             # step P1 by a quarter of a transition period: start just below a transition, end above it
             period = d.ci.transition_period_v(0, "P1")
             cases.append((vb, v, rate_eq, period))

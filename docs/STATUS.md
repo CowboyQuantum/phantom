@@ -57,8 +57,8 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   carry `R_L: 0.7, R_R: 0.7`; the lead rate spans 1e2–1e10 Hz as the outer barrier goes 0.0–0.2 V.
 - Step 4 still owes the RF tank response, the single-shot histogram and SNR protocols, catalog-tied fluctuator
   statistics, and the two P1 rows (a charge-noise spectrum, a latching signature) once their entries exist.
-- A shorted plunger–middle-barrier pair merges the two dots into one at the clean operating point; the two-dot CI model
-  cannot represent it, so the fault protocol shows the plunger–outer-barrier short instead (noted in the protocol).
+- A plunger shorted to a neighbouring barrier opens that barrier and dissolves the dot into the reservoir (or merges the
+  dots); the two-dot CI model cannot represent it, so the fault protocol shows a plunger–sensor-gate short instead.
 - Step 3 generators run on the catalog draft's placeholder densities (`calibration: none`); the owner's catalog entries
   (#1–#14) set the real distributions. Strain and g-factor draws wait for `spin`; switcher and drift rates tie to the
   catalog in Step 4. No screening in the charge potentials (upper bound) until Step 7.
