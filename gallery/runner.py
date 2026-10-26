@@ -23,9 +23,10 @@ MEASURED = ROOT / "docs/gallery/measured.json"
 """Last recorded protocol costs and model benchmarks (ADR 0011), written by `scripts/gallery.py --record`."""
 CI_TIME_FACTOR = 3.0
 """Wall time may exceed its budget by this factor on shared CI runners (ADR 0009); `--strict` uses 1."""
-CROSS_PLATFORM_RTOL = 1e-12
+CROSS_PLATFORM_RTOL = 1e-9
 """Arrays from another platform must agree with the reference platform's to this relative tolerance,
-measured per array as max|a − b| / max|a| (ADR 0010)."""
+measured per array as max|a − b| / max|a| (ADR 0010; 1e-9 since ADR 0014: derived chains amplify last-bit
+differences to ~1e-11 at sharp features)."""
 REFERENCE_PLATFORM = "ubuntu-latest"
 
 

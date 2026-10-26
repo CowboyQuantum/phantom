@@ -41,6 +41,8 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 - Step 1 sign-offs still pending. PRs #21 and #22 merged.
 
 ## Known gaps
+- ADR 0014: cross-platform tolerance raised from 1e-12 to 1e-9 after the layout-derived stability maps differed by
+  2e-11 between platforms (derived chains amplify last-bit differences at sharp steps). Typed chains still agree to 3e-14.
 - Step 2 still owes the P1 reproduction against a published layout (its reference entry does not exist yet; the
   owner names the paper) and the owner's sign-offs of its protocols. `pinch-off-barrier` from the layout is
   covered by `turn-on-single-gate-layout` (same sweep seen from the barrier side); say so if a separate picture is wanted.
