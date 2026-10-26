@@ -12,7 +12,7 @@ instance:
   seeds: [1, 2, 3]
   severity: 1.0
 sweep:
-  - {axis: x, unit: nm, points: 153}
+  - {axis: x, unit: nm, points: 381}
   - {axis: y, unit: nm, points: 226}
 readout: {channel: potential_energy, unit: meV}
 render:
@@ -23,5 +23,5 @@ render:
     - {kind: map, x: x_nm, y: y_nm, z: u_seed3_mev, xlabel: "x (nm)", ylabel: "y (nm)", zlabel: "U (meV)", cmap: viridis_r, overlay: gate_outlines_seed3_nm, title: "draw 3"}
 budget:
   compile: {wall_s: 1.0, solver_calls: 0}
-  run: {wall_ms_per_point: 0.001, points: 138312, model_evals_per_point: 1, solver_calls: 0}
+  run: {wall_ms_per_point: 0.001, points: 344424, model_evals_per_point: 1, solver_calls: 0}
 must_show: []

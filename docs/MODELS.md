@@ -259,7 +259,7 @@ Last recorded on 2026-10-26 at commit `28e8d87` on Windows-11-10.0.26200-SP0 (py
 | `fault-signatures-stability` | 57,600 | 2.0 / 0.1807 | 0.1 / 0.01905 | 1 |
 | `gate-hysteresis-trapping` | 722 | 0.5 / 0.1283 | 1.0 / 0.51118 | 1 |
 | `gate-hysteresis` | 361 | 0.5 / 0.127 | 1.0 / 0.51645 | 1 |
-| `gate-leakage-iv` | 1,806 | 0.5 / 0.0 | 0.02 / 9e-05 | 1 |
+| `gate-leakage-iv` | 2,408 | 0.5 / 0.0 | 0.02 / 9e-05 | 1 |
 | `gate-leakage-pair` | 201 | 0.5 / 0.0 | 0.02 / 0.00027 | 1 |
 | `lead-rate-time-trace` | 900 | 1.0 / 0.1634 | 2.0 / 0.85305 | 1 |
 | `noise-psd` | 30,000 | 0.5 / 0.0003 | 0.1 / 0.02608 | 1 |
@@ -269,8 +269,8 @@ Last recorded on 2026-10-26 at commit `28e8d87` on Windows-11-10.0.26200-SP0 (py
 | `pinch-off-crosstalk` | 24,321 | 0.5 / 0.1509 | 0.01 / 2e-05 | 1 |
 | `plunger-vs-barrier-map` | 28,800 | 0.5 / 0.0001 | 0.05 / 0.00475 | 1 |
 | `potential-cut-along-channel` | 1,203 | 0.5 / 0.1984 | 0.01 / 0.00152 | 1 |
-| `potential-map-disorder` | 138,312 | 1.0 / 0.6583 | 0.001 / 0.0 | 1 |
-| `potential-map-layout` | 34,578 | 0.5 / 0.1924 | 0.001 / 1e-05 | 1 |
+| `potential-map-disorder` | 344,424 | 1.0 / 0.6583 | 0.001 / 0.0 | 1 |
+| `potential-map-layout` | 86,106 | 0.5 / 0.1924 | 0.001 / 1e-05 | 1 |
 | `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00496 | 1 |
 | `stability-coarse-2dot-disorder` | 57,600 | 2.0 / 0.628 | 0.1 / 0.02585 | 1 |
 | `stability-coarse-2dot-layout` | 22,500 | 0.5 / 0.2902 | 0.1 / 0.02413 | 1 |
