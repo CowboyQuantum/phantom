@@ -567,8 +567,9 @@
 <p>Dynamics, not just ground states: lead tunnel rates, rate equations, latching and sweep-rate dependence, the charge sensor and RF reflectometry response, and noise from fluctuator ensembles.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li><code>readout</code>: WKB tunnel rates to leads from barrier heights; a master equation over the few-electron states; latching when sweeps outrun rates; sensor SET with Coulomb-blockade peaks and capacitive shifts; RF tank-circuit response</li>
-<li>fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics</li>
+<li><code>readout</code>: WKB tunnel rates to leads from barrier heights (done, <code>readout.rates</code>, with <code>electrostatics.barrier_width_nm</code> at the lead Fermi level); a master equation over the few-electron states with detailed balance (done, <code>readout.master_equation</code>); latching when sweeps outrun rates (emerges from the lag, done); sensor SET with Coulomb-blockade peaks and capacitive shifts (Step 1); RF tank-circuit response (to do)</li>
+<li>fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics (Step 1 has the ensemble; tying its rates to the catalog is to do)</li>
+<li>the textbook layout gained reservoir accumulation gates R_L, R_R so lead barriers are the outer barrier gates (done)</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
@@ -583,7 +584,10 @@
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li>to be listed before the step starts; each carries a <code>budget</code> (ADR 0009)</li>
+<li><code>stability-vs-sweep-rate</code>: the layout-derived coarse map at 1 ms, 10 µs and 100 ns per point with WKB lead rates; equilibrium, lag, frozen (rendering)</li>
+<li><code>stability-direction</code>: the same map scanned forward and backward at a lagging dwell, with the charge difference (rendering)</li>
+<li><code>lead-rate-time-trace</code>: charge relaxation after a plunger step for three lead barriers; the slope is the derived lead rate (rendering)</li>
+<li>to come: <code>rf-resonance</code>, <code>rf-sensor-flank</code>, <code>single-shot-histogram</code>, <code>snr-vs-integration-time</code>; <code>switcher-histogram</code> and <code>drift-repeated-cuts</code> with catalog-tied rates</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
@@ -595,7 +599,7 @@
 <li>how much of RF reflectometry to model (tank + sensor impedance) vs. a transfer function</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS</p>
 
 
 

@@ -785,15 +785,27 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 </tr>
 <tr>
 <td><code>stability-vs-sweep-rate</code></td>
-<td>(P1, P2) at several sweep rates</td>
+<td>(P1 slow, P2 fast) at several dwell times, lead rates from the layout's WKB barriers</td>
 <td>sensor_conductance</td>
-<td>latching and missing transitions as the rate exceeds the lead rate (Step 4)</td>
+<td>the equilibrium honeycomb at long dwell; lines fade and shift along the fast axis as the dwell falls below one over the lead rate; frozen at the shortest (Step 4)</td>
+</tr>
+<tr>
+<td><code>stability-direction</code></td>
+<td>the same map at a lagging dwell, fast axis forward and backward</td>
+<td>sensor_conductance, charge difference</td>
+<td>latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4)</td>
+</tr>
+<tr>
+<td><code>stability-direction</code></td>
+<td>the same map at a lagging dwell, fast axis forward and backward</td>
+<td>sensor_conductance, charge difference</td>
+<td>latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4)</td>
 </tr>
 <tr>
 <td><code>lead-rate-time-trace</code></td>
-<td>t at a transition, after a gate step</td>
-<td>sensor_conductance</td>
-<td>exponential tunnelling into or out of the dot; the lead rate (Step 4)</td>
+<td>t after a plunger step across a transition, for several lead-barrier settings</td>
+<td>charge on the dot</td>
+<td>exponential relaxation whose rate is the WKB lead rate the layout predicts; decades of rate over a few hundred mV of barrier (Step 4)</td>
 </tr>
 <tr>
 <td><code>crosstalk-lines</code></td>
