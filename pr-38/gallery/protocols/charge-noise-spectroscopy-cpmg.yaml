@@ -1,0 +1,18 @@
+id: charge-noise-spectroscopy-cpmg
+name: Charge-noise spectroscopy of the exchange qubit by CPMG
+step: 6
+description: Coherence of the exchange qubit at 30 percent of the way to the anticrossing after N CPMG pi pulses in a fixed total time of 1 us, against the filter frequency N / 2 tau, on the device's charge-noise spectrum. The spectrum is the noise draw's 1/f law with the amplitude defined over the sensor band (the same amplitude the sensor's noise-psd protocol shows at low frequency) extended to 1 GHz, projected onto the qubit through the lever arms and dJ/dε. Coherence recovers with N because the filter moves to higher frequency where 1/f noise is weaker (ADR 0022).
+layers: [charge, disorder, spin]
+runner: step6b:charge_noise_spectroscopy_cpmg
+instance: {t0_uev: 20.0, v_scale_v: 0.05, seed: 0, material: SiGe, eps_over_anticrossing: 0.3, tau_us: 1.0, f_high_hz: 1.0e+9, n_pulses: [0, 1, 2, 4, 8, 16, 32, 64, 128]}
+sweep:
+  - {axis: n_pulses, from: 0, to: 128, points: 9, unit: ""}
+readout: {channel: spin_outcome, unit: coherence}
+render:
+  panels:
+    - {kind: line, x: n_pulses, y: coherence, xlabel: "number of pi pulses", ylabel: "coherence at 1 us", title: "CPMG on the draw's 1/f noise"}
+    - {kind: line, x: f_hz, y: [s_eps_uev2_per_hz], log_x: true, log_y: true, xlabel: "frequency (Hz)", ylabel: "detuning noise (ueV^2/Hz)", title: "the spectrum the qubit sees"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 50.0, points: 9, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

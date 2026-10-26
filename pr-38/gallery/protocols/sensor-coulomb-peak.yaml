@@ -1,0 +1,18 @@
+id: sensor-coulomb-peak
+name: One sensor Coulomb peak and its flank
+step: 1
+description: Sensor current against the sensor plunger around one peak, and the slope of that curve. The steep flank is where the sensor is operated; its slope is the sensitivity. Noise-free.
+layers: [readout]
+runner: step1:sensor_coulomb_peak
+instance: {model: sensed-double-dot, seed: 0, noise: none}
+sweep:
+  - {gate: SG, half_span_v: 0.15, points: 601, unit: V}
+readout: {channel: current, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_sg_v, y: current_a, xlabel: "sensor plunger (V)", ylabel: "current (A)", title: peak}
+    - {kind: line, x: v_sg_v, y: slope_a_per_v, xlabel: "sensor plunger (V)", ylabel: "dI/dV (A/V)", title: sensitivity}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 601, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

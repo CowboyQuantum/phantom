@@ -1,0 +1,34 @@
+id: fault-signatures-stability
+name: Wiring-fault signatures in the coarse stability map
+step: 3
+description: The layout-derived coarse map with the clean wiring and with three named faults, programmed voltages on the axes. Sensor-coupling asymmetry (dot 2 coupled four times more weakly) leaves one dot's lines faint. Shorting P2 to the sensor gate SG makes the sensor gate follow P2, so the sensor is dragged off its flank as P2 sweeps and the whole map is modulated by the sensor's own Coulomb peak. (Shorting a plunger to a neighbouring barrier opens that barrier and dissolves the dot into the reservoir or merges the two dots, which the two-dot model cannot show.) An open B_L floats at 0 V instead of its set point, raising the left barrier so dot 1 holds fewer electrons and its lines shift. Placeholder faults (calibration none), default noise draw.
+layers: [layout, electrostatics, disorder, charge, readout]
+runner: step3:fault_signatures_stability
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  sensor_gate: SG
+  seed: 0
+  noise: default
+  cases:
+    - {name: clean}
+    - {name: sensor_asym, sensor_beta_factors: [1.0, 0.25]}
+    - {name: short_P2_SG, shorted: [[P2, SG]]}
+    - {name: open_BL, open: [B_L], stuck_potential_v: 0.0}
+sweep:
+  - {gate: P1, from: -0.12, to: 0.12, points: 120, unit: V, relative_to: operating_point}
+  - {gate: P2, from: -0.12, to: 0.12, points: 120, unit: V, relative_to: operating_point}
+readout: {channel: sensor_conductance, unit: A, dt_s: 1.0e-3}
+render:
+  panels:
+    - {kind: map, x: v_p1_clean_v, y: v_p2_clean_v, z: current_clean_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: clean}
+    - {kind: map, x: v_p1_sensor_asym_v, y: v_p2_sensor_asym_v, z: current_sensor_asym_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "dot 2 weakly coupled to the sensor"}
+    - {kind: map, x: v_p1_short_P2_SG_v, y: v_p2_short_P2_SG_v, z: current_short_P2_SG_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "P2 shorted to SG"}
+    - {kind: map, x: v_p1_open_BL_v, y: v_p2_open_BL_v, z: current_open_BL_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "B_L open (floats at 0 V)"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 57600, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
