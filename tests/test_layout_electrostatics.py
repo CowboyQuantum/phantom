@@ -9,7 +9,7 @@ from phantom.electrostatics.dots import harmonic_radius_nm
 from phantom.electrostatics.schrodinger import dot_levels_ev
 from phantom.layout import Gate, Layout, MaterialClass, two_dot_layout
 
-OPERATING_POINT = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.6])  # B_L P1 B_M P2 B_R SG
+OPERATING_POINT = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.6, 0.7, 0.7])  # B_L P1 B_M P2 B_R SG R_L R_R
 
 
 def test_polygon_solid_angle_matches_the_rectangle_closed_form():

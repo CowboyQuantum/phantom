@@ -8,7 +8,7 @@ instance:
   layout: two-dot-textbook
   material: MOS
   pitch_nm: 80.0
-  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6}
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6, R_L: 0.7, R_R: 0.7}
   severities: [0.3, 1.0, 3.0, 10.0, 30.0]
   n_draws: 25
 sweep:
@@ -20,5 +20,5 @@ render:
     - {kind: line, x: density_cm2, y: fraction_with_extra, xlabel: "interface charge density (cm^-2)", ylabel: "fraction of draws with an extra minimum", log_x: true, title: "fraction"}
 budget:
   compile: {wall_s: 1.0, solver_calls: 0}
-  run: {wall_ms_per_point: 400.0, points: 125, model_evals_per_point: 1, solver_calls: 0}
+  run: {wall_ms_per_point: 1000.0, points: 125, model_evals_per_point: 1, solver_calls: 0}
 must_show: []

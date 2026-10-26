@@ -133,6 +133,41 @@ def barrier_between(basis: GateBasis, voltages_v: np.ndarray, a: DerivedDot, b: 
     return DerivedBarrier((a.name, b.name), float(line[k] - max(a.energy_ev, b.energy_ev)), float(xs[k]), float(ys[k]))
 
 
+def barrier_width_nm(
+    basis: GateBasis,
+    voltages_v: np.ndarray,
+    a: DerivedDot,
+    b_point_nm: tuple[float, float],
+    level_ev: float | None = None,
+    samples: int = 401,
+    lead_fermi_ev: float = 2e-3,
+) -> tuple[float, float]:
+    """(height, width) of the barrier between dot `a` and the point `b_point_nm` (a reservoir or another
+    dot) for an electron at the tunnelling level, and the length of the stretch where U exceeds it.
+
+    The tunnelling level is the higher of the dot's ground level (minimum plus harmonic zero-point energy)
+    and the lead's Fermi level (the electron energy at the far point plus `lead_fermi_ev`, a placeholder
+    for the two-dimensional electron gas density): a dot deeper than the lead fills up to the lead's
+    Fermi level, and that is where its electrons tunnel. The height is the barrier top above that level;
+    the width is the first contiguous forbidden stretch seen from the dot.
+    """
+    s, u = line_cut(basis, voltages_v, a.x_nm, a.y_nm, b_point_nm[0], b_point_nm[1], samples)
+    if level_ev is None:
+        hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(a.curvature_ev_per_nm2, 1e-12) / 0.19)
+        level_ev = max(a.energy_ev + hbar_omega, float(u[-1]) + lead_fermi_ev)
+    above = u > level_ev
+    height = float(u.max() - level_ev)
+    if not above.any():
+        return height, 0.0
+    ds = s[1] - s[0]
+    idx = np.flatnonzero(above)
+    start = idx[0]
+    end = start
+    while end + 1 < len(u) and above[end + 1]:
+        end += 1
+    return height, float((end - start + 1) * ds)
+
+
 def line_cut(basis: GateBasis, voltages_v: np.ndarray, x0: float, y0: float, x1: float, y1: float, samples: int = 301) -> tuple[np.ndarray, np.ndarray]:
     """U (eV) along the straight line from (x0, y0) to (x1, y1); returns (distance_nm, u_ev)."""
     u = basis.energy_ev(voltages_v)

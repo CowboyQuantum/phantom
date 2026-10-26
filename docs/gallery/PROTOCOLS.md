@@ -53,8 +53,10 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `tunnel-coupling-vs-barrier` | detuning cut repeated vs. B_interdot | step width | exponential t_c(V_B) |
 | `detuning-cut-vs-temperature` | detuning cut vs. electron temperature | step width | thermal broadening floor; where t_c dominates |
 | `bias-triangles` | (P1, P2) at finite V_sd | current | triangle pairs; edges give lever arms; excited-state lines inside |
-| `stability-vs-sweep-rate` | (P1, P2) at several sweep rates | sensor_conductance | latching and missing transitions as the rate exceeds the lead rate (Step 4) |
-| `lead-rate-time-trace` | t at a transition, after a gate step | sensor_conductance | exponential tunnelling into or out of the dot; the lead rate (Step 4) |
+| `stability-vs-sweep-rate` | (P1 slow, P2 fast) at several dwell times, lead rates from the layout's WKB barriers | sensor_conductance | the equilibrium honeycomb at long dwell; lines fade and shift along the fast axis as the dwell falls below one over the lead rate; frozen at the shortest (Step 4) |
+| `stability-direction` | the same map at a lagging dwell, fast axis forward and backward | sensor_conductance, charge difference | latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4) |
+| `stability-direction` | the same map at a lagging dwell, fast axis forward and backward | sensor_conductance, charge difference | latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4) |
+| `lead-rate-time-trace` | t after a plunger step across a transition, for several lead-barrier settings | charge on the dot | exponential relaxation whose rate is the WKB lead rate the layout predicts; decades of rate over a few hundred mV of barrier (Step 4) |
 | `crosstalk-lines` | (P_i, P_j) for every pair incl. barriers | sensor_conductance | transition-line slopes; the full cross-capacitance (virtual-gate) matrix |
 
 ## D. Noise and drift (readout, disorder) — Step 1, extended in Steps 3 and 4
