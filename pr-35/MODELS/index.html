@@ -1,0 +1,1608 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../steps/">
+      
+      
+        <link rel="next" href="../adr/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Models - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-the-models-fit-together-adr-0011" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Models
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#measurement-flow-hand-maintained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement flow (hand-maintained)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-dependency-graph-generated-do-not-edit-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module dependency graph (generated; do not edit by hand)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtimes (generated from docs/gallery/measured.json and the protocol files; do not edit by hand)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runtimes (generated from docs/gallery/measured.json and the protocol files; do not edit by hand)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-model-microseconds-per-point-or-sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per model (microseconds per point or sample)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-protocol-declared-budget-beside-the-last-measurement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per protocol (declared budget beside the last measurement)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#measurement-flow-hand-maintained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement flow (hand-maintained)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-dependency-graph-generated-do-not-edit-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module dependency graph (generated; do not edit by hand)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtimes (generated from docs/gallery/measured.json and the protocol files; do not edit by hand)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runtimes (generated from docs/gallery/measured.json and the protocol files; do not edit by hand)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-model-microseconds-per-point-or-sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per model (microseconds per point or sample)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-protocol-declared-budget-beside-the-last-measurement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per protocol (declared budget beside the last measurement)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-the-models-fit-together-adr-0011">How the models fit together (ADR 0011)</h1>
+<p>Two diagrams and a runtime ledger, kept current with every change to a model. The first diagram is
+drawn by hand and says how a measurement is produced from a gate vector: which model feeds which, in the
+order the physics happens. Whoever adds or rewires a model updates it in the same pull request. The
+second is generated from the imports in <code>src/phantom</code> by <code>scripts/model_graph.py</code> and checked in CI, so
+it can never be stale. The ledger records what each model and each protocol costs to run: declared
+budgets from the protocol files, and the last measurement recorded by <code>scripts/gallery.py --record</code>.</p>
+<h2 id="measurement-flow-hand-maintained">Measurement flow (hand-maintained)</h2>
+<p>Read left to right: a layout and a gate vector go in, a measured quantity comes out. Boxes are models;
+the layer each lives in is named in the box. Dashed boxes are placeholders or offline checks that a later
+step replaces (the step is named).</p>
+<pre class="mermaid"><code>flowchart LR
+  V["gate vector V(t), source–drain bias, time t"]
+
+  subgraph layout
+    LAY["geometry.Layout&lt;br/&gt;gate polygons, Stack (effective depth), MaterialClass; JSON file"]
+  end
+
+  subgraph disorder
+    SCN["scenario.draw_scenario / apply_scenario&lt;br/&gt;material params + seed + severity → perturbed layout and basis; serialisable; severity 0 = clean"]
+    CHG["charges.draw_fixed_charges, charge_energy_ev&lt;br/&gt;Poisson interface charges → image-charge energy offset (placeholder density)"]
+    MIS["geometry_faults.draw_misalignment, apply_misalignment&lt;br/&gt;gate-layer shift and per-gate edge error as polygon transforms"]
+    WIR["wiring.WiringDraw&lt;br/&gt;open and shorted gates (M·V + c), gate-to-gate leaks, sensor-coupling factors"]
+    TRP["trapping.effective_gate_voltage&lt;br/&gt;history-dependent trapped fraction → screened gate voltage"]
+    NDR["noise_draw.draw_noise&lt;br/&gt;per-device 1/f amplitude, dominant switchers (Poisson), white floor"]
+  end
+
+  subgraph electrostatics
+    BASIS["closed_form.GateBasis (+ offset_ev)&lt;br/&gt;solid angle of each gate polygon / 2π on a grid: potential per volt"]
+    DOTS["dots.find_dots, barrier_between&lt;br/&gt;minima → dot positions, harmonic radii, lever arms; saddles → barrier heights"]
+    SCH["schrodinger.dot_levels_ev&lt;br/&gt;offline check of the harmonic estimate (compile tier)"]
+  end
+
+  subgraph charge
+    DER["derived.derive_double_dot&lt;br/&gt;C_dot from radii, C_gate = C_dot·α → ConstantInteractionParams; sensor α from the basis"]
+    CI["ci.ConstantInteractionParams&lt;br/&gt;occupation N(V) at width kT; lever arms, triple points"]
+    HB["hubbard.HubbardParams&lt;br/&gt;N(V) with tunnel coupling; t → 0 gives CI"]
+    BAR["dot.Barrier t(V_B), dot.Dot E_c(radius)"]
+  end
+
+  subgraph valley
+    VAL["splitting.ValleyParams, draw_valley_splitting_uev&lt;br/&gt;Rice draw per dot: Δ_det + σ(n₁ + i n₂); σ ∝ 1/radius, √(x̄(1−x̄)), √(interface width); MOS Δ_det ∝ field (placeholders)"]
+    VSIG["signatures.second_electron_shift_uev, relaxation_rate_hz, pulsed_spectroscopy_occupation&lt;br/&gt;magnetospectroscopy kink at g μ_B B = E_V; T₁ hot spot; excited-state line at E_V/α"]
+  end
+
+  subgraph spin
+    EXC["exchange.exchange_j_ev, detuning_voltages, symmetric_point_v&lt;br/&gt;J = E(|↑↑⟩) − E(lowest singlet) from the Hubbard two-electron block; detuning axis through the plunger lever arms; dJ/dε; σ_ε from gate noise"]
+    DYN["dynamics.Lindblad, rotating_frame_hamiltonian_ev, SpinDraw&lt;br/&gt;½δσz + ½Ωσx per spin + J(S₁·S₂ − ¼); T₁ and T_φ collapse operators; expm per step; quasi-static Gaussian noise by quadrature (T₂* = √2ħ/σ_E)"]
+    PSB["psb.psb_occupation, psb_contrast&lt;br/&gt;singlet steps at the anticrossing, triplet at ε = E_V of the receiving dot: the readout window"]
+  end
+
+  subgraph readout
+    RATES["loading.LeadRateLandscape / LeadBarrier&lt;br/&gt;dot-to-lead rate Γ(V); lifetime width ħΓ&lt;br/&gt;(Step 1 placeholder, kept for its protocols)"]
+    LAT["loading.latched_occupation&lt;br/&gt;charge actually present given Γ and dwell time (placeholder)"]
+    WKB["rates.wkb_tunnel_rate_hz&lt;br/&gt;Γ from barrier height and width at the lead Fermi level; attempt rate from the dot curvature"]
+    ME["master_equation.RateEquation&lt;br/&gt;rate matrix over the CI window with detailed balance; sweep() propagates by expm per sample: latching = lag"]
+    RF["rf.TankCircuit&lt;br/&gt;series L into (R_sensor ∥ C_p): reflection Γ(f), resonance, matching"]
+    SS["single_shot.single_shots&lt;br/&gt;consecutive integrated shots on the noise processes; SNR, fidelity"]
+    SENS["sensor.SensorSETParams&lt;br/&gt;φ_s = αV + βN + δφ → current I(φ_s, V_sd)"]
+    NOISE["noise.WhiteNoise / TelegraphNoise / OneOverFNoise&lt;br/&gt;gate offset g(t), sensor offset s(t), readout r(t)"]
+    MEAS["measure.SensedDoubleDot&lt;br/&gt;sweep_a, trace_a: raster times, noise applied"]
+    LCK["lockin.lockin_sweep_a_per_v (quasi-static)&lt;br/&gt;lockin_sweep_dynamic_a_per_v (with Γ)"]
+    TR["transport.ChannelTurnOn, pinch_off_current_a&lt;br/&gt;(placeholder → Step 2 potential)"]
+  end
+
+  OUT["arrays: current (A), demodulated dI/dV (A/V), N present, valley splitting (µeV), T₁ (s), J (GHz), spin probabilities"]
+
+  LAY --&gt; BASIS
+  HB --&gt; EXC
+  EXC --&gt; DYN
+  NDR --&gt; EXC
+  NDR --&gt; DYN
+  VAL --&gt; PSB
+  HB --&gt; PSB
+  DYN --&gt; OUT
+  PSB --&gt; OUT
+  EXC --&gt; OUT
+  DOTS --&gt; VAL
+  VAL --&gt; VSIG
+  VSIG --&gt; OUT
+  LAY --&gt; SCN
+  SCN --&gt; CHG
+  SCN --&gt; MIS
+  SCN --&gt; WIR
+  SCN --&gt; NDR
+  NDR --&gt; NOISE
+  V --&gt; WIR
+  V --&gt; TRP
+  WIR --&gt; BASIS
+  TRP --&gt; BASIS
+  WIR --&gt; SENS
+  WIR --&gt; TR
+  MIS --&gt; BASIS
+  CHG --&gt; BASIS
+  BASIS --&gt; DOTS
+  DOTS --&gt; DER
+  DOTS -.-&gt; SCH
+  DER --&gt; CI
+  V --&gt; BASIS
+  V --&gt; CI
+  V --&gt; HB
+  BAR --&gt; HB
+  V --&gt; RATES
+  CI --&gt; LAT
+  RATES --&gt; LAT
+  DOTS --&gt; WKB
+  WKB --&gt; ME
+  CI --&gt; ME
+  ME --&gt; SENS
+  SENS --&gt; RF
+  SENS --&gt; SS
+  NOISE --&gt; SS
+  RF --&gt; OUT
+  SS --&gt; OUT
+  DOTS --&gt; WKB
+  WKB --&gt; ME
+  CI --&gt; ME
+  ME --&gt; SENS
+  LAT --&gt; SENS
+  CI --&gt; SENS
+  HB --&gt; SENS
+  NOISE --&gt; MEAS
+  SENS --&gt; MEAS
+  MEAS --&gt; LCK
+  RATES --&gt; LCK
+  V --&gt; TR
+  MEAS --&gt; OUT
+  LCK --&gt; OUT
+  TR --&gt; OUT
+
+  style RATES stroke-dasharray: 4 3
+  style TR stroke-dasharray: 4 3
+  style SCH stroke-dasharray: 4 3
+  style CHG stroke-dasharray: 4 3
+  style MIS stroke-dasharray: 4 3
+  style WIR stroke-dasharray: 4 3
+  style TRP stroke-dasharray: 4 3</code></pre>
+<p>Which protocol uses which path (Step 1):</p>
+<table>
+<thead>
+<tr>
+<th>protocol</th>
+<th>path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turn-on-single-gate</code>, <code>pinch-off-barrier</code></td>
+<td>V → transport → current</td>
+</tr>
+<tr>
+<td><code>coulomb-oscillations-single-dot</code>, <code>diamonds-single-dot</code>, <code>sensor-coulomb-peak</code></td>
+<td>V → CI (plungers at 0) → sensor → current; the sensor is itself the single dot in transport</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot</code>, <code>stability-fine-2dot</code></td>
+<td>V(t) → CI → sensor, with noise through measure</td>
+</tr>
+<tr>
+<td><code>stability-lockin-p1</code>, <code>-p2</code>, <code>-common</code>, <code>-detuning</code></td>
+<td>V(t) chopped → rates → CI (broadened) → latched occupation → sensor → demodulation</td>
+</tr>
+<tr>
+<td><code>noise-time-trace</code>, <code>noise-psd</code></td>
+<td>fixed V, t → noise → measure → current</td>
+</tr>
+<tr>
+<td><code>potential-map-layout</code>, <code>potential-cut-along-channel</code></td>
+<td>Layout → GateBasis → U(x, y) at the operating point (Step 2)</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-layout</code></td>
+<td>Layout → GateBasis → dots → derived CI and sensor α → sensor flank set → sweep with noise (Step 2)</td>
+</tr>
+<tr>
+<td><code>pinch-off-crosstalk</code></td>
+<td>Layout → GateBasis at the barrier → linear pinch-off line; phenomenological step (Step 2)</td>
+</tr>
+<tr>
+<td><code>turn-on-global</code>, <code>turn-on-single-gate-layout</code>, <code>gate-hysteresis</code></td>
+<td>Layout → GateBasis → highest energy along the channel → transport.channel_transmission_current_a (Step 2)</td>
+</tr>
+<tr>
+<td><code>gate-leakage-iv</code>, <code>ohmic-iv</code></td>
+<td>Layout gate areas and stack thickness → transport.gate_leakage_current_a; transport.ohmic_current_a (Step 2, phenomenological)</td>
+</tr>
+<tr>
+<td><code>crosstalk-lines</code></td>
+<td>Layout → derived CI and sensor α → noise-free maps against four gate pairs (Step 2)</td>
+</tr>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>Layout → scenario draw (charges, misalignment) → perturbed basis → U(x, y), clean beside draws (Step 3)</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>Layout → scenario draw → perturbed basis → dots → derived CI and sensor α → sensor flank → sweep, per draw (Step 3)</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>Layout (MOS) → many scenario draws → minima count in the channel vs. density (Step 3)</td>
+</tr>
+<tr>
+<td><code>fault-signatures-stability</code></td>
+<td>Layout → wiring draw applied to programmed V → derived CI and sensor (β scaled) → sweep (Step 3)</td>
+</tr>
+<tr>
+<td><code>gate-leakage-pair</code></td>
+<td>wiring leak network + transport.gate_leakage_current_a (Step 3)</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis-trapping</code></td>
+<td>trapping → effective gate voltage → channel barrier → transport.channel_transmission_current_a (Step 3)</td>
+</tr>
+<tr>
+<td><code>stability-vs-sweep-rate</code>, <code>stability-direction</code></td>
+<td>Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4)</td>
+</tr>
+<tr>
+<td><code>lead-rate-time-trace</code></td>
+<td>Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4)</td>
+</tr>
+<tr>
+<td><code>rf-resonance</code>, <code>rf-sensor-flank</code></td>
+<td>sensor current → resistance → rf.TankCircuit reflection (Step 4)</td>
+</tr>
+<tr>
+<td><code>single-shot-histogram</code>, <code>snr-vs-integration-time</code></td>
+<td>sensor at the flank, two charge states → single_shot.single_shots on the noise processes (Step 4)</td>
+</tr>
+<tr>
+<td><code>switcher-histogram</code>, <code>drift-repeated-cuts</code></td>
+<td>noise_draw → SensedDoubleDot.from_noise_draw → traces and repeated cuts (Step 4)</td>
+</tr>
+<tr>
+<td><code>plunger-vs-barrier-map</code></td>
+<td>Layout → per barrier row: WKB lead rate → RateEquation.sweep along P1, carried across rows → sensor (Step 4 re-render)</td>
+</tr>
+<tr>
+<td><code>stability-vs-sweep-rate</code>, <code>stability-direction</code></td>
+<td>Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4)</td>
+</tr>
+<tr>
+<td><code>lead-rate-time-trace</code></td>
+<td>Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="module-dependency-graph-generated-do-not-edit-by-hand">Module dependency graph (generated; do not edit by hand)</h2>
+<!-- module-graph:start -->
+<pre class="mermaid"><code>flowchart LR
+  subgraph layout
+    layout_geometry["geometry"]
+  end
+  subgraph electrostatics
+    electrostatics_closed_form["closed_form"]
+    electrostatics_dots["dots"]
+    electrostatics_schrodinger["schrodinger"]
+  end
+  subgraph disorder
+    disorder_charges["charges"]
+    disorder_geometry_faults["geometry_faults"]
+    disorder_noise_draw["noise_draw"]
+    disorder_scenario["scenario"]
+    disorder_trapping["trapping"]
+    disorder_wiring["wiring"]
+  end
+  subgraph valley
+    valley_signatures["signatures"]
+    valley_splitting["splitting"]
+  end
+  subgraph charge
+    charge_ci["ci"]
+    charge_derived["derived"]
+    charge_dot["dot"]
+    charge_hubbard["hubbard"]
+  end
+  subgraph readout
+    readout_loading["loading"]
+    readout_lockin["lockin"]
+    readout_master_equation["master_equation"]
+    readout_measure["measure"]
+    readout_noise["noise"]
+    readout_rates["rates"]
+    readout_rf["rf"]
+    readout_sensor["sensor"]
+    readout_single_shot["single_shot"]
+    readout_transport["transport"]
+  end
+  subgraph spin
+    spin_dynamics["dynamics"]
+    spin_exchange["exchange"]
+    spin_psb["psb"]
+  end
+  charge_ci --&gt; constants
+  charge_derived --&gt; charge_ci
+  charge_derived --&gt; charge_dot
+  charge_derived --&gt; electrostatics_closed_form
+  charge_derived --&gt; electrostatics_dots
+  charge_derived --&gt; layout_geometry
+  charge_dot --&gt; constants
+  charge_hubbard --&gt; charge_ci
+  charge_hubbard --&gt; charge_dot
+  disorder_charges --&gt; constants
+  disorder_geometry_faults --&gt; layout_geometry
+  disorder_scenario --&gt; disorder_charges
+  disorder_scenario --&gt; disorder_geometry_faults
+  disorder_scenario --&gt; disorder_noise_draw
+  disorder_scenario --&gt; disorder_wiring
+  disorder_scenario --&gt; electrostatics_closed_form
+  disorder_scenario --&gt; layout_geometry
+  electrostatics_closed_form --&gt; layout_geometry
+  electrostatics_dots --&gt; constants
+  electrostatics_dots --&gt; electrostatics_closed_form
+  electrostatics_schrodinger --&gt; electrostatics_dots
+  readout_loading --&gt; constants
+  readout_lockin --&gt; readout_loading
+  readout_lockin --&gt; readout_measure
+  readout_master_equation --&gt; charge_ci
+  readout_master_equation --&gt; constants
+  readout_measure --&gt; charge_ci
+  readout_measure --&gt; disorder_noise_draw
+  readout_measure --&gt; readout_noise
+  readout_measure --&gt; readout_sensor
+  readout_rates --&gt; constants
+  readout_single_shot --&gt; readout_measure
+  readout_single_shot --&gt; readout_noise
+  readout_transport --&gt; charge_dot
+  spin_dynamics --&gt; constants
+  spin_dynamics --&gt; valley_signatures
+  spin_exchange --&gt; charge_hubbard</code></pre>
+<table>
+<thead>
+<tr>
+<th>module</th>
+<th>what it owns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>charge.ci</code></td>
+<td>Constant-interaction (CI) model of a few-electron double quantum dot.</td>
+</tr>
+<tr>
+<td><code>charge.derived</code></td>
+<td>Charge-model parameters derived from a layout instead of typed (Step 2, ADR 0013).</td>
+</tr>
+<tr>
+<td><code>charge.dot</code></td>
+<td>Dots and barriers as the named parts of a charge model.</td>
+</tr>
+<tr>
+<td><code>charge.hubbard</code></td>
+<td>Two-site extended Hubbard model of a few-electron double dot.</td>
+</tr>
+<tr>
+<td><code>constants</code></td>
+<td>Physical constants (CODATA 2018), below every layer so any layer may import them (ADR 0004).</td>
+</tr>
+<tr>
+<td><code>disorder.charges</code></td>
+<td>Random fixed charges at an interface, as a perturbation of the electron energy landscape.</td>
+</tr>
+<tr>
+<td><code>disorder.geometry_faults</code></td>
+<td>Gate misalignment and width error as transforms of the layout polygons.</td>
+</tr>
+<tr>
+<td><code>disorder.noise_draw</code></td>
+<td>Noise parameters drawn per device: the fluctuator ensemble behind 1/f, the dominant switchers, and</td>
+</tr>
+<tr>
+<td><code>disorder.scenario</code></td>
+<td>A scenario draw: material + catalog parameters + seed → a perturbed device, serialisable.</td>
+</tr>
+<tr>
+<td><code>disorder.trapping</code></td>
+<td>Charge trapping with gate history: the hysteresis loop in a gate sweep.</td>
+</tr>
+<tr>
+<td><code>disorder.wiring</code></td>
+<td>Gate wiring faults: open gates, shorted gates, gate-to-gate leakage, and sensor-coupling asymmetry.</td>
+</tr>
+<tr>
+<td><code>electrostatics.closed_form</code></td>
+<td>Closed-form potential of polygonal surface gates over a two-dimensional electron gas.</td>
+</tr>
+<tr>
+<td><code>electrostatics.dots</code></td>
+<td>Dots and barriers as features of the potential-energy landscape.</td>
+</tr>
+<tr>
+<td><code>electrostatics.schrodinger</code></td>
+<td>Two-dimensional effective-mass Schrödinger solve on a potential-energy window: dot levels and spacings.</td>
+</tr>
+<tr>
+<td><code>layout.geometry</code></td>
+<td>Gate polygons, the dielectric stack and the material class: data only, no physics.</td>
+</tr>
+<tr>
+<td><code>readout.loading</code></td>
+<td>Rate-limited loading of the dots from their reservoirs, and the lead-rate landscape over gate space.</td>
+</tr>
+<tr>
+<td><code>readout.lockin</code></td>
+<td>The <code>sensor_lockin</code> channel: a hardware derivative of the sensor signal.</td>
+</tr>
+<tr>
+<td><code>readout.master_equation</code></td>
+<td>A master equation over the few-electron charge states of the double dot.</td>
+</tr>
+<tr>
+<td><code>readout.measure</code></td>
+<td>A double dot read by an SET sensor, with noise on an explicit time axis.</td>
+</tr>
+<tr>
+<td><code>readout.noise</code></td>
+<td>Noise processes with an explicit time axis.</td>
+</tr>
+<tr>
+<td><code>readout.rates</code></td>
+<td>Tunnel rates through barriers of the landscape, in the WKB approximation.</td>
+</tr>
+<tr>
+<td><code>readout.rf</code></td>
+<td>Radio-frequency reflectometry: a lumped tank circuit with the charge sensor as its load.</td>
+</tr>
+<tr>
+<td><code>readout.sensor</code></td>
+<td>A charge sensor: a single-electron transistor (SET) read in sequential tunnelling.</td>
+</tr>
+<tr>
+<td><code>readout.single_shot</code></td>
+<td>Single-shot charge readout: integrated sensor signals, their histograms, and signal-to-noise against</td>
+</tr>
+<tr>
+<td><code>readout.transport</code></td>
+<td>Channel turn-on and barrier pinch-off: the direct-current shapes of the electrical-health protocols.</td>
+</tr>
+<tr>
+<td><code>spin.dynamics</code></td>
+<td>Few-spin dynamics: Hamiltonians in the rotating frame, a Lindblad propagator, and the analytic</td>
+</tr>
+<tr>
+<td><code>spin.exchange</code></td>
+<td>Exchange J(ε, t_c) from the two-site Hubbard model, and the detuning axis in gate space (ADR 0021).</td>
+</tr>
+<tr>
+<td><code>spin.psb</code></td>
+<td>Pauli spin blockade readout with the valley draw (ADR 0021).</td>
+</tr>
+<tr>
+<td><code>valley.signatures</code></td>
+<td>What a valley splitting does to measurements that do not need the spin layer (ADR 0020).</td>
+</tr>
+<tr>
+<td><code>valley.splitting</code></td>
+<td>Valley splitting per dot as a statistical draw (ADR 0020).</td>
+</tr>
+</tbody>
+</table>
+<!-- module-graph:end -->
+
+<h2 id="runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand">Runtimes (generated from <code>docs/gallery/measured.json</code> and the protocol files; do not edit by hand)</h2>
+<!-- runtimes:start -->
+<p>Last recorded on 2026-10-26 at commit <code>e7561a4</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
+<h3 id="per-model-microseconds-per-point-or-sample">Per model (microseconds per point or sample)</h3>
+<table>
+<thead>
+<tr>
+<th>model</th>
+<th>what is timed</th>
+<th>points</th>
+<th>us per point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>charge.ci.ConstantInteractionParams.mean_occupation</code></td>
+<td>thermal occupation per gate point</td>
+<td>10,000</td>
+<td>1.871</td>
+</tr>
+<tr>
+<td><code>charge.hubbard.HubbardParams.mean_occupation</code></td>
+<td>16x16 diagonalisation per gate point</td>
+<td>10,000</td>
+<td>9.87</td>
+</tr>
+<tr>
+<td><code>readout.sensor.SensorSETParams.current_a</code></td>
+<td>sensor current per point</td>
+<td>100,000</td>
+<td>0.078</td>
+</tr>
+<tr>
+<td><code>readout.noise.TelegraphNoise.trace</code></td>
+<td>one fluctuator per sample</td>
+<td>100,000</td>
+<td>0.653</td>
+</tr>
+<tr>
+<td><code>readout.noise.OneOverFNoise.trace</code></td>
+<td>24 fluctuators per sample</td>
+<td>10,000</td>
+<td>15.751</td>
+</tr>
+<tr>
+<td><code>readout.measure.SensedDoubleDot.sweep_a (noisy)</code></td>
+<td>occupation + sensor + three noise traces per point</td>
+<td>10,000</td>
+<td>18.672</td>
+</tr>
+<tr>
+<td><code>readout.lockin.lockin_sweep_a_per_v</code></td>
+<td>8 evaluations per point, noisy</td>
+<td>2,500</td>
+<td>148.492</td>
+</tr>
+<tr>
+<td><code>readout.lockin.lockin_sweep_dynamic_a_per_v</code></td>
+<td>8 evaluations + rate dynamics per point, noisy</td>
+<td>2,500</td>
+<td>156.619</td>
+</tr>
+<tr>
+<td><code>readout.loading.latched_occupation</code></td>
+<td>per scan step</td>
+<td>100,000</td>
+<td>0.87</td>
+</tr>
+</tbody>
+</table>
+<h3 id="per-protocol-declared-budget-beside-the-last-measurement">Per protocol (declared budget beside the last measurement)</h3>
+<table>
+<thead>
+<tr>
+<th>protocol</th>
+<th>points</th>
+<th>compile budget s / measured</th>
+<th>run budget ms per point / measured</th>
+<th>evaluations per point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>coulomb-oscillations-single-dot</code></td>
+<td>1,201</td>
+<td>0.5 / 0.0</td>
+<td>0.05 / 0.00247</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>crosstalk-lines</code></td>
+<td>57,600</td>
+<td>0.5 / 0.2699</td>
+<td>0.05 / 0.00244</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>diamonds-single-dot</code></td>
+<td>64,521</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00011</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>drift-repeated-cuts</code></td>
+<td>24,000</td>
+<td>1.0 / 0.0006</td>
+<td>0.1 / 0.02516</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>esr-line</code></td>
+<td>120,701</td>
+<td>0.5 / 0.0002</td>
+<td>0.002 / 3e-05</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>exchange-fingerprint</code></td>
+<td>40,401</td>
+<td>0.5 / 0.0002</td>
+<td>0.02 / 0.00091</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>exchange-house-cells</code></td>
+<td>22,801</td>
+<td>0.5 / 0.0002</td>
+<td>0.4 / 0.02802</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>exchange-vs-barrier</code></td>
+<td>251</td>
+<td>0.5 / 0.0003</td>
+<td>0.2 / 0.00263</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>exchange-vs-detuning</code></td>
+<td>401</td>
+<td>0.5 / 0.0001</td>
+<td>0.2 / 0.00885</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>fault-signatures-stability</code></td>
+<td>57,600</td>
+<td>2.0 / 0.1539</td>
+<td>0.1 / 0.01905</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis-trapping</code></td>
+<td>722</td>
+<td>0.5 / 0.1347</td>
+<td>1.0 / 0.3403</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis</code></td>
+<td>361</td>
+<td>0.5 / 0.1375</td>
+<td>1.0 / 0.22724</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>gate-leakage-iv</code></td>
+<td>2,408</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 9e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>gate-leakage-pair</code></td>
+<td>201</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00025</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>lead-rate-time-trace</code></td>
+<td>900</td>
+<td>1.0 / 0.1373</td>
+<td>2.0 / 0.66977</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>magnetospectroscopy-transition</code></td>
+<td>1,803</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 3e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>noise-psd</code></td>
+<td>30,000</td>
+<td>0.5 / 0.0003</td>
+<td>0.1 / 0.01896</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>noise-time-trace</code></td>
+<td>30,000</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.01894</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>ohmic-iv</code></td>
+<td>201</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 3e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>pinch-off-barrier</code></td>
+<td>601</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 2e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>pinch-off-crosstalk</code></td>
+<td>24,321</td>
+<td>0.5 / 0.1279</td>
+<td>0.01 / 2e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>plunger-vs-barrier-map</code></td>
+<td>12,000</td>
+<td>5.0 / 0.2679</td>
+<td>2.0 / 0.79204</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>potential-cut-along-channel</code></td>
+<td>1,203</td>
+<td>0.5 / 0.1239</td>
+<td>0.01 / 0.00125</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>344,424</td>
+<td>1.0 / 0.4865</td>
+<td>0.001 / 0.0</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>potential-map-layout</code></td>
+<td>86,106</td>
+<td>0.5 / 0.1294</td>
+<td>0.001 / 0.0</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>psb-readout-window</code></td>
+<td>1,602</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 0.00012</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>pulsed-gate-spectroscopy</code></td>
+<td>60,501</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 2e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>rabi-chevron</code></td>
+<td>20,301</td>
+<td>0.5 / 0.0001</td>
+<td>0.02 / 0.00212</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>ramsey-fringes</code></td>
+<td>1,202</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 5e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>rf-resonance</code></td>
+<td>4,004</td>
+<td>0.5 / 0.0</td>
+<td>0.01 / 5e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>rf-sensor-flank</code></td>
+<td>601</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00253</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>sensor-coulomb-peak</code></td>
+<td>601</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00221</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>single-shot-histogram</code></td>
+<td>2,000</td>
+<td>0.5 / 0.0007</td>
+<td>0.5 / 0.33393</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>snr-vs-integration-time</code></td>
+<td>3,200</td>
+<td>0.5 / 0.0005</td>
+<td>5.0 / 1.11916</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>57,600</td>
+<td>2.0 / 0.4854</td>
+<td>0.1 / 0.01952</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-layout</code></td>
+<td>22,500</td>
+<td>0.5 / 0.2366</td>
+<td>0.1 / 0.01906</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot</code></td>
+<td>40,000</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.019</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-direction</code></td>
+<td>12,800</td>
+<td>1.0 / 0.1335</td>
+<td>2.0 / 0.67894</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-fine-2dot</code></td>
+<td>22,500</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.01867</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-lockin-common</code></td>
+<td>40,000</td>
+<td>0.5 / 0.0004</td>
+<td>0.5 / 0.16516</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>stability-lockin-detuning</code></td>
+<td>40,000</td>
+<td>0.5 / 0.0006</td>
+<td>0.5 / 0.16134</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>stability-lockin-p1</code></td>
+<td>40,000</td>
+<td>0.5 / 0.0006</td>
+<td>0.5 / 0.16222</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>stability-lockin-p2</code></td>
+<td>40,000</td>
+<td>0.5 / 0.0004</td>
+<td>0.5 / 0.16145</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>stability-vs-sweep-rate</code></td>
+<td>19,200</td>
+<td>1.0 / 0.1327</td>
+<td>2.0 / 0.71349</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>switcher-histogram</code></td>
+<td>600,000</td>
+<td>1.0 / 0.0005</td>
+<td>0.05 / 0.02523</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>t1-hot-spot</code></td>
+<td>1,803</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 3e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>turn-on-global</code></td>
+<td>201</td>
+<td>0.5 / 0.1154</td>
+<td>1.0 / 0.19065</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>turn-on-single-gate-layout</code></td>
+<td>361</td>
+<td>0.5 / 0.1077</td>
+<td>1.0 / 0.18299</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>turn-on-single-gate</code></td>
+<td>601</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 7e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>125</td>
+<td>1.0 / 0.0001</td>
+<td>1000.0 / 425.98072</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>valley-splitting-draws</code></td>
+<td>108,000</td>
+<td>0.5 / 0.0</td>
+<td>0.01 / 0.00064</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<!-- runtimes:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
