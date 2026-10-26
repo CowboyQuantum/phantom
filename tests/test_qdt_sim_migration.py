@@ -22,14 +22,21 @@ def test_fixture_is_synthetic():
     assert "qdt-sim" in str(load()["provenance"]) and "no device data" in str(load()["provenance"])
 
 
-def test_stability_map_and_occupation_match():
+def test_stability_map_and_occupation_match_away_from_the_empty_corner():
+    """qdt-sim counted the clipped (0, 0) window entries several times near the empty corner; phantom's
+    CI model (MODEL_VERSION 2) does not, so the two agree exactly only where no clipping happens: both
+    gate-induced charges at least `window` electrons. Step 8 regenerates qdt's fixtures."""
     f = load()
     d = SensedDoubleDot()
     v = np.zeros((24, 32, 3))
     v[..., 0] = f["p1_v"][:, None]
     v[..., 1] = f["p2_v"][None, :]
-    np.testing.assert_allclose(d.charge.mean_occupation(v), f["mean_occupation"], rtol=0, atol=1e-12)
-    np.testing.assert_allclose(d.current_a(v), f["sensor_current_a"], rtol=1e-12, atol=0)
+    n_g = d.charge.induced_charge(v)
+    unclipped = (n_g >= d.charge.window + 0.5).all(axis=-1)
+    assert unclipped.sum() > 100, "enough of the fixture grid is away from the corner"
+    np.testing.assert_allclose(d.charge.mean_occupation(v)[unclipped], f["mean_occupation"][unclipped], rtol=0, atol=1e-12)
+    np.testing.assert_allclose(d.current_a(v)[unclipped], f["sensor_current_a"][unclipped], rtol=1e-12, atol=0)
+    # in the corner the two models differ on purpose (duplicate weighting); no assertion there
     np.testing.assert_allclose(d.charge.charge_lattice(), f["charge_lattice"], rtol=1e-15)
 
 

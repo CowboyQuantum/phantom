@@ -26,8 +26,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-MODEL_VERSION = 1
-"""Bumped whenever any output of this module changes for the same parameters (ADR 0003)."""
+MODEL_VERSION = 2
+"""Bumped whenever any output of this module changes for the same parameters (ADR 0003). 2: duplicated
+clipped states near the empty corner carry no weight (qdt-sim over-counted them)."""
 
 from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
@@ -80,7 +81,24 @@ class ConstantInteractionParams:
         d = states - n_g[..., None, :]
         c_inv = np.linalg.inv(self.c_dot_af)
         u = 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
+        # Clipping at zero electrons makes some window entries identical near the empty corner. Only the
+        # first occurrence of a state keeps its energy; duplicates get +inf so they carry no weight
+        # (MODEL_VERSION 2: qdt-sim counted them several times).
+        key = states[..., 0] * (4 * self.window + 3) + states[..., 1]
+        k = key.shape[-1]
+        dup = np.zeros(key.shape, dtype=bool)
+        for i in range(1, k):
+            dup[..., i] = (key[..., :i] == key[..., i : i + 1]).any(axis=-1)
+        u = np.where(dup, np.inf, u)
         return states, u
+
+    def state_energies_ev(self, v: np.ndarray, states: np.ndarray) -> np.ndarray:
+        """Energies (k,) of the given integer occupations `states` (k, 2) at gate voltages `v` (gates,),
+        for any states, not only the window: U(N) = ½ E_UNIT (N − n_g)ᵀ C_dot⁻¹ (N − n_g)."""
+        n_g = self.induced_charge(np.asarray(v, dtype=float))
+        d = np.asarray(states, dtype=float) - n_g
+        c_inv = np.linalg.inv(self.c_dot_af)
+        return 0.5 * E_UNIT_V_PER_E_AF * np.einsum("ki,ij,kj->k", d, c_inv, d)
 
     def occupation_probabilities(
         self, v: np.ndarray, kt_ev: float | np.ndarray | None = None

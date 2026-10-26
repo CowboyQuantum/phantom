@@ -2,9 +2,9 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** 1 (#16) and 2 (#17) complete except the owner's sign-offs and Step 2's P1 row; 3 (#25, disorder
-and the fault models) in progress → `docs/steps/03-disorder-faults.md`. Milestones: "Steps 1-2", "Steps 3-4".
-**Branch:** `step-3/fault-generators` (second Step 3 PR, part of #25). PRs #19–#26 merged.
+**Current step:** 1 (#16), 2 (#17), 3 (#25) complete except the owner's sign-offs, catalog entries and P1 rows;
+4 (#28, readout physics) in progress → `docs/steps/04-readout.md`. Milestones: "Steps 1-2", "Steps 3-4".
+**Branch:** `step-4/rates-and-master-equation` (first Step 4 PR, part of #28). PRs #19–#27 merged.
 **Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
@@ -31,7 +31,12 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- Second Step 3 PR: `disorder.wiring` (open/shorted gates as a gate matrix, leak network, sensor-coupling factors),
+- First Step 4 PR: `readout.rates` (WKB), `readout.master_equation` (RateEquation with detailed balance, sweep
+  propagation), `electrostatics.barrier_width_nm` at the lead Fermi level, reservoir gates in `two_dot_layout`,
+  CI MODEL_VERSION 2 (duplicate clipped states no longer over-weighted; qdt-sim fixture compared away from the
+  empty corner), ADR 0017, protocols `stability-vs-sweep-rate`, `stability-direction`, `lead-rate-time-trace`,
+  six P0 tests (detailed balance, latching threshold, direction dependence, metastability without an interdot rate).
+- Merged as PR #27, second Step 3 PR: `disorder.wiring` (open/shorted gates as a gate matrix, leak network, sensor-coupling factors),
   `disorder.trapping` (history-dependent trapped fraction, hysteresis loop), both in the scenario draw; ADR 0016;
   protocols `fault-signatures-stability`, `gate-leakage-pair`, `gate-hysteresis-trapping`; six P0 tests.
 - Merged as PR #26, first Step 3 PR: `disorder` layer (interface charges as image-charge energy offsets, misalignment and width error as
@@ -48,6 +53,10 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 - Step 1 sign-offs still pending. PRs #21 and #22 merged.
 
 ## Known gaps
+- All Step 2/3 pictures changed with the reservoir gates and the CI fix (re-rendered, unsigned). Operating points
+  carry `R_L: 0.7, R_R: 0.7`; the lead rate spans 1e2–1e10 Hz as the outer barrier goes 0.0–0.2 V.
+- Step 4 still owes the RF tank response, the single-shot histogram and SNR protocols, catalog-tied fluctuator
+  statistics, and the two P1 rows (a charge-noise spectrum, a latching signature) once their entries exist.
 - A shorted plunger–middle-barrier pair merges the two dots into one at the clean operating point; the two-dot CI model
   cannot represent it, so the fault protocol shows the plunger–outer-barrier short instead (noted in the protocol).
 - Step 3 generators run on the catalog draft's placeholder densities (`calibration: none`); the owner's catalog entries
@@ -77,8 +86,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 ## Next action
 Owner reviews the three Step 3 pictures on the PR preview and merges; writes or confirms catalog entries so the
 generators get real densities; names the published layout for Step 2's P1 row and a MOS/SiGe unintentional-dot
-comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: Step 4 (readout physics: lead rates and the master equation replacing the Step 1 loading
-placeholders, sweep-rate latching, RF response, switcher and drift rates tied to the catalog); file its issue.
+comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: the rest of Step 4 (RF tank response as a transfer function per the open decision, single-shot
+histogram and SNR, fluctuator statistics tied to the catalog), then re-render the Step 1 loading protocols on the
+master equation and retire `readout.loading`.
 
 Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates

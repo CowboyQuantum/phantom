@@ -155,6 +155,10 @@ class Layout:
     def gate_names(self) -> tuple[str, ...]:
         return tuple(g.name for g in self.gates)
 
+    def reservoir_points_nm(self) -> dict[str, tuple[float, float]]:
+        """Centroids of the reservoir gates, by name: where the leads are for tunnel-rate estimates."""
+        return {g.name: g.centroid_nm for g in self.gates if g.role == "reservoir"}
+
     def gate(self, name: str) -> Gate:
         return self.gates[self.gate_names.index(name)]
 
@@ -179,8 +183,9 @@ class Layout:
 
 def two_dot_layout(material: str = "SiGe", pitch_nm: float = 80.0) -> Layout:
     """A textbook single-layer double-dot layout with a charge sensor: two plungers P1, P2 over a channel
-    along x, three barriers B_L, B_M, B_R across it, and a sensor plunger SG over a sensor channel at
-    positive y. Depletion of the channel edges is left to the barriers; reservoirs lie beyond x = ±2 pitch."""
+    along x, three barriers B_L, B_M, B_R across it, a sensor plunger SG over a sensor channel at positive y,
+    and two reservoir accumulation gates R_L, R_R beyond the outer barriers that hold the leads populated,
+    so the lead barriers are the outer barrier gates and not the ungated region."""
     half = pitch_nm / 2
     pw, bw, gl = 0.55 * pitch_nm, 0.3 * pitch_nm, 120.0  # plunger width, barrier width, gate length (y)
     gates = (
@@ -190,6 +195,8 @@ def two_dot_layout(material: str = "SiGe", pitch_nm: float = 80.0) -> Layout:
         Gate.rectangle("P2", half - pw / 2, half + pw / 2, -gl / 2, gl / 2, "plunger"),
         Gate.rectangle("B_R", half + pitch_nm / 2 - bw / 2, half + pitch_nm / 2 + bw / 2, -gl / 2, gl / 2, "barrier"),
         Gate.rectangle("SG", -pw / 2, pw / 2, 150.0, 150.0 + gl, "sensor"),
+        Gate.rectangle("R_L", -4 * pitch_nm, -half - pitch_nm / 2 - bw / 2 - 10.0, -gl / 2, gl / 2, "reservoir"),
+        Gate.rectangle("R_R", half + pitch_nm / 2 + bw / 2 + 10.0, 4 * pitch_nm, -gl / 2, gl / 2, "reservoir"),
     )
     mat = MaterialClass.by_name(material)
     return Layout(

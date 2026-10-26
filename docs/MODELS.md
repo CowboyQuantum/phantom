@@ -43,8 +43,10 @@ flowchart LR
   end
 
   subgraph readout
-    RATES["loading.LeadRateLandscape / LeadBarrier<br/>dot-to-lead rate Γ(V); lifetime width ħΓ<br/>(placeholder → Step 4 master equation)"]
-    LAT["loading.latched_occupation<br/>charge actually present given Γ and dwell time"]
+    RATES["loading.LeadRateLandscape / LeadBarrier<br/>dot-to-lead rate Γ(V); lifetime width ħΓ<br/>(Step 1 placeholder, kept for its protocols)"]
+    LAT["loading.latched_occupation<br/>charge actually present given Γ and dwell time (placeholder)"]
+    WKB["rates.wkb_tunnel_rate_hz<br/>Γ from barrier height and width at the lead Fermi level; attempt rate from the dot curvature"]
+    ME["master_equation.RateEquation<br/>rate matrix over the CI window with detailed balance; sweep() propagates by expm per sample: latching = lag"]
     SENS["sensor.SensorSETParams<br/>φ_s = αV + βN + δφ → current I(φ_s, V_sd)"]
     NOISE["noise.WhiteNoise / TelegraphNoise / OneOverFNoise<br/>gate offset g(t), sensor offset s(t), readout r(t)"]
     MEAS["measure.SensedDoubleDot<br/>sweep_a, trace_a: raster times, noise applied"]
@@ -78,6 +80,14 @@ flowchart LR
   V --> RATES
   CI --> LAT
   RATES --> LAT
+  DOTS --> WKB
+  WKB --> ME
+  CI --> ME
+  ME --> SENS
+  DOTS --> WKB
+  WKB --> ME
+  CI --> ME
+  ME --> SENS
   LAT --> SENS
   CI --> SENS
   HB --> SENS
@@ -121,6 +131,10 @@ Which protocol uses which path (Step 1):
 | `fault-signatures-stability` | Layout → wiring draw applied to programmed V → derived CI and sensor (β scaled) → sweep (Step 3) |
 | `gate-leakage-pair` | wiring leak network + transport.gate_leakage_current_a (Step 3) |
 | `gate-hysteresis-trapping` | trapping → effective gate voltage → channel barrier → transport.channel_transmission_current_a (Step 3) |
+| `stability-vs-sweep-rate`, `stability-direction` | Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4) |
+| `lead-rate-time-trace` | Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4) |
+| `stability-vs-sweep-rate`, `stability-direction` | Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4) |
+| `lead-rate-time-trace` | Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4) |
 
 ## Module dependency graph (generated; do not edit by hand)
 
@@ -151,8 +165,10 @@ flowchart LR
   subgraph readout
     readout_loading["loading"]
     readout_lockin["lockin"]
+    readout_master_equation["master_equation"]
     readout_measure["measure"]
     readout_noise["noise"]
+    readout_rates["rates"]
     readout_sensor["sensor"]
     readout_transport["transport"]
   end
@@ -179,9 +195,12 @@ flowchart LR
   readout_loading --> constants
   readout_lockin --> readout_loading
   readout_lockin --> readout_measure
+  readout_master_equation --> charge_ci
+  readout_master_equation --> constants
   readout_measure --> charge_ci
   readout_measure --> readout_noise
   readout_measure --> readout_sensor
+  readout_rates --> constants
   readout_transport --> charge_dot
 ```
 
@@ -203,8 +222,10 @@ flowchart LR
 | `layout.geometry` | Gate polygons, the dielectric stack and the material class: data only, no physics. |
 | `readout.loading` | Rate-limited loading of the dots from their reservoirs, and the lead-rate landscape over gate space. |
 | `readout.lockin` | The `sensor_lockin` channel: a hardware derivative of the sensor signal. |
+| `readout.master_equation` | A master equation over the few-electron charge states of the double dot. |
 | `readout.measure` | A double dot read by an SET sensor, with noise on an explicit time axis. |
 | `readout.noise` | Noise processes with an explicit time axis. |
+| `readout.rates` | Tunnel rates through barriers of the landscape, in the WKB approximation. |
 | `readout.sensor` | A charge sensor: a single-electron transistor (SET) read in sequential tunnelling. |
 | `readout.transport` | Channel turn-on and barrier pinch-off: the direct-current shapes of the electrical-health protocols. |
 <!-- module-graph:end -->
@@ -240,6 +261,7 @@ Last recorded on 2026-10-26 at commit `eb0100e` on Windows-11-10.0.26200-SP0 (py
 | `gate-hysteresis` | 361 | 0.5 / 0.0405 | 1.0 / 0.07208 | 1 |
 | `gate-leakage-iv` | 1,806 | 0.5 / 0.0 | 0.02 / 9e-05 | 1 |
 | `gate-leakage-pair` | 201 | 0.5 / 0.0 | 0.02 / 0.00027 | 1 |
+| `lead-rate-time-trace` | 900 | 1.0 / not recorded | 2.0 / not recorded | 1 |
 | `noise-psd` | 30,000 | 0.5 / 0.0003 | 0.1 / 0.01878 | 1 |
 | `noise-time-trace` | 30,000 | 0.5 / 0.0005 | 0.1 / 0.01861 | 1 |
 | `ohmic-iv` | 201 | 0.5 / 0.0 | 0.02 / 6e-05 | 1 |
@@ -253,11 +275,13 @@ Last recorded on 2026-10-26 at commit `eb0100e` on Windows-11-10.0.26200-SP0 (py
 | `stability-coarse-2dot-disorder` | 57,600 | 2.0 / 0.188 | 0.1 / 0.02261 | 1 |
 | `stability-coarse-2dot-layout` | 22,500 | 0.5 / 0.0798 | 0.1 / 0.01913 | 1 |
 | `stability-coarse-2dot` | 40,000 | 0.5 / 0.0004 | 0.1 / 0.0208 | 1 |
+| `stability-direction` | 12,800 | 1.0 / not recorded | 2.0 / not recorded | 1 |
 | `stability-fine-2dot` | 22,500 | 0.5 / 0.0005 | 0.1 / 0.0189 | 1 |
 | `stability-lockin-common` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.16262 | 8 |
 | `stability-lockin-detuning` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.16237 | 8 |
 | `stability-lockin-p1` | 40,000 | 0.5 / 0.0006 | 0.5 / 0.16375 | 8 |
 | `stability-lockin-p2` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.1631 | 8 |
+| `stability-vs-sweep-rate` | 19,200 | 1.0 / not recorded | 2.0 / not recorded | 1 |
 | `turn-on-global` | 201 | 0.5 / 0.0363 | 1.0 / 0.07725 | 1 |
 | `turn-on-single-gate-layout` | 361 | 0.5 / 0.0386 | 1.0 / 0.07483 | 1 |
 | `turn-on-single-gate` | 601 | 0.5 / 0.0 | 0.02 / 7e-05 | 1 |

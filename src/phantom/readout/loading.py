@@ -16,9 +16,9 @@ Two forms:
   barriers through cross-coupling, so low-voltage corners latch and high-voltage corners broaden.
 
 Lifetime broadening is applied as an energy width sqrt((kT)² + (ħΓ)²) in the Boltzmann occupation,
-a thermal stand-in for the Lorentzian line shape. Step 4 replaces all of this with lead tunnel rates
-and a master equation on the device clock; this module is `calibration: none` and carries no claim
-beyond the exponential barrier dependence.
+a thermal stand-in for the Lorentzian line shape. Superseded for dynamics by `readout.rates` (WKB rates from the landscape) and `readout.master_equation`
+(ADR 0017); kept for the Step 1 protocols that use it until they are re-rendered. This module is
+`calibration: none` and carries no claim beyond the exponential barrier dependence.
 """
 
 from __future__ import annotations

@@ -14,6 +14,7 @@ from phantom.electrostatics.dots import (
     DerivedBarrier,
     DerivedDot,
     barrier_between,
+    barrier_width_nm,
     find_dots,
     line_cut,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "DerivedDot",
     "GateBasis",
     "barrier_between",
+    "barrier_width_nm",
     "find_dots",
     "line_cut",
     "polygon_solid_angle",
