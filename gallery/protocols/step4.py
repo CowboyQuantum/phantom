@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from gallery.protocols.step2 import _layout, _operating_point
+from gallery.protocols.step2 import _axis, _layout, _operating_point
 from gallery.runner import Context, Protocol
 from phantom.charge import derive_double_dot
 from phantom.electrostatics import GateBasis, barrier_width_nm
@@ -161,3 +161,119 @@ def lead_rate_time_trace(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
             out[f"barrier_case{k}_v"] = np.array(vb)
         ctx.count(model_evals=n_t * len(settings))
     return out
+
+
+# --- RF reflectometry and single-shot readout ---------------------------------------------------
+
+from phantom.readout import (
+    TankCircuit,
+    noisy_device_for_sampling,
+    sensor_resistance_ohm,
+    single_shots,
+)
+from phantom.readout.measure import SensedDoubleDot as _Sensed
+
+
+def _tank(p: Protocol) -> TankCircuit:
+    return TankCircuit(**p.instance.get("tank", {}))
+
+
+def rf_resonance(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Reflected amplitude and phase against carrier frequency for several sensor resistances: the
+    resonance of the tank, the dip to zero at the matched resistance, and the phase flipping by π as the
+    sensor crosses it."""
+    with ctx.compile():
+        tank = _tank(p)
+        resistances = np.array([float(r) for r in p.instance["sensor_resistances_ohm"]])
+    f = _axis(p.sweep[0])
+    out: dict[str, np.ndarray] = {"f_mhz": f / 1e6, "f0_mhz": np.array(tank.resonance_hz / 1e6), "r_match_ohm": np.array(tank.matched_resistance_ohm)}
+    with ctx.run(len(f) * len(resistances)):
+        for k, r in enumerate(resistances):
+            g = tank.reflection(f, r)
+            out[f"mag_r{k}"] = np.abs(g)
+            out[f"phase_r{k}_deg"] = np.degrees(np.angle(g))
+        ctx.count(model_evals=len(f) * len(resistances))
+    return out
+
+
+def rf_sensor_flank(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The sensor plunger swept across one Coulomb peak: the DC current, the sensor resistance it implies,
+    and the reflected amplitude at the carrier frequency. The RF flank mirrors the DC peak, steepest
+    where the resistance crosses the matching value."""
+    with ctx.compile():
+        d = _Sensed()
+        tank = _tank(p)
+        f_carrier = float(p.instance.get("carrier_hz", tank.resonance_hz))
+        centre = d.sensor.phase_v
+    half = float(p.sweep[0].get("half_span_v", 0.15))
+    sg = np.linspace(centre - half, centre + half, int(p.sweep[0]["points"]))
+    v = np.zeros((len(sg), len(d.charge.gate_names)))
+    v[:, 2] = sg
+    with ctx.run(len(sg)):
+        i = d.current_a(v)
+        r = sensor_resistance_ohm(i, d.sensor.bias_v)
+        g = tank.reflection(f_carrier, r)
+        ctx.count(model_evals=len(sg))
+    return {"v_sg_v": sg, "current_a": i, "resistance_ohm": r, "rf_magnitude": np.abs(g), "rf_phase_deg": np.degrees(np.angle(g))}
+
+
+def _readout_point(d: _Sensed, flank_widths: float):
+    v = np.array([0.0, 0.0, d.sensor.phase_v + flank_widths * d.sensor.width_v])
+    n0 = d.charge.mean_occupation(v)
+    states = np.array([n0, n0 + np.array([1.0, 0.0])])
+    return v, states
+
+
+def single_shot_histogram(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Many consecutive shots at a readout point on the sensor flank, the dot in one of two charge states
+    at random: the histogram of integrated signals is bimodal, its separation set by one electron's shift
+    of the sensor and its widths by the readout noise over the integration time, with 1/f drift and
+    telegraph switching moving both peaks between shots."""
+    inst = p.instance
+    with ctx.compile():
+        base = _Sensed.default_noisy(seed=int(inst.get("seed", 0)))
+        v, states = _readout_point(base, float(inst.get("sensor_flank_widths", 0.9)))
+        tau = float(inst["tau_s"])
+        dt = float(inst.get("dt_s", tau / 20))
+        dev = noisy_device_for_sampling(base, dt, seed=int(inst.get("seed", 0)) + 100)
+        n_shots = int(inst.get("n_shots", 2000))
+        rng = np.random.default_rng(int(inst.get("seed", 0)) + 200)
+    with ctx.run(n_shots):
+        res = single_shots(dev, v, states, tau, dt, n_shots, rng)
+        ctx.count(model_evals=n_shots)
+    bins = np.linspace(res.signals_a.min(), res.signals_a.max(), 61)
+    centres = 0.5 * (bins[1:] + bins[:-1])
+    h0, _ = np.histogram(res.signals_a[res.true_state == 0], bins)
+    h1, _ = np.histogram(res.signals_a[res.true_state == 1], bins)
+    return {
+        "signal_pa": centres * 1e12,
+        "counts_state0": h0.astype(float),
+        "counts_state1": h1.astype(float),
+        "shot_index": np.arange(n_shots, dtype=float),
+        "shot_signal_pa": res.signals_a * 1e12,
+        "snr": np.array(res.snr),
+        "fidelity": np.array(res.fidelity),
+    }
+
+
+def snr_vs_integration_time(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Signal-to-noise ratio and readout fidelity of the two-state discrimination against integration
+    time: square-root growth while white noise dominates, then saturation and decline once the shots
+    are long enough for 1/f drift and telegraph switching to move the distributions."""
+    inst = p.instance
+    with ctx.compile():
+        base = _Sensed.default_noisy(seed=int(inst.get("seed", 0)))
+        v, states = _readout_point(base, float(inst.get("sensor_flank_widths", 0.9)))
+        taus = np.array([float(x) for x in inst["tau_s"]])
+        n_shots = int(inst.get("n_shots", 400))
+    snr = np.empty(len(taus))
+    fid = np.empty(len(taus))
+    with ctx.run(len(taus) * n_shots):
+        for k, tau in enumerate(taus):
+            dt = min(tau / 20, 1e-4)
+            dev = noisy_device_for_sampling(base, dt, seed=int(inst.get("seed", 0)) + 100 + k)
+            res = single_shots(dev, v, states, tau, dt, n_shots, np.random.default_rng(int(inst.get("seed", 0)) + 200 + k))
+            snr[k] = res.snr
+            fid[k] = res.fidelity
+        ctx.count(model_evals=len(taus) * n_shots)
+    return {"tau_s": taus, "snr": snr, "fidelity": fid, "sqrt_law": snr[0] * np.sqrt(taus / taus[0])}

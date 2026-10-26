@@ -21,4 +21,5 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0015 | Disorder generators: interface charges as image-charge offsets, lithography faults as polygon transforms, one seeded scenario draw | Accepted |
 | 0016 | Wiring faults as a gate matrix and a leak network; sensor asymmetry as coupling draws; trapping as a history state | Accepted |
 | 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
+| 0018 | RF reflectometry as a lumped tank loaded by the sensor; single-shot readout as integrated noisy shots | Accepted |
 | 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
