@@ -4,7 +4,9 @@ Modules: `sensor` (SET sensor and single-dot transport current), `noise` (seeded
 axis), `measure` (a CI double dot read by the sensor with noise), `lockin` (the `sensor_lockin`
 hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only), `loading` (Step 1 placeholder for
 rate-limited loading; superseded for dynamics by `master_equation`), `rates` (WKB tunnel rates from barrier height
-and width), `master_equation` (rate equation over the CI charge states with detailed balance; latching from the lag).
+and width), `master_equation` (rate equation over the CI charge states with detailed balance; latching from the lag), `rf`
+(lumped tank circuit with the sensor as load: reflection and resonance), `single_shot` (integrated shots,
+histograms, signal-to-noise against integration time).
 """
 
 from phantom.readout.loading import LeadBarrier, LeadRateLandscape, latched_occupation
@@ -20,7 +22,9 @@ from phantom.readout.noise import (
     WhiteNoise,
 )
 from phantom.readout.rates import attempt_rate_hz, wkb_transmission, wkb_tunnel_rate_hz
+from phantom.readout.rf import TankCircuit, sensor_resistance_ohm
 from phantom.readout.sensor import SensorSETParams
+from phantom.readout.single_shot import ShotResult, noisy_device_for_sampling, single_shots
 from phantom.readout.transport import (
     ChannelTurnOn,
     channel_transmission_current_a,
@@ -29,7 +33,7 @@ from phantom.readout.transport import (
     pinch_off_current_a,
 )
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
 
 __all__ = [
@@ -45,6 +49,8 @@ __all__ = [
     "RateEquation",
     "SensedDoubleDot",
     "SensorSETParams",
+    "ShotResult",
+    "TankCircuit",
     "TelegraphNoise",
     "WhiteNoise",
     "attempt_rate_hz",
@@ -53,9 +59,12 @@ __all__ = [
     "latched_occupation",
     "lockin_sweep_a_per_v",
     "lockin_sweep_dynamic_a_per_v",
+    "noisy_device_for_sampling",
     "ohmic_current_a",
     "pinch_off_current_a",
     "raster_times_s",
+    "sensor_resistance_ohm",
+    "single_shots",
     "wkb_transmission",
     "wkb_tunnel_rate_hz",
 ]

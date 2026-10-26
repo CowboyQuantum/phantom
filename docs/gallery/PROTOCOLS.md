@@ -72,10 +72,10 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 ## E. Readout hardware (readout) — Step 4
 | id | sweep | readout | must show |
 |---|---|---|---|
-| `rf-resonance` | carrier f | rf_response amplitude and phase | the tank resonance; its shift with sensor conductance |
-| `rf-sensor-flank` | S at the resonance | rf_response | the same flank as the DC peak, in reflected signal |
-| `single-shot-histogram` | many repeats at a readout point | counts vs. signal | bimodal histogram; separation vs. integration time |
-| `snr-vs-integration-time` | integration time | SNR | square-root growth until 1/f takes over |
+| `rf-resonance` | carrier f, several sensor resistances | rf_response amplitude and phase | the tank resonance; the dip to zero at the matched resistance; the phase flipping by half a turn across the match (Step 4) |
+| `rf-sensor-flank` | S at the resonance | DC current, sensor resistance, reflected amplitude | the same flank as the DC peak in reflected signal, steepest where the resistance crosses the match (Step 4) |
+| `single-shot-histogram` | many consecutive shots at a readout point | counts vs. integrated signal, shot sequence | bimodal histogram, one electron apart; both peaks moved by 1/f and telegraph noise between shots (Step 4) |
+| `snr-vs-integration-time` | integration time | SNR, fidelity | square-root growth while white noise dominates, saturation and decline once slow noise moves the distributions (Step 4) |
 
 ## F. Valley and excited states (valley, charge) — Step 5
 | id | sweep | readout | must show |
