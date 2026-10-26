@@ -1,0 +1,24 @@
+id: gate-leakage-iv
+name: Leakage current of every gate
+step: 2
+description: Leakage through the dielectric stack for each gate of the textbook layout against its own voltage, all others grounded. Antisymmetric, proportional to the gate area (so the two plungers leak more than the three narrower barriers), and exponential in the field across the stack, so it is negligible inside the safe window and rises steeply beyond it. Phenomenological (calibration none); an open gate would show no current anywhere, which Step 3 adds as a fault.
+layers: [layout, readout]
+runner: step2:gate_leakage_iv
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  onset_field_v_per_nm: 0.08
+  steepness_v: 0.2
+  i_onset_a_per_um2: 1.0e-9
+sweep:
+  - {gate: each, from: -4.0, to: 4.0, points: 301, unit: V}
+readout: {channel: leakage_current, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_gate_v, y: [leak_B_L_a, leak_P1_a, leak_B_M_a, leak_P2_a, leak_B_R_a, leak_SG_a], xlabel: "gate voltage (V)", ylabel: "leakage (A)", title: linear}
+    - {kind: line, x: v_gate_v, y: [abs_leak_P1_a, abs_leak_B_L_a], xlabel: "gate voltage (V)", ylabel: "|leakage| (A)", title: "P1 and B_L", log_y: true}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 2408, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
