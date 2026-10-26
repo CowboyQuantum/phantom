@@ -568,7 +568,7 @@
 <h2 id="deliverables">Deliverables</h2>
 <ul>
 <li><code>disorder</code>: static random interface/oxide charges (density per material class) added to the potential basis as image-charge energy offsets (done, ADR 0015); gate misalignment and width error as polygon transforms (done); strain and g-factor perturbations as parameter draws (waits for <code>spin</code>)</li>
-<li>fault generators for every catalog entry marked <code>runtime</code>, each with a severity knob</li>
+<li>fault generators for every catalog entry marked <code>runtime</code>, each with a severity knob: interface charges, misalignment and width error, open and shorted gates, gate-to-gate leakage, sensor-coupling asymmetry, trapping hysteresis (done on placeholders, ADR 0015/0016); valley, strain, dopants, drift wait for their layers or Step 4</li>
 <li>a scenario draw: material + catalog + seed → a perturbed device, serialisable (<code>disorder.scenario</code>, done; parameters are the catalog draft's placeholders until the entries are written)</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
@@ -585,7 +585,10 @@
 <li><code>potential-map-disorder</code>: the landscape of the clean layout beside three draws, gate outlines overlaid (rendering)</li>
 <li><code>stability-coarse-2dot-disorder</code>: the layout-derived coarse map, clean beside three draws each re-derived from its own landscape (rendering)</li>
 <li><code>unintentional-dots</code>: mean extra minima in the channel against charge density over many draws, MOS class (rendering; the P1 row's curve)</li>
-<li>to come as catalog entries land: leaky barrier, open or shorted gate, sensor-coupling asymmetry; <code>gate-hysteresis</code> with a trapping loop; switcher and drift rates tied to the catalog (Step 4)</li>
+<li><code>fault-signatures-stability</code>: the coarse map with clean wiring and three named faults: a weakly coupled dot, a shorted plunger–barrier pair, an open barrier (rendering)</li>
+<li><code>gate-leakage-pair</code>: a gigaohm leak between two neighbouring gates against the healthy curve (rendering)</li>
+<li><code>gate-hysteresis-trapping</code>: the turn-on swept up and down with trapping, the loop against the clean baseline (rendering)</li>
+<li>to come: switcher and drift rates tied to the catalog (Step 4); fault signatures in the lock-in and plunger-barrier maps as the owner asks</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>

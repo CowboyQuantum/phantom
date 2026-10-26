@@ -1046,6 +1046,24 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td>extra minima in the channel (count)</td>
 <td>the mean and 90th percentile of extra minima and the fraction of affected draws rising with density; the P1 row compares with a published MOS/SiGe comparison</td>
 </tr>
+<tr>
+<td><code>fault-signatures-stability</code></td>
+<td>(P1, P2) coarse map, programmed voltages, clean wiring and named faults</td>
+<td>sensor_conductance</td>
+<td>one dot's lines faint (sensor asymmetry); a barrier following a plunger (short) changes that dot's slopes and spacing; an open barrier floating at a stuck potential shifts the lines</td>
+</tr>
+<tr>
+<td><code>gate-leakage-pair</code></td>
+<td>one gate swept, others grounded, with a finite resistance to a neighbour</td>
+<td>leakage current of both gates</td>
+<td>equal and opposite linear currents on the pair on top of the dielectric leakage; the healthy curve flat</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis-trapping</code></td>
+<td>one gate up then down with trapping</td>
+<td>current, trapped fraction</td>
+<td>a loop: the downward trace turns off at a shifted voltage; the trapped fraction charges above capture and releases below release</td>
+</tr>
 </tbody>
 </table>
 <h2 id="candidates-not-included-for-the-owner-to-decide">Candidates not included, for the owner to decide</h2>

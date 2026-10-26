@@ -616,7 +616,7 @@
 </blockquote>
 <p><strong>Current step:</strong> 1 (#16) and 2 (#17) complete except the owner's sign-offs and Step 2's P1 row; 3 (#25, disorder
 and the fault models) in progress → <code>docs/steps/03-disorder-faults.md</code>. Milestones: "Steps 1-2", "Steps 3-4".
-<strong>Branch:</strong> <code>step-3/interface-charges-and-misalignment</code> (first Step 3 PR, part of #25). PRs #19–#24 merged.
+<strong>Branch:</strong> <code>step-3/fault-generators</code> (second Step 3 PR, part of #25). PRs #19–#26 merged.
 <strong>Last session:</strong> 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; <code>check_references.py</code>; <code>gallery.py</code> with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.</p>
@@ -644,7 +644,10 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>First Step 3 PR: <code>disorder</code> layer (interface charges as image-charge energy offsets, misalignment and width error as
+<li>Second Step 3 PR: <code>disorder.wiring</code> (open/shorted gates as a gate matrix, leak network, sensor-coupling factors),
+  <code>disorder.trapping</code> (history-dependent trapped fraction, hysteresis loop), both in the scenario draw; ADR 0016;
+  protocols <code>fault-signatures-stability</code>, <code>gate-leakage-pair</code>, <code>gate-hysteresis-trapping</code>; six P0 tests.</li>
+<li>Merged as PR #26, first Step 3 PR: <code>disorder</code> layer (interface charges as image-charge energy offsets, misalignment and width error as
   polygon transforms, seeded serialisable scenario draw, severity 0 bit-identical to clean), <code>GateBasis.offset_ev</code>,
   <code>phantom.constants</code> below every layer, ADR 0015, three protocols (<code>potential-map-disorder</code>,
   <code>stability-coarse-2dot-disorder</code>, <code>unintentional-dots</code>), six P0 tests; catalog draft entry gains <code>calibration: none</code>.</li>
@@ -659,6 +662,8 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
+<li>A shorted plunger–middle-barrier pair merges the two dots into one at the clean operating point; the two-dot CI model
+  cannot represent it, so the fault protocol shows the plunger–outer-barrier short instead (noted in the protocol).</li>
 <li>Step 3 generators run on the catalog draft's placeholder densities (<code>calibration: none</code>); the owner's catalog entries
   (#1–#14) set the real distributions. Strain and g-factor draws wait for <code>spin</code>; switcher and drift rates tie to the
   catalog in Step 4. No screening in the charge potentials (upper bound) until Step 7.</li>
@@ -686,8 +691,8 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 <h2 id="next-action">Next action</h2>
 <p>Owner reviews the three Step 3 pictures on the PR preview and merges; writes or confirms catalog entries so the
 generators get real densities; names the published layout for Step 2's P1 row and a MOS/SiGe unintentional-dot
-comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: fault generators for the entries
-that exist (leaky barrier, open/shorted gate, sensor asymmetry) and the hysteresis loop from trapping.</p>
+comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: Step 4 (readout physics: lead rates and the master equation replacing the Step 1 loading
+placeholders, sweep-rate latching, RF response, switcher and drift rates tied to the catalog); file its issue.</p>
 <p>Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
 on protocols from the review, then writes sign-offs as instructed. In parallel, start Step 2 on
