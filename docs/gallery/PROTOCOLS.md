@@ -106,6 +106,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `potential-map-disorder` | (x, y) landscape, clean beside three seeded draws | potential energy (meV), gate outlines | the gate layer shifted and resized; charge dips and bumps (visible at MOS densities, below a meV for SiGe) |
 | `stability-coarse-2dot-disorder` | (P1, P2) coarse map, clean beside three draws, each re-derived | sensor_conductance | lines tilt and shift, periods change between draws; an extra family of lines when a draw has an unintentional minimum |
 | `unintentional-dots` | charge-density severity, many draws | extra minima in the channel (count) | the mean and 90th percentile of extra minima and the fraction of affected draws rising with density; the P1 row compares with a published MOS/SiGe comparison |
+| `fault-signatures-stability` | (P1, P2) coarse map, programmed voltages, clean wiring and named faults | sensor_conductance | one dot's lines faint (sensor asymmetry); a barrier following a plunger (short) changes that dot's slopes and spacing; an open barrier floating at a stuck potential shifts the lines |
+| `gate-leakage-pair` | one gate swept, others grounded, with a finite resistance to a neighbour | leakage current of both gates | equal and opposite linear currents on the pair on top of the dielectric leakage; the healthy curve flat |
+| `gate-hysteresis-trapping` | one gate up then down with trapping | current, trapped fraction | a loop: the downward trace turns off at a shifted voltage; the trapped fraction charges above capture and releases below release |
 
 ## Candidates not included, for the owner to decide
 - Multi-dot arrays (linear 3+ dots): per-pair stability maps and sensor coverage. Deferred until a layout step defines arrays.
