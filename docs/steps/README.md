@@ -6,7 +6,7 @@ One file per roadmap step, fixed headings. `STATUS.md` names the current one.
 |---|---|---|
 | 0 | [Bootstrap](00-bootstrap.md) | DONE |
 | 1 | [Charge and readout core](01-charge-readout-core.md) | IN PROGRESS |
-| 2 | [Layout and closed-form electrostatics](02-layout-electrostatics.md) | NOT STARTED |
+| 2 | [Layout and closed-form electrostatics](02-layout-electrostatics.md) | IN PROGRESS |
 | 3 | [Disorder and the fault models](03-disorder-faults.md) | NOT STARTED |
 | 4 | [Readout physics](04-readout.md) | NOT STARTED |
 | 5 | [Valley](05-valley.md) | NOT STARTED |

@@ -9,15 +9,26 @@ budgets from the protocol files, and the last measurement recorded by `scripts/g
 
 ## Measurement flow (hand-maintained)
 
-Read left to right: a gate vector and a time go in, a measured quantity comes out. Boxes are models;
-the layer each lives in is named in the box. Dashed boxes are Step 1 placeholders that a later step
-replaces (the step is named).
+Read left to right: a layout and a gate vector go in, a measured quantity comes out. Boxes are models;
+the layer each lives in is named in the box. Dashed boxes are placeholders or offline checks that a later
+step replaces (the step is named).
 
 ```mermaid
 flowchart LR
   V["gate vector V(t), source–drain bias, time t"]
 
+  subgraph layout
+    LAY["geometry.Layout<br/>gate polygons, Stack (effective depth), MaterialClass; JSON file"]
+  end
+
+  subgraph electrostatics
+    BASIS["closed_form.GateBasis<br/>solid angle of each gate polygon / 2π on a grid: potential per volt"]
+    DOTS["dots.find_dots, barrier_between<br/>minima → dot positions, harmonic radii, lever arms; saddles → barrier heights"]
+    SCH["schrodinger.dot_levels_ev<br/>offline check of the harmonic estimate (compile tier)"]
+  end
+
   subgraph charge
+    DER["derived.derive_double_dot<br/>C_dot from radii, C_gate = C_dot·α → ConstantInteractionParams; sensor α from the basis"]
     CI["ci.ConstantInteractionParams<br/>occupation N(V) at width kT; lever arms, triple points"]
     HB["hubbard.HubbardParams<br/>N(V) with tunnel coupling; t → 0 gives CI"]
     BAR["dot.Barrier t(V_B), dot.Dot E_c(radius)"]
@@ -35,6 +46,12 @@ flowchart LR
 
   OUT["arrays: current (A), demodulated dI/dV (A/V), N present"]
 
+  LAY --> BASIS
+  BASIS --> DOTS
+  DOTS --> DER
+  DOTS -.-> SCH
+  DER --> CI
+  V --> BASIS
   V --> CI
   V --> HB
   BAR --> HB
@@ -55,6 +72,7 @@ flowchart LR
 
   style RATES stroke-dasharray: 4 3
   style TR stroke-dasharray: 4 3
+  style SCH stroke-dasharray: 4 3
 ```
 
 Which protocol uses which path (Step 1):
@@ -67,14 +85,26 @@ Which protocol uses which path (Step 1):
 | `stability-lockin-p1`, `-p2`, `-common`, `-detuning` | V(t) chopped → rates → CI (broadened) → latched occupation → sensor → demodulation |
 | `plunger-vs-barrier-map` | V → CI with a lead-barrier gate → LeadBarrier rate → latched occupation → sensor |
 | `noise-time-trace`, `noise-psd` | fixed V, t → noise → measure → current |
+| `potential-map-layout`, `potential-cut-along-channel` | Layout → GateBasis → U(x, y) at the operating point (Step 2) |
+| `stability-coarse-2dot-layout` | Layout → GateBasis → dots → derived CI and sensor α → sensor flank set → sweep with noise (Step 2) |
+| `pinch-off-crosstalk` | Layout → GateBasis at the barrier → linear pinch-off line; phenomenological step (Step 2) |
 
 ## Module dependency graph (generated; do not edit by hand)
 
 <!-- module-graph:start -->
 ```mermaid
 flowchart LR
+  subgraph layout
+    layout_geometry["geometry"]
+  end
+  subgraph electrostatics
+    electrostatics_closed_form["closed_form"]
+    electrostatics_dots["dots"]
+    electrostatics_schrodinger["schrodinger"]
+  end
   subgraph charge
     charge_ci["ci"]
+    charge_derived["derived"]
     charge_dot["dot"]
     charge_hubbard["hubbard"]
   end
@@ -86,9 +116,17 @@ flowchart LR
     readout_sensor["sensor"]
     readout_transport["transport"]
   end
+  charge_derived --> charge_ci
+  charge_derived --> charge_dot
+  charge_derived --> electrostatics_closed_form
+  charge_derived --> electrostatics_dots
+  charge_derived --> layout_geometry
   charge_dot --> charge_ci
   charge_hubbard --> charge_ci
   charge_hubbard --> charge_dot
+  electrostatics_closed_form --> layout_geometry
+  electrostatics_dots --> electrostatics_closed_form
+  electrostatics_schrodinger --> electrostatics_dots
   readout_loading --> charge_ci
   readout_lockin --> readout_loading
   readout_lockin --> readout_measure
@@ -101,8 +139,13 @@ flowchart LR
 | module | what it owns |
 |---|---|
 | `charge.ci` | Constant-interaction (CI) model of a few-electron double quantum dot. |
+| `charge.derived` | Charge-model parameters derived from a layout instead of typed (Step 2, ADR 0013). |
 | `charge.dot` | Dots and barriers as the named parts of a charge model. |
 | `charge.hubbard` | Two-site extended Hubbard model of a few-electron double dot. |
+| `electrostatics.closed_form` | Closed-form potential of polygonal surface gates over a two-dimensional electron gas. |
+| `electrostatics.dots` | Dots and barriers as features of the potential-energy landscape. |
+| `electrostatics.schrodinger` | Two-dimensional effective-mass Schrödinger solve on a potential-energy window: dot levels and spacings. |
+| `layout.geometry` | Gate polygons, the dielectric stack and the material class: data only, no physics. |
 | `readout.loading` | Rate-limited loading of the dots from their reservoirs, and the lead-rate landscape over gate space. |
 | `readout.lockin` | The `sensor_lockin` channel: a hardware derivative of the sensor signal. |
 | `readout.measure` | A double dot read by an SET sensor, with noise on an explicit time axis. |
@@ -114,38 +157,42 @@ flowchart LR
 ## Runtimes (generated from `docs/gallery/measured.json` and the protocol files; do not edit by hand)
 
 <!-- runtimes:start -->
-Last recorded on 2026-10-25 at commit `3eb2301` on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by `scripts/gallery.py --record`. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact `gallery-ubuntu-latest` (ADR 0010).
+Last recorded on 2026-10-25 at commit `ab10b03` on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by `scripts/gallery.py --record`. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact `gallery-ubuntu-latest` (ADR 0010).
 
 ### Per model (microseconds per point or sample)
 
 | model | what is timed | points | us per point |
 |---|---|---|---|
-| `charge.ci.ConstantInteractionParams.mean_occupation` | thermal occupation per gate point | 10,000 | 1.517 |
-| `charge.hubbard.HubbardParams.mean_occupation` | 16x16 diagonalisation per gate point | 10,000 | 10.24 |
-| `readout.sensor.SensorSETParams.current_a` | sensor current per point | 100,000 | 0.125 |
-| `readout.noise.TelegraphNoise.trace` | one fluctuator per sample | 100,000 | 0.674 |
-| `readout.noise.OneOverFNoise.trace` | 24 fluctuators per sample | 10,000 | 16.227 |
-| `readout.measure.SensedDoubleDot.sweep_a (noisy)` | occupation + sensor + three noise traces per point | 10,000 | 18.357 |
-| `readout.lockin.lockin_sweep_a_per_v` | 8 evaluations per point, noisy | 2,500 | 147.904 |
-| `readout.lockin.lockin_sweep_dynamic_a_per_v` | 8 evaluations + rate dynamics per point, noisy | 2,500 | 156.557 |
-| `readout.loading.latched_occupation` | per scan step | 100,000 | 0.928 |
+| `charge.ci.ConstantInteractionParams.mean_occupation` | thermal occupation per gate point | 10,000 | 1.451 |
+| `charge.hubbard.HubbardParams.mean_occupation` | 16x16 diagonalisation per gate point | 10,000 | 10.047 |
+| `readout.sensor.SensorSETParams.current_a` | sensor current per point | 100,000 | 0.12 |
+| `readout.noise.TelegraphNoise.trace` | one fluctuator per sample | 100,000 | 0.663 |
+| `readout.noise.OneOverFNoise.trace` | 24 fluctuators per sample | 10,000 | 16.537 |
+| `readout.measure.SensedDoubleDot.sweep_a (noisy)` | occupation + sensor + three noise traces per point | 10,000 | 18.282 |
+| `readout.lockin.lockin_sweep_a_per_v` | 8 evaluations per point, noisy | 2,500 | 149.015 |
+| `readout.lockin.lockin_sweep_dynamic_a_per_v` | 8 evaluations + rate dynamics per point, noisy | 2,500 | 154.779 |
+| `readout.loading.latched_occupation` | per scan step | 100,000 | 0.912 |
 
 ### Per protocol (declared budget beside the last measurement)
 
 | protocol | points | compile budget s / measured | run budget ms per point / measured | evaluations per point |
 |---|---|---|---|---|
-| `coulomb-oscillations-single-dot` | 1,201 | 0.5 / 0.0 | 0.05 / 0.00187 | 1 |
-| `diamonds-single-dot` | 64,521 | 0.5 / 0.0 | 0.02 / 0.0001 | 1 |
-| `noise-psd` | 30,000 | 0.5 / 0.008 | 0.1 / 0.01869 | 1 |
-| `noise-time-trace` | 30,000 | 0.5 / 0.0005 | 0.1 / 0.01917 | 1 |
+| `coulomb-oscillations-single-dot` | 1,201 | 0.5 / 0.0 | 0.05 / 0.00176 | 1 |
+| `diamonds-single-dot` | 64,521 | 0.5 / 0.0 | 0.02 / 0.00011 | 1 |
+| `noise-psd` | 30,000 | 0.5 / 0.0074 | 0.1 / 0.01904 | 1 |
+| `noise-time-trace` | 30,000 | 0.5 / 0.0004 | 0.1 / 0.01843 | 1 |
 | `pinch-off-barrier` | 601 | 0.5 / 0.0 | 0.02 / 3e-05 | 1 |
-| `plunger-vs-barrier-map` | 28,800 | 0.5 / 0.0001 | 0.05 / 0.00277 | 1 |
-| `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00166 | 1 |
-| `stability-coarse-2dot` | 40,000 | 0.5 / 0.0003 | 0.1 / 0.0186 | 1 |
-| `stability-fine-2dot` | 22,500 | 0.5 / 0.0006 | 0.1 / 0.01908 | 1 |
-| `stability-lockin-common` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.16314 | 8 |
-| `stability-lockin-detuning` | 40,000 | 0.5 / 0.0006 | 0.5 / 0.15971 | 8 |
-| `stability-lockin-p1` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.15959 | 8 |
-| `stability-lockin-p2` | 40,000 | 0.5 / 0.0005 | 0.5 / 0.16094 | 8 |
-| `turn-on-single-gate` | 601 | 0.5 / 0.0 | 0.02 / 8e-05 | 1 |
+| `pinch-off-crosstalk` | 24,321 | 0.5 / 0.0443 | 0.01 / 2e-05 | 1 |
+| `plunger-vs-barrier-map` | 28,800 | 0.5 / 0.0001 | 0.05 / 0.00293 | 1 |
+| `potential-cut-along-channel` | 1,203 | 0.5 / 0.0422 | 0.01 / 0.0004 | 1 |
+| `potential-map-layout` | 34,578 | 0.5 / 0.0398 | 0.001 / 0.0 | 1 |
+| `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00164 | 1 |
+| `stability-coarse-2dot-layout` | 22,500 | 0.5 / 0.0835 | 0.1 / 0.01827 | 1 |
+| `stability-coarse-2dot` | 40,000 | 0.5 / 0.0007 | 0.1 / 0.01854 | 1 |
+| `stability-fine-2dot` | 22,500 | 0.5 / 0.0005 | 0.1 / 0.01847 | 1 |
+| `stability-lockin-common` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.1599 | 8 |
+| `stability-lockin-detuning` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.15973 | 8 |
+| `stability-lockin-p1` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.15953 | 8 |
+| `stability-lockin-p2` | 40,000 | 0.5 / 0.0004 | 0.5 / 0.15963 | 8 |
+| `turn-on-single-gate` | 601 | 0.5 / 0.0 | 0.02 / 9e-05 | 1 |
 <!-- runtimes:end -->
