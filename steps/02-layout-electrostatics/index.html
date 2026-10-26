@@ -567,9 +567,9 @@
 <p>A gate layout and a material stack give V(r; gate vector) in microseconds; dots and barriers emerge from the potential; lever-arm fields and the capacitance matrix are derived, not typed.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li><code>layout</code>: gate polygons, stack (2DEG depth, dielectric layers), material class (<code>SiGe</code>, <code>MOS</code>) with their default parameters</li>
-<li><code>electrostatics</code>: Davies–Larkin–Stern closed-form potential for polygonal gates over a 2DEG; per-gate basis; superposition; a 2D effective-mass Schrödinger solve on the potential for dot positions and level spacings</li>
-<li><code>charge</code> reads lever arms and barrier heights from <code>electrostatics</code> instead of constants</li>
+<li><code>layout</code>: gate polygons, stack (2DEG depth, dielectric layers), material class (<code>SiGe</code>, <code>MOS</code>) with their default parameters; JSON in and out; the textbook <code>two_dot_layout()</code> (done)</li>
+<li><code>electrostatics</code>: Davies–Larkin–Stern closed-form potential for polygonal gates over a 2DEG as the solid angle of any polygon; per-gate basis; superposition; dots as minima with harmonic radii, barriers as saddles; a 2D effective-mass Schrödinger solve, offline (done; ADR 0013)</li>
+<li><code>charge</code> reads lever arms and barrier heights from <code>electrostatics</code> instead of constants: <code>charge.derived.derive_double_dot</code> builds the CI parameters from a layout (done)</li>
 <li>reference entries (<code>proposed</code>) for the closed-form potential and for the published layout the P1 row reproduces (ADR 0007)</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
@@ -584,15 +584,16 @@
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li><code>potential-map-layout</code>: V(x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid; two wells and the barriers between them visible</li>
-<li><code>potential-cut-along-channel</code>: V along the dot-to-dot axis for several barrier voltages; the barrier height falls as the gate opens</li>
+<li><code>potential-map-layout</code>: V(x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid; two wells and the barriers between them visible (rendering)</li>
+<li><code>potential-cut-along-channel</code>: V along the dot-to-dot axis for several barrier voltages; the barrier height falls as the gate opens (rendering)</li>
+<li><code>stability-coarse-2dot-layout</code>: the coarse map with nothing typed but the layout, the operating point and the sensor's per-electron coupling; the sensor gate is set on its flank first (rendering)</li>
 <li><code>gate-leakage-iv</code>: leakage current vs. each gate; ~0 in the safe window, onset at the extremes</li>
 <li><code>ohmic-iv</code>: current vs. source–drain bias with all gates accumulated; linear</li>
 <li><code>turn-on-global</code>: current vs. all gates swept together; threshold and saturation, MOS vs. SiGe scale</li>
-<li><code>pinch-off-crosstalk</code>: pinch-off voltage of one barrier vs. another gate's voltage; a straight line whose slope is the cross-capacitance ratio</li>
+<li><code>pinch-off-crosstalk</code>: pinch-off voltage of one barrier vs. another gate's voltage; a straight line whose slope is the cross-capacitance ratio (rendering; step shape phenomenological)</li>
 <li><code>crosstalk-lines</code>: sensor signal vs. every gate pair; the full cross-capacitance matrix from the line slopes</li>
 <li><code>gate-hysteresis</code>: one gate up then down; the two traces overlap for a clean device (the loop appears in Step 3)</li>
-<li>re-rendered from a layout file rather than constants: <code>turn-on-single-gate</code>, <code>pinch-off-barrier</code>, <code>stability-coarse-2dot</code>
+<li>still to do: <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>, <code>crosstalk-lines</code>, <code>gate-hysteresis</code>; re-rendering <code>turn-on-single-gate</code> and <code>pinch-off-barrier</code> from the layout
 Full roster: <code>docs/gallery/PROTOCOLS.md</code>. Each carries a <code>budget</code>; each is unsigned until the owner has reviewed it in the PR artifact.</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
@@ -606,7 +607,7 @@ Full roster: <code>docs/gallery/PROTOCOLS.md</code>. Each carries a <code>budget
 <li>gate overlap and multi-layer gates: closed-form limits vs. FEM (Step 7)</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS</p>
 
 
 

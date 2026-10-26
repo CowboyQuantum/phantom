@@ -614,9 +614,9 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 1 — Charge and readout core → <code>docs/steps/01-charge-readout-core.md</code>, issue #16. Step 2 (issue #17)
-runs together with it. Milestone: "Steps 1-2: charge, readout, layout, electrostatics".
-<strong>Branch:</strong> <code>step-1/pages-previews</code> (PR pending, part of #16); PR #19 merged.
+<p><strong>Current step:</strong> 1 (issue #16, awaiting sign-offs) and 2 (issue #17, in progress) together →
+<code>docs/steps/01-charge-readout-core.md</code>, <code>docs/steps/02-layout-electrostatics.md</code>. Milestone: "Steps 1-2".
+<strong>Branch:</strong> <code>step-2/layout-electrostatics</code> (first Step 2 PR, part of #17). PRs #19 and #20 merged; #21, #22 small follow-ups.
 <strong>Last session:</strong> 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; <code>check_references.py</code>; <code>gallery.py</code> with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.</p>
@@ -644,11 +644,18 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>PR #19 merged (Step 1 core, tooling, fourteen protocols, model map, runtime ledger). Sign-offs still pending.</li>
-<li>PR for per-PR Pages previews (ADR 0012) from <code>step-1/pages-previews</code>.</li>
+<li>First Step 2 PR: <code>layout</code> (Gate, Layer, Stack, MaterialClass, Layout JSON, <code>two_dot_layout</code>), <code>electrostatics</code>
+  (solid-angle closed form for any polygon, GateBasis, dots and barriers from the landscape, offline Schrödinger),
+  <code>charge.derived.derive_double_dot</code>, ADR 0013, reference entry <code>davies1995-patterned-2deg</code> (proposed), four Step 2
+  protocols rendering (potential map, channel cut, layout-derived stability map, pinch-off crosstalk), 8 new P0 tests.</li>
+<li>Step 1 sign-offs still pending; PR #21 (preview comment formatting) and #22 (README links) awaiting merge.</li>
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
+<li>Step 2 still owes: <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>, <code>crosstalk-lines</code>, <code>gate-hysteresis</code>,
+  re-rendering turn-on and pinch-off from the layout, and the P1 reproduction against a published layout (its
+  reference entry does not exist yet; the owner names the paper).</li>
+<li>Pages source still points at <code>main</code>; must be <code>gh-pages</code> (root) for the docs root and the per-PR previews to be served.</li>
 <li>Pages: ADR 0012 moves publishing to the <code>gh-pages</code> branch with per-PR previews at <code>/pr-&lt;n&gt;/</code>; the repository's
   Pages source must be set to that branch (root) once it exists, by the owner if the session is not permitted.</li>
 <li>No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
@@ -665,7 +672,10 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   <code>stability-coarse-2dot</code>, budget 0.1) but not yet confirmed on CI.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
+<p>Merge the first Step 2 PR after the owner reviews its four pictures on the preview; then the remaining Step 2
+protocols and the P1 row. In parallel, Step 1 sign-offs as the owner reviews.</p>
+<p>Previous next action, still valid for Step 1:
+When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
 on protocols from the review, then writes sign-offs as instructed. In parallel, start Step 2 on
 <code>step-2/layout-electrostatics</code> (issue #17): <code>layout</code> dataclasses, Davies–Larkin–Stern closed-form potential,
 lever arms derived from the layout, <code>potential-map-layout</code> and <code>potential-cut-along-channel</code> protocols first.</p>
