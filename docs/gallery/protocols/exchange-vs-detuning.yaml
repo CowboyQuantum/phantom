@@ -1,0 +1,18 @@
+id: exchange-vs-detuning
+name: Exchange J against detuning from the Hubbard model at three barrier settings
+step: 6
+description: The exchange energy J, the singlet-triplet splitting of the (1,1) pair, against detuning between the (2,0) and (0,2) anticrossings, read from the two-electron sector of the Hubbard model at three interdot barrier voltages. The second-order formula 2t²/Δ_R + 2t²/Δ_L overlays the middle curve, and dJ/dε, which turns charge noise into exchange dephasing, is plotted alongside. J is smallest and flat at the symmetric point (the sweet spot) and rises toward either anticrossing (ADR 0021).
+layers: [charge, spin]
+runner: step6:exchange_vs_detuning
+instance: {t0_uev: 20.0, v_scale_v: 0.05, v_barrier_values_v: [-0.05, 0.0, 0.05], seed: 0}
+sweep:
+  - {axis: eps_over_anticrossing, from: -0.95, to: 0.95, points: 401, unit: ""}
+readout: {channel: exchange, unit: GHz}
+render:
+  panels:
+    - {kind: line, x: eps_mev, y: [j_vb0_ghz, j_vb1_ghz, j_vb2_ghz, j_second_order_ghz], log_y: true, xlabel: "detuning (meV)", ylabel: "J/h (GHz)", title: "V_B = -50, 0, +50 mV; second order at 0"}
+    - {kind: line, x: eps_mev, y: dj_deps_vb1, xlabel: "detuning (meV)", ylabel: "dJ/dε", title: "charge-noise sensitivity at V_B = 0"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.2, points: 401, model_evals_per_point: 5, solver_calls: 0}
+must_show: []
