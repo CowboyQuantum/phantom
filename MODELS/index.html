@@ -668,6 +668,7 @@ step replaces (the step is named).</p>
     MIS["geometry_faults.draw_misalignment, apply_misalignment&lt;br/&gt;gate-layer shift and per-gate edge error as polygon transforms"]
     WIR["wiring.WiringDraw&lt;br/&gt;open and shorted gates (M·V + c), gate-to-gate leaks, sensor-coupling factors"]
     TRP["trapping.effective_gate_voltage&lt;br/&gt;history-dependent trapped fraction → screened gate voltage"]
+    NDR["noise_draw.draw_noise&lt;br/&gt;per-device 1/f amplitude, dominant switchers (Poisson), white floor"]
   end
 
   subgraph electrostatics
@@ -704,6 +705,8 @@ step replaces (the step is named).</p>
   SCN --&gt; CHG
   SCN --&gt; MIS
   SCN --&gt; WIR
+  SCN --&gt; NDR
+  NDR --&gt; NOISE
   V --&gt; WIR
   V --&gt; TRP
   WIR --&gt; BASIS
@@ -781,10 +784,6 @@ step replaces (the step is named).</p>
 <td>V(t) chopped → rates → CI (broadened) → latched occupation → sensor → demodulation</td>
 </tr>
 <tr>
-<td><code>plunger-vs-barrier-map</code></td>
-<td>V → CI with a lead-barrier gate → LeadBarrier rate → latched occupation → sensor</td>
-</tr>
-<tr>
 <td><code>noise-time-trace</code>, <code>noise-psd</code></td>
 <td>fixed V, t → noise → measure → current</td>
 </tr>
@@ -853,6 +852,14 @@ step replaces (the step is named).</p>
 <td>sensor at the flank, two charge states → single_shot.single_shots on the noise processes (Step 4)</td>
 </tr>
 <tr>
+<td><code>switcher-histogram</code>, <code>drift-repeated-cuts</code></td>
+<td>noise_draw → SensedDoubleDot.from_noise_draw → traces and repeated cuts (Step 4)</td>
+</tr>
+<tr>
+<td><code>plunger-vs-barrier-map</code></td>
+<td>Layout → per barrier row: WKB lead rate → RateEquation.sweep along P1, carried across rows → sensor (Step 4 re-render)</td>
+</tr>
+<tr>
 <td><code>stability-vs-sweep-rate</code>, <code>stability-direction</code></td>
 <td>Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4)</td>
 </tr>
@@ -876,6 +883,7 @@ step replaces (the step is named).</p>
   subgraph disorder
     disorder_charges["charges"]
     disorder_geometry_faults["geometry_faults"]
+    disorder_noise_draw["noise_draw"]
     disorder_scenario["scenario"]
     disorder_trapping["trapping"]
     disorder_wiring["wiring"]
@@ -911,6 +919,7 @@ step replaces (the step is named).</p>
   disorder_geometry_faults --&gt; layout_geometry
   disorder_scenario --&gt; disorder_charges
   disorder_scenario --&gt; disorder_geometry_faults
+  disorder_scenario --&gt; disorder_noise_draw
   disorder_scenario --&gt; disorder_wiring
   disorder_scenario --&gt; electrostatics_closed_form
   disorder_scenario --&gt; layout_geometry
@@ -924,6 +933,7 @@ step replaces (the step is named).</p>
   readout_master_equation --&gt; charge_ci
   readout_master_equation --&gt; constants
   readout_measure --&gt; charge_ci
+  readout_measure --&gt; disorder_noise_draw
   readout_measure --&gt; readout_noise
   readout_measure --&gt; readout_sensor
   readout_rates --&gt; constants
@@ -965,6 +975,10 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>disorder.geometry_faults</code></td>
 <td>Gate misalignment and width error as transforms of the layout polygons.</td>
+</tr>
+<tr>
+<td><code>disorder.noise_draw</code></td>
+<td>Noise parameters drawn per device: the fluctuator ensemble behind 1/f, the dominant switchers, and</td>
 </tr>
 <tr>
 <td><code>disorder.scenario</code></td>
@@ -1040,7 +1054,7 @@ step replaces (the step is named).</p>
 
 <h2 id="runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand">Runtimes (generated from <code>docs/gallery/measured.json</code> and the protocol files; do not edit by hand)</h2>
 <!-- runtimes:start -->
-<p>Last recorded on 2026-10-26 at commit <code>9e6c752</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
+<p>Last recorded on 2026-10-26 at commit <code>c90ac0e</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
 <h3 id="per-model-microseconds-per-point-or-sample">Per model (microseconds per point or sample)</h3>
 <table>
 <thead>
@@ -1056,55 +1070,55 @@ step replaces (the step is named).</p>
 <td><code>charge.ci.ConstantInteractionParams.mean_occupation</code></td>
 <td>thermal occupation per gate point</td>
 <td>10,000</td>
-<td>2.097</td>
+<td>2.072</td>
 </tr>
 <tr>
 <td><code>charge.hubbard.HubbardParams.mean_occupation</code></td>
 <td>16x16 diagonalisation per gate point</td>
 <td>10,000</td>
-<td>9.761</td>
+<td>10.931</td>
 </tr>
 <tr>
 <td><code>readout.sensor.SensorSETParams.current_a</code></td>
 <td>sensor current per point</td>
 <td>100,000</td>
-<td>0.136</td>
+<td>0.175</td>
 </tr>
 <tr>
 <td><code>readout.noise.TelegraphNoise.trace</code></td>
 <td>one fluctuator per sample</td>
 <td>100,000</td>
-<td>0.647</td>
+<td>0.75</td>
 </tr>
 <tr>
 <td><code>readout.noise.OneOverFNoise.trace</code></td>
 <td>24 fluctuators per sample</td>
 <td>10,000</td>
-<td>16.338</td>
+<td>20.807</td>
 </tr>
 <tr>
 <td><code>readout.measure.SensedDoubleDot.sweep_a (noisy)</code></td>
 <td>occupation + sensor + three noise traces per point</td>
 <td>10,000</td>
-<td>19.434</td>
+<td>22.907</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_a_per_v</code></td>
 <td>8 evaluations per point, noisy</td>
 <td>2,500</td>
-<td>149.535</td>
+<td>170.254</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_dynamic_a_per_v</code></td>
 <td>8 evaluations + rate dynamics per point, noisy</td>
 <td>2,500</td>
-<td>156.149</td>
+<td>186.892</td>
 </tr>
 <tr>
 <td><code>readout.loading.latched_occupation</code></td>
 <td>per scan step</td>
 <td>100,000</td>
-<td>0.9</td>
+<td>1.065</td>
 </tr>
 </tbody>
 </table>
@@ -1124,14 +1138,14 @@ step replaces (the step is named).</p>
 <td><code>coulomb-oscillations-single-dot</code></td>
 <td>1,201</td>
 <td>0.5 / 0.0</td>
-<td>0.05 / 0.00254</td>
+<td>0.05 / 0.00248</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>crosstalk-lines</code></td>
 <td>57,600</td>
-<td>0.5 / 0.2677</td>
-<td>0.05 / 0.00243</td>
+<td>0.5 / 0.2687</td>
+<td>0.05 / 0.0024</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1142,24 +1156,31 @@ step replaces (the step is named).</p>
 <td>1</td>
 </tr>
 <tr>
+<td><code>drift-repeated-cuts</code></td>
+<td>24,000</td>
+<td>1.0 / 0.0007</td>
+<td>0.1 / 0.02559</td>
+<td>1</td>
+</tr>
+<tr>
 <td><code>fault-signatures-stability</code></td>
 <td>57,600</td>
-<td>2.0 / 0.1514</td>
-<td>0.1 / 0.01926</td>
+<td>2.0 / 0.1557</td>
+<td>0.1 / 0.0196</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis-trapping</code></td>
 <td>722</td>
-<td>0.5 / 0.135</td>
-<td>1.0 / 0.49384</td>
+<td>0.5 / 0.1353</td>
+<td>1.0 / 0.37394</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis</code></td>
 <td>361</td>
-<td>0.5 / 0.1299</td>
-<td>1.0 / 0.52358</td>
+<td>0.5 / 0.154</td>
+<td>1.0 / 0.20768</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1173,76 +1194,76 @@ step replaces (the step is named).</p>
 <td><code>gate-leakage-pair</code></td>
 <td>201</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00025</td>
+<td>0.02 / 0.00024</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>lead-rate-time-trace</code></td>
 <td>900</td>
-<td>1.0 / 0.1443</td>
-<td>2.0 / 0.68559</td>
+<td>1.0 / 0.1571</td>
+<td>2.0 / 0.91852</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-psd</code></td>
 <td>30,000</td>
 <td>0.5 / 0.0003</td>
-<td>0.1 / 0.01908</td>
+<td>0.1 / 0.03058</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-time-trace</code></td>
 <td>30,000</td>
 <td>0.5 / 0.0003</td>
-<td>0.1 / 0.01894</td>
+<td>0.1 / 0.02528</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>ohmic-iv</code></td>
 <td>201</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 6e-05</td>
+<td>0.02 / 4e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>pinch-off-barrier</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 3e-05</td>
+<td>0.02 / 2e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>pinch-off-crosstalk</code></td>
 <td>24,321</td>
-<td>0.5 / 0.1302</td>
+<td>0.5 / 0.1755</td>
 <td>0.01 / 2e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>plunger-vs-barrier-map</code></td>
-<td>28,800</td>
-<td>0.5 / 0.0001</td>
-<td>0.05 / 0.00347</td>
+<td>12,000</td>
+<td>5.0 / 0.3473</td>
+<td>2.0 / 1.04009</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-cut-along-channel</code></td>
 <td>1,203</td>
-<td>0.5 / 0.1362</td>
-<td>0.01 / 0.00156</td>
+<td>0.5 / 0.1692</td>
+<td>0.01 / 0.00075</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-disorder</code></td>
 <td>344,424</td>
-<td>1.0 / 0.5015</td>
-<td>0.001 / 0.0</td>
+<td>1.0 / 0.6226</td>
+<td>0.001 / 1e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-layout</code></td>
 <td>86,106</td>
-<td>0.5 / 0.1812</td>
+<td>0.5 / 0.2206</td>
 <td>0.001 / 1e-05</td>
 <td>1</td>
 </tr>
@@ -1250,133 +1271,140 @@ step replaces (the step is named).</p>
 <td><code>rf-resonance</code></td>
 <td>4,004</td>
 <td>0.5 / 0.0</td>
-<td>0.01 / 0.00011</td>
+<td>0.01 / 0.00013</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>rf-sensor-flank</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00457</td>
+<td>0.02 / 0.00647</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-coulomb-peak</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00448</td>
+<td>0.02 / 0.00536</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>single-shot-histogram</code></td>
 <td>2,000</td>
 <td>0.5 / 0.0007</td>
-<td>0.5 / 0.32941</td>
+<td>0.5 / 0.4281</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>snr-vs-integration-time</code></td>
 <td>3,200</td>
-<td>0.5 / 0.0005</td>
-<td>5.0 / 1.10784</td>
+<td>0.5 / 0.0006</td>
+<td>5.0 / 1.48626</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-disorder</code></td>
 <td>57,600</td>
-<td>2.0 / 0.4947</td>
-<td>0.1 / 0.01892</td>
+<td>2.0 / 0.6293</td>
+<td>0.1 / 0.02326</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-layout</code></td>
 <td>22,500</td>
-<td>0.5 / 0.2539</td>
-<td>0.1 / 0.01912</td>
+<td>0.5 / 0.2766</td>
+<td>0.1 / 0.02764</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0003</td>
-<td>0.1 / 0.01889</td>
+<td>0.5 / 0.0005</td>
+<td>0.1 / 0.02294</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-direction</code></td>
 <td>12,800</td>
-<td>1.0 / 0.1257</td>
-<td>2.0 / 0.67235</td>
+<td>1.0 / 0.1394</td>
+<td>2.0 / 0.83231</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-fine-2dot</code></td>
 <td>22,500</td>
-<td>0.5 / 0.0004</td>
-<td>0.1 / 0.01892</td>
+<td>0.5 / 0.0006</td>
+<td>0.1 / 0.02481</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-lockin-common</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.16353</td>
+<td>0.5 / 0.18011</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-detuning</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.16274</td>
+<td>0.5 / 0.16384</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p1</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.16164</td>
+<td>0.5 / 0.16181</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p2</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.16328</td>
+<td>0.5 / 0.16301</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-vs-sweep-rate</code></td>
 <td>19,200</td>
-<td>1.0 / 0.1407</td>
-<td>2.0 / 0.71368</td>
+<td>1.0 / 0.1382</td>
+<td>2.0 / 0.71444</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>switcher-histogram</code></td>
+<td>600,000</td>
+<td>1.0 / 0.0005</td>
+<td>0.05 / 0.02548</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-global</code></td>
 <td>201</td>
-<td>0.5 / 0.1161</td>
-<td>1.0 / 0.19219</td>
+<td>0.5 / 0.1185</td>
+<td>1.0 / 0.51838</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate-layout</code></td>
 <td>361</td>
-<td>0.5 / 0.1169</td>
-<td>1.0 / 0.50911</td>
+<td>0.5 / 0.1236</td>
+<td>1.0 / 0.49683</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 8e-05</td>
+<td>0.02 / 9e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>unintentional-dots</code></td>
 <td>125</td>
 <td>1.0 / 0.0001</td>
-<td>1000.0 / 432.83042</td>
+<td>1000.0 / 473.81874</td>
 <td>1</td>
 </tr>
 </tbody>

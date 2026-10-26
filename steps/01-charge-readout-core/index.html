@@ -597,7 +597,7 @@
 <li><code>stability-fine-2dot</code>: same, zoomed on one triple-point pair; interdot line with tunnel-coupling broadening</li>
 <li><code>stability-lockin-p1</code>, <code>-p2</code>, <code>-common</code>, <code>-detuning</code>: the coarse region read through <code>sensor_lockin</code> with the chop on P1, on P2, on both (common mode) and in opposition (detuning); with lead-rate dynamics (<code>readout.loading.LeadRateLandscape</code>): latching where the rate is below the chop frequency, lifetime broadening where it is far above</li>
 <li><code>docs/MODELS.md</code> measurement-flow diagram and generated module graph (ADR 0011)</li>
-<li><code>plunger-vs-barrier-map</code>: sensor signal vs. (P1, lead barrier of dot 1), dot 1 the only dot with a reservoir; line tilt from the lever arm and latching as the barrier closes (minimal loading model in <code>readout.loading</code>, replaced in Step 4)</li>
+<li><code>plunger-vs-barrier-map</code>: sensor signal vs. (P1, lead barrier of dot 1) on the layout; line tilt from the lever arm and latching as the barrier closes, on the master equation with WKB rates since Step 4 (ADR 0017, 0019)</li>
 <li><code>sensor-coulomb-peak</code>: sensor conductance vs. sensor plunger; a peak and its slope</li>
 <li><code>noise-time-trace</code>: sensor signal vs. time at a fixed point; telegraph and drift visible</li>
 <li><code>noise-psd</code>: power spectral density of the trace; the 1/f slope and white floor

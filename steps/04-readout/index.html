@@ -568,7 +568,7 @@
 <h2 id="deliverables">Deliverables</h2>
 <ul>
 <li><code>readout</code>: WKB tunnel rates to leads from barrier heights (done, <code>readout.rates</code>, with <code>electrostatics.barrier_width_nm</code> at the lead Fermi level); a master equation over the few-electron states with detailed balance (done, <code>readout.master_equation</code>); latching when sweeps outrun rates (emerges from the lag, done); sensor SET with Coulomb-blockade peaks and capacitive shifts (Step 1); RF tank-circuit response (done, <code>readout.rf</code>, ADR 0018); single-shot statistics (done, <code>readout.single_shot</code>)</li>
-<li>fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics (Step 1 has the ensemble; tying its rates to the catalog is to do)</li>
+<li>fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics: per-device draws of the 1/f amplitude, the dominant switchers and the white floor from catalog placeholders (done, <code>disorder.noise_draw</code>, ADR 0019; real distributions await entries #1 and #12)</li>
 <li>the textbook layout gained reservoir accumulation gates R_L, R_R so lead barriers are the outer barrier gates (done)</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
@@ -591,7 +591,10 @@
 <li><code>rf-sensor-flank</code>: the DC peak, the sensor resistance and the reflected amplitude at resonance across one Coulomb peak (rendering)</li>
 <li><code>single-shot-histogram</code>: two thousand 1 ms shots at the flank, bimodal histogram per true state, the shot sequence with a telegraph switch (rendering)</li>
 <li><code>snr-vs-integration-time</code>: SNR and fidelity against integration time; the square-root law and its breakdown under slow noise (rendering)</li>
-<li>to come: <code>switcher-histogram</code> and <code>drift-repeated-cuts</code> with catalog-tied rates; the Step 1 <code>plunger-vs-barrier-map</code> and lock-in dynamics re-rendered on the master equation</li>
+<li><code>switcher-histogram</code>: a 600 s trace on a drawn device and the dwell-time histograms of its dominant switcher (rendering)</li>
+<li><code>drift-repeated-cuts</code>: one cut repeated every minute for two hours; the transition's drift and jumps (rendering)</li>
+<li><code>plunger-vs-barrier-map</code> (Step 1) re-rendered on the master equation with WKB rates per barrier row (rendering)</li>
+<li>to come: the lock-in dynamics on the master equation (cost); the two P1 rows</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>

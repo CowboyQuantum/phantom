@@ -688,9 +688,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 </tr>
 <tr>
 <td><code>plunger-vs-barrier-map</code></td>
-<td>(P1 fast, lead barrier BL of dot 1 slow); dot 1 is the only dot with a reservoir, dot 2 loads only through dot 1; P2 fixed</td>
-<td>sensor_conductance, plus the charge present and the charge at equilibrium</td>
-<td>the dot-1 transition lines tilt with the lead barrier's lever arm; as the barrier closes the tunnel rate drops below the inverse dwell time and the lines fade, latch along the row and carry across the flyback; the interdot-barrier variant is a separate protocol when Step 4 adds tunnel-coupling broadening (owner's configuration, 2026-10-25)</td>
+<td>(P1 fast, lead barrier B_L slow) on the layout; dot 1's lead swept</td>
+<td>sensor_conductance, charge present and at equilibrium, lead rate per row</td>
+<td>the dot-1 lines tilt with the lever arm; as the barrier closes the WKB rate drops below the inverse dwell and the lines fade, latch along the row and carry across rows (master equation, Step 4)</td>
 </tr>
 <tr>
 <td><code>sensor-coulomb-peak</code></td>
@@ -846,9 +846,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 </tr>
 <tr>
 <td><code>drift-repeated-cuts</code></td>
-<td>one P cut repeated over hours</td>
+<td>one P cut repeated over hours on a drawn device</td>
 <td>transition position vs. t</td>
-<td>slow drift and occasional jumps</td>
+<td>slow drift from the 1/f ensemble's slowest fluctuators and jumps when a switcher flips (Step 4)</td>
 </tr>
 <tr>
 <td><code>stability-repeat-diff</code></td>
@@ -858,9 +858,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 </tr>
 <tr>
 <td><code>switcher-histogram</code></td>
-<td>long trace</td>
-<td>dwell-time histograms</td>
-<td>two-level statistics; switching rates</td>
+<td>long trace on a drawn device</td>
+<td>dwell-time histograms of the dominant switcher</td>
+<td>exponential dwell times in each level with the drawn up and down rates (Step 4)</td>
 </tr>
 </tbody>
 </table>
