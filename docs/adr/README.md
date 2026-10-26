@@ -19,3 +19,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0013 | Closed-form electrostatics: solid-angle potentials, effective depth, dots as harmonic minima | Accepted |
 | 0014 | The cross-platform tolerance is 1e-9 relative, because derived parameter chains amplify last-bit differences | Accepted |
 | 0015 | Disorder generators: interface charges as image-charge offsets, lithography faults as polygon transforms, one seeded scenario draw | Accepted |
+| 0016 | Wiring faults as a gate matrix and a leak network; sensor asymmetry as coupling draws; trapping as a history state | Accepted |
