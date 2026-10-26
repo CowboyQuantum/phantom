@@ -11,10 +11,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from phantom.charge.ci import E_CHARGE_C
-
-EPSILON_0_F_PER_M = 8.8541878128e-12
-"""Vacuum permittivity in F/m (CODATA 2018)."""
+from phantom.constants import E_CHARGE_C, EPSILON_0_F_PER_M
 
 
 @dataclass(frozen=True)

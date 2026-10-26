@@ -29,12 +29,7 @@ import numpy as np
 MODEL_VERSION = 1
 """Bumped whenever any output of this module changes for the same parameters (ADR 0003)."""
 
-E_CHARGE_C = 1.602176634e-19
-"""Elementary charge in coulomb (CODATA 2018, exact)."""
-E_UNIT_V_PER_E_AF = E_CHARGE_C / 1e-18
-"""Volts per electron per attofarad: e / (1 aF). Converts aF·V to electrons and e²/aF to eV."""
-K_B_EV_PER_K = 8.617333262e-5
-"""Boltzmann constant in eV/K (CODATA 2018)."""
+from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
 
 @dataclass(frozen=True)

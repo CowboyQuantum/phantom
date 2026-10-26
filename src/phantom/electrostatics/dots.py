@@ -26,8 +26,7 @@ from phantom.electrostatics.closed_form import GateBasis
 MODEL_VERSION = 1
 """Bumped whenever any output of this module changes for the same inputs (ADR 0003)."""
 
-HBAR2_OVER_2ME_EV_NM2 = 0.0380998212
-"""ħ² / (2 m_e) in eV·nm² (CODATA 2018)."""
+from phantom.constants import HBAR2_OVER_2ME_EV_NM2
 
 
 @dataclass(frozen=True)

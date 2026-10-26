@@ -18,3 +18,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0012 | Every pull request publishes a preview of the docs and the rendered gallery; main publishes the root | Accepted |
 | 0013 | Closed-form electrostatics: solid-angle potentials, effective depth, dots as harmonic minima | Accepted |
 | 0014 | The cross-platform tolerance is 1e-9 relative, because derived parameter chains amplify last-bit differences | Accepted |
+| 0015 | Disorder generators: interface charges as image-charge offsets, lithography faults as polygon transforms, one seeded scenario draw | Accepted |

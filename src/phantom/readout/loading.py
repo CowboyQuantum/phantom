@@ -27,13 +27,11 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from phantom.charge.ci import K_B_EV_PER_K
+from phantom.constants import HBAR_EV_S, K_B_EV_PER_K
 
 MODEL_VERSION = 2
 """Bumped whenever any output of this module changes for the same parameters and seed (ADR 0003)."""
 
-HBAR_EV_S = 6.582119569e-16
-"""Reduced Planck constant in eV·s (CODATA 2018)."""
 
 
 @dataclass(frozen=True)
