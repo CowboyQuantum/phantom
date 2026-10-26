@@ -567,7 +567,7 @@
 <p>Dynamics, not just ground states: lead tunnel rates, rate equations, latching and sweep-rate dependence, the charge sensor and RF reflectometry response, and noise from fluctuator ensembles.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li><code>readout</code>: WKB tunnel rates to leads from barrier heights (done, <code>readout.rates</code>, with <code>electrostatics.barrier_width_nm</code> at the lead Fermi level); a master equation over the few-electron states with detailed balance (done, <code>readout.master_equation</code>); latching when sweeps outrun rates (emerges from the lag, done); sensor SET with Coulomb-blockade peaks and capacitive shifts (Step 1); RF tank-circuit response (to do)</li>
+<li><code>readout</code>: WKB tunnel rates to leads from barrier heights (done, <code>readout.rates</code>, with <code>electrostatics.barrier_width_nm</code> at the lead Fermi level); a master equation over the few-electron states with detailed balance (done, <code>readout.master_equation</code>); latching when sweeps outrun rates (emerges from the lag, done); sensor SET with Coulomb-blockade peaks and capacitive shifts (Step 1); RF tank-circuit response (done, <code>readout.rf</code>, ADR 0018); single-shot statistics (done, <code>readout.single_shot</code>)</li>
 <li>fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics (Step 1 has the ensemble; tying its rates to the catalog is to do)</li>
 <li>the textbook layout gained reservoir accumulation gates R_L, R_R so lead barriers are the outer barrier gates (done)</li>
 </ul>
@@ -587,7 +587,11 @@
 <li><code>stability-vs-sweep-rate</code>: the layout-derived coarse map at 1 ms, 10 µs and 100 ns per point with WKB lead rates; equilibrium, lag, frozen (rendering)</li>
 <li><code>stability-direction</code>: the same map scanned forward and backward at a lagging dwell, with the charge difference (rendering)</li>
 <li><code>lead-rate-time-trace</code>: charge relaxation after a plunger step for three lead barriers; the slope is the derived lead rate (rendering)</li>
-<li>to come: <code>rf-resonance</code>, <code>rf-sensor-flank</code>, <code>single-shot-histogram</code>, <code>snr-vs-integration-time</code>; <code>switcher-histogram</code> and <code>drift-repeated-cuts</code> with catalog-tied rates</li>
+<li><code>rf-resonance</code>: reflected amplitude and phase vs. carrier for four sensor resistances; the matched dip and the phase flip (rendering)</li>
+<li><code>rf-sensor-flank</code>: the DC peak, the sensor resistance and the reflected amplitude at resonance across one Coulomb peak (rendering)</li>
+<li><code>single-shot-histogram</code>: two thousand 1 ms shots at the flank, bimodal histogram per true state, the shot sequence with a telegraph switch (rendering)</li>
+<li><code>snr-vs-integration-time</code>: SNR and fidelity against integration time; the square-root law and its breakdown under slow noise (rendering)</li>
+<li>to come: <code>switcher-histogram</code> and <code>drift-repeated-cuts</code> with catalog-tied rates; the Step 1 <code>plunger-vs-barrier-map</code> and lock-in dynamics re-rendered on the master equation</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
@@ -596,7 +600,7 @@
 </ul>
 <h2 id="open-decisions">Open decisions</h2>
 <ul>
-<li>how much of RF reflectometry to model (tank + sensor impedance) vs. a transfer function</li>
+<li>how much of RF reflectometry to model: decided in ADR 0018 (lumped tank + sensor resistance; cables and amplifier left to a consumer's transfer function)</li>
 </ul>
 <h2 id="status">Status</h2>
 <p>IN PROGRESS</p>

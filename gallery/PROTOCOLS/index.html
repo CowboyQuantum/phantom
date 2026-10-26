@@ -877,27 +877,27 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <tbody>
 <tr>
 <td><code>rf-resonance</code></td>
-<td>carrier f</td>
+<td>carrier f, several sensor resistances</td>
 <td>rf_response amplitude and phase</td>
-<td>the tank resonance; its shift with sensor conductance</td>
+<td>the tank resonance; the dip to zero at the matched resistance; the phase flipping by half a turn across the match (Step 4)</td>
 </tr>
 <tr>
 <td><code>rf-sensor-flank</code></td>
 <td>S at the resonance</td>
-<td>rf_response</td>
-<td>the same flank as the DC peak, in reflected signal</td>
+<td>DC current, sensor resistance, reflected amplitude</td>
+<td>the same flank as the DC peak in reflected signal, steepest where the resistance crosses the match (Step 4)</td>
 </tr>
 <tr>
 <td><code>single-shot-histogram</code></td>
-<td>many repeats at a readout point</td>
-<td>counts vs. signal</td>
-<td>bimodal histogram; separation vs. integration time</td>
+<td>many consecutive shots at a readout point</td>
+<td>counts vs. integrated signal, shot sequence</td>
+<td>bimodal histogram, one electron apart; both peaks moved by 1/f and telegraph noise between shots (Step 4)</td>
 </tr>
 <tr>
 <td><code>snr-vs-integration-time</code></td>
 <td>integration time</td>
-<td>SNR</td>
-<td>square-root growth until 1/f takes over</td>
+<td>SNR, fidelity</td>
+<td>square-root growth while white noise dominates, saturation and decline once slow noise moves the distributions (Step 4)</td>
 </tr>
 </tbody>
 </table>

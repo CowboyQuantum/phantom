@@ -688,6 +688,8 @@ step replaces (the step is named).</p>
     LAT["loading.latched_occupation&lt;br/&gt;charge actually present given Γ and dwell time (placeholder)"]
     WKB["rates.wkb_tunnel_rate_hz&lt;br/&gt;Γ from barrier height and width at the lead Fermi level; attempt rate from the dot curvature"]
     ME["master_equation.RateEquation&lt;br/&gt;rate matrix over the CI window with detailed balance; sweep() propagates by expm per sample: latching = lag"]
+    RF["rf.TankCircuit&lt;br/&gt;series L into (R_sensor ∥ C_p): reflection Γ(f), resonance, matching"]
+    SS["single_shot.single_shots&lt;br/&gt;consecutive integrated shots on the noise processes; SNR, fidelity"]
     SENS["sensor.SensorSETParams&lt;br/&gt;φ_s = αV + βN + δφ → current I(φ_s, V_sd)"]
     NOISE["noise.WhiteNoise / TelegraphNoise / OneOverFNoise&lt;br/&gt;gate offset g(t), sensor offset s(t), readout r(t)"]
     MEAS["measure.SensedDoubleDot&lt;br/&gt;sweep_a, trace_a: raster times, noise applied"]
@@ -725,6 +727,11 @@ step replaces (the step is named).</p>
   WKB --&gt; ME
   CI --&gt; ME
   ME --&gt; SENS
+  SENS --&gt; RF
+  SENS --&gt; SS
+  NOISE --&gt; SS
+  RF --&gt; OUT
+  SS --&gt; OUT
   DOTS --&gt; WKB
   WKB --&gt; ME
   CI --&gt; ME
@@ -838,6 +845,14 @@ step replaces (the step is named).</p>
 <td>Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4)</td>
 </tr>
 <tr>
+<td><code>rf-resonance</code>, <code>rf-sensor-flank</code></td>
+<td>sensor current → resistance → rf.TankCircuit reflection (Step 4)</td>
+</tr>
+<tr>
+<td><code>single-shot-histogram</code>, <code>snr-vs-integration-time</code></td>
+<td>sensor at the flank, two charge states → single_shot.single_shots on the noise processes (Step 4)</td>
+</tr>
+<tr>
 <td><code>stability-vs-sweep-rate</code>, <code>stability-direction</code></td>
 <td>Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4)</td>
 </tr>
@@ -878,7 +893,9 @@ step replaces (the step is named).</p>
     readout_measure["measure"]
     readout_noise["noise"]
     readout_rates["rates"]
+    readout_rf["rf"]
     readout_sensor["sensor"]
+    readout_single_shot["single_shot"]
     readout_transport["transport"]
   end
   charge_ci --&gt; constants
@@ -910,6 +927,8 @@ step replaces (the step is named).</p>
   readout_measure --&gt; readout_noise
   readout_measure --&gt; readout_sensor
   readout_rates --&gt; constants
+  readout_single_shot --&gt; readout_measure
+  readout_single_shot --&gt; readout_noise
   readout_transport --&gt; charge_dot</code></pre>
 <table>
 <thead>
@@ -1000,8 +1019,16 @@ step replaces (the step is named).</p>
 <td>Tunnel rates through barriers of the landscape, in the WKB approximation.</td>
 </tr>
 <tr>
+<td><code>readout.rf</code></td>
+<td>Radio-frequency reflectometry: a lumped tank circuit with the charge sensor as its load.</td>
+</tr>
+<tr>
 <td><code>readout.sensor</code></td>
 <td>A charge sensor: a single-electron transistor (SET) read in sequential tunnelling.</td>
+</tr>
+<tr>
+<td><code>readout.single_shot</code></td>
+<td>Single-shot charge readout: integrated sensor signals, their histograms, and signal-to-noise against</td>
 </tr>
 <tr>
 <td><code>readout.transport</code></td>
@@ -1013,7 +1040,7 @@ step replaces (the step is named).</p>
 
 <h2 id="runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand">Runtimes (generated from <code>docs/gallery/measured.json</code> and the protocol files; do not edit by hand)</h2>
 <!-- runtimes:start -->
-<p>Last recorded on 2026-10-26 at commit <code>28e8d87</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
+<p>Last recorded on 2026-10-26 at commit <code>9e6c752</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
 <h3 id="per-model-microseconds-per-point-or-sample">Per model (microseconds per point or sample)</h3>
 <table>
 <thead>
@@ -1029,55 +1056,55 @@ step replaces (the step is named).</p>
 <td><code>charge.ci.ConstantInteractionParams.mean_occupation</code></td>
 <td>thermal occupation per gate point</td>
 <td>10,000</td>
-<td>2.817</td>
+<td>2.097</td>
 </tr>
 <tr>
 <td><code>charge.hubbard.HubbardParams.mean_occupation</code></td>
 <td>16x16 diagonalisation per gate point</td>
 <td>10,000</td>
-<td>11.477</td>
+<td>9.761</td>
 </tr>
 <tr>
 <td><code>readout.sensor.SensorSETParams.current_a</code></td>
 <td>sensor current per point</td>
 <td>100,000</td>
-<td>0.158</td>
+<td>0.136</td>
 </tr>
 <tr>
 <td><code>readout.noise.TelegraphNoise.trace</code></td>
 <td>one fluctuator per sample</td>
 <td>100,000</td>
-<td>0.69</td>
+<td>0.647</td>
 </tr>
 <tr>
 <td><code>readout.noise.OneOverFNoise.trace</code></td>
 <td>24 fluctuators per sample</td>
 <td>10,000</td>
-<td>18.332</td>
+<td>16.338</td>
 </tr>
 <tr>
 <td><code>readout.measure.SensedDoubleDot.sweep_a (noisy)</code></td>
 <td>occupation + sensor + three noise traces per point</td>
 <td>10,000</td>
-<td>21.664</td>
+<td>19.434</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_a_per_v</code></td>
 <td>8 evaluations per point, noisy</td>
 <td>2,500</td>
-<td>184.785</td>
+<td>149.535</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_dynamic_a_per_v</code></td>
 <td>8 evaluations + rate dynamics per point, noisy</td>
 <td>2,500</td>
-<td>213.524</td>
+<td>156.149</td>
 </tr>
 <tr>
 <td><code>readout.loading.latched_occupation</code></td>
 <td>per scan step</td>
 <td>100,000</td>
-<td>1.016</td>
+<td>0.9</td>
 </tr>
 </tbody>
 </table>
@@ -1097,14 +1124,14 @@ step replaces (the step is named).</p>
 <td><code>coulomb-oscillations-single-dot</code></td>
 <td>1,201</td>
 <td>0.5 / 0.0</td>
-<td>0.05 / 0.00249</td>
+<td>0.05 / 0.00254</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>crosstalk-lines</code></td>
 <td>57,600</td>
-<td>0.5 / 0.2673</td>
-<td>0.05 / 0.00244</td>
+<td>0.5 / 0.2677</td>
+<td>0.05 / 0.00243</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1117,22 +1144,22 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>fault-signatures-stability</code></td>
 <td>57,600</td>
-<td>2.0 / 0.1807</td>
-<td>0.1 / 0.01905</td>
+<td>2.0 / 0.1514</td>
+<td>0.1 / 0.01926</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis-trapping</code></td>
 <td>722</td>
-<td>0.5 / 0.1283</td>
-<td>1.0 / 0.51118</td>
+<td>0.5 / 0.135</td>
+<td>1.0 / 0.49384</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis</code></td>
 <td>361</td>
-<td>0.5 / 0.127</td>
-<td>1.0 / 0.51645</td>
+<td>0.5 / 0.1299</td>
+<td>1.0 / 0.52358</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1146,48 +1173,48 @@ step replaces (the step is named).</p>
 <td><code>gate-leakage-pair</code></td>
 <td>201</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00027</td>
+<td>0.02 / 0.00025</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>lead-rate-time-trace</code></td>
 <td>900</td>
-<td>1.0 / 0.1634</td>
-<td>2.0 / 0.85305</td>
+<td>1.0 / 0.1443</td>
+<td>2.0 / 0.68559</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-psd</code></td>
 <td>30,000</td>
 <td>0.5 / 0.0003</td>
-<td>0.1 / 0.02608</td>
+<td>0.1 / 0.01908</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-time-trace</code></td>
 <td>30,000</td>
 <td>0.5 / 0.0003</td>
-<td>0.1 / 0.02682</td>
+<td>0.1 / 0.01894</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>ohmic-iv</code></td>
 <td>201</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 8e-05</td>
+<td>0.02 / 6e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>pinch-off-barrier</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 8e-05</td>
+<td>0.02 / 3e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>pinch-off-crosstalk</code></td>
 <td>24,321</td>
-<td>0.5 / 0.1509</td>
+<td>0.5 / 0.1302</td>
 <td>0.01 / 2e-05</td>
 <td>1</td>
 </tr>
@@ -1195,119 +1222,147 @@ step replaces (the step is named).</p>
 <td><code>plunger-vs-barrier-map</code></td>
 <td>28,800</td>
 <td>0.5 / 0.0001</td>
-<td>0.05 / 0.00475</td>
+<td>0.05 / 0.00347</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-cut-along-channel</code></td>
 <td>1,203</td>
-<td>0.5 / 0.1984</td>
-<td>0.01 / 0.00152</td>
+<td>0.5 / 0.1362</td>
+<td>0.01 / 0.00156</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-disorder</code></td>
 <td>344,424</td>
-<td>1.0 / 0.6583</td>
+<td>1.0 / 0.5015</td>
 <td>0.001 / 0.0</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-layout</code></td>
 <td>86,106</td>
-<td>0.5 / 0.1924</td>
+<td>0.5 / 0.1812</td>
 <td>0.001 / 1e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>rf-resonance</code></td>
+<td>4,004</td>
+<td>0.5 / 0.0</td>
+<td>0.01 / 0.00011</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>rf-sensor-flank</code></td>
+<td>601</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00457</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-coulomb-peak</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00496</td>
+<td>0.02 / 0.00448</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>single-shot-histogram</code></td>
+<td>2,000</td>
+<td>0.5 / 0.0007</td>
+<td>0.5 / 0.32941</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>snr-vs-integration-time</code></td>
+<td>3,200</td>
+<td>0.5 / 0.0005</td>
+<td>5.0 / 1.10784</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-disorder</code></td>
 <td>57,600</td>
-<td>2.0 / 0.628</td>
-<td>0.1 / 0.02585</td>
+<td>2.0 / 0.4947</td>
+<td>0.1 / 0.01892</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-layout</code></td>
 <td>22,500</td>
-<td>0.5 / 0.2902</td>
-<td>0.1 / 0.02413</td>
+<td>0.5 / 0.2539</td>
+<td>0.1 / 0.01912</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0016</td>
-<td>0.1 / 0.02697</td>
+<td>0.5 / 0.0003</td>
+<td>0.1 / 0.01889</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-direction</code></td>
 <td>12,800</td>
-<td>1.0 / 0.1584</td>
-<td>2.0 / 0.86436</td>
+<td>1.0 / 0.1257</td>
+<td>2.0 / 0.67235</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-fine-2dot</code></td>
 <td>22,500</td>
-<td>0.5 / 0.0005</td>
-<td>0.1 / 0.02574</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.01892</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-lockin-common</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.20499</td>
+<td>0.5 / 0.16353</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-detuning</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.2142</td>
+<td>0.5 / 0.16274</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p1</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.2212</td>
+<td>0.5 / 0.16164</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p2</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.21606</td>
+<td>0.5 / 0.16328</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-vs-sweep-rate</code></td>
 <td>19,200</td>
-<td>1.0 / 0.1528</td>
-<td>2.0 / 0.9076</td>
+<td>1.0 / 0.1407</td>
+<td>2.0 / 0.71368</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-global</code></td>
 <td>201</td>
-<td>0.5 / 0.1651</td>
-<td>1.0 / 0.42984</td>
+<td>0.5 / 0.1161</td>
+<td>1.0 / 0.19219</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate-layout</code></td>
 <td>361</td>
-<td>0.5 / 0.1437</td>
-<td>1.0 / 0.36805</td>
+<td>0.5 / 0.1169</td>
+<td>1.0 / 0.50911</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1320,8 +1375,8 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>unintentional-dots</code></td>
 <td>125</td>
-<td>1.0 / 0.0</td>
-<td>1000.0 / 563.63218</td>
+<td>1.0 / 0.0001</td>
+<td>1000.0 / 432.83042</td>
 <td>1</td>
 </tr>
 </tbody>
