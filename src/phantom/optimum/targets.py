@@ -4,7 +4,8 @@ Everything here is cheap and reads the `Device`'s runtime objects; nothing calls
 answers are what a perfect tuner would find:
 
 - **sensor** — the sensor-gate voltage where the sensor current is steepest (the flank of its Coulomb
-  peak), found by a coarse scan over one peak period and a golden-section refinement of |dI/dV|;
+  peak), found by a coarse scan over one peak period, a fine scan around its best point and a
+  parabolic interpolation of |dI/dV|;
 - **lattice** — the virtual-gate matrix: the plungers are replaced by linear combinations that each
   move one dot's potential alone, at the raw plunger's scale (inv(L_pp)·diag(L_pp)), that compensate
   the other gates' cross-talk, and that hold the sensor potential fixed, so the honeycomb's lines come
@@ -103,7 +104,12 @@ def _sensor_slope(device: Device, v_sg: np.ndarray, dv: float = 1e-5) -> np.ndar
     return np.abs(sensed.sweep_a(vp, None) - sensed.sweep_a(vm, None)) / (2 * dv)
 
 
-def sensor_optimum(device: Device, coarse_points: int = 201) -> SensorOptimum:
+def sensor_optimum(device: Device, coarse_points: int = 201, fine_points: int = 201) -> SensorOptimum:
+    """The steepest point of the sensor current over one peak period around the compiled set-point: a
+    coarse scan, a fine scan of one coarse step around its best point, and a parabolic interpolation
+    through the fine scan's best three points. (A golden-section search converged to a point that
+    differed between platforms by 1e-7 relative, because it compares slopes equal to the last bit on
+    a flat maximum; the grid-and-parabola answer is deterministic to ADR 0014's tolerance.)"""
     sensor = device.runtime_sensor()
     j = device.gate_names.index(device.params["sensor_gate"])
     v0 = device.operating_point()[j]
@@ -112,20 +118,14 @@ def sensor_optimum(device: Device, coarse_points: int = 201) -> SensorOptimum:
     grid = v0 + np.linspace(-period_v / 2, period_v / 2, coarse_points)
     slope = _sensor_slope(device, grid)
     k = int(np.argmax(slope))
-    a, b = grid[max(k - 1, 0)], grid[min(k + 1, coarse_points - 1)]
-    phi = (np.sqrt(5) - 1) / 2
-    x1, x2 = b - phi * (b - a), a + phi * (b - a)
-    f1, f2 = _sensor_slope(device, np.array([x1]))[0], _sensor_slope(device, np.array([x2]))[0]
-    for _ in range(60):
-        if f1 < f2:
-            a, x1, f1 = x1, x2, f2
-            x2 = a + phi * (b - a)
-            f2 = _sensor_slope(device, np.array([x2]))[0]
-        else:
-            b, x2, f2 = x2, x1, f1
-            x1 = b - phi * (b - a)
-            f1 = _sensor_slope(device, np.array([x1]))[0]
-    x = 0.5 * (a + b)
+    step = grid[1] - grid[0]
+    fine = grid[k] + np.linspace(-step, step, fine_points)
+    fs = _sensor_slope(device, fine)
+    m = int(np.clip(np.argmax(fs), 1, fine_points - 2))
+    y0, y1, y2 = fs[m - 1], fs[m], fs[m + 1]
+    denom = y0 - 2 * y1 + y2
+    offset = 0.5 * (y0 - y2) / denom if denom < 0 else 0.0
+    x = fine[m] + offset * (fine[1] - fine[0])
     return SensorOptimum(float(x), float(_sensor_slope(device, np.array([x]))[0]))
 
 

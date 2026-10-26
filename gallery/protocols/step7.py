@@ -34,8 +34,9 @@ def _plunger_grid(dev: Device, v0: np.ndarray, half: float, n: int) -> tuple[np.
 
 def compiled_device_roundtrip(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     """Compile a device from the layout and a seed, serialise it to JSON text, reload it, and draw the
-    coarse stability map from both: the two maps are bit-identical (their difference is all zeros) and
-    the device file is a few kilobytes. The compiled parameters that set the picture are recorded."""
+    coarse stability map from both: the two maps are bit-identical (their difference is all zeros).
+    The compiled parameters that set the picture are recorded (not the file's byte count, whose last
+    digits differ between platforms' float printing)."""
     with ctx.compile():
         dev = _compiled(p)
         text = dev.dumps()
@@ -52,7 +53,6 @@ def compiled_device_roundtrip(ctx: Context, p: Protocol) -> dict[str, np.ndarray
         "v_p2_v": p2,
         "current_a": i_a,
         "difference_a": i_b - i_a,
-        "device_json_bytes": np.array(float(len(text.encode("utf-8")))),
         "tunnel_coupling_uev": np.array(dev.tunnel_coupling_ev * 1e6),
         "lead_rates_hz": np.array([b.rate_hz for b in dev.barriers]),
         "valley_splittings_uev": dev.valley_splittings_uev(),
