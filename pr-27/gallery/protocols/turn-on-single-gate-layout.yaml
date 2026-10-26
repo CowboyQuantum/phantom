@@ -1,0 +1,28 @@
+id: turn-on-single-gate-layout
+name: Channel turn-on under one gate, from the layout
+step: 2
+description: The Step 1 protocol turn-on-single-gate re-rendered from the layout rather than a typed shape. B_L is swept with every other gate at 1.0 V so the rest of the channel is fully open; the channel opens when the energy under B_L, the highest point along the channel, falls below the threshold. The threshold voltage and the slope come from the lever arms; the step shape is phenomenological (calibration none).
+layers: [layout, electrostatics, readout]
+runner: step2:turn_on_single_gate_layout
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  grid_pitch_nm: 2.0
+  operating_point_v: {B_L: 1.0, P1: 1.0, B_M: 1.0, P2: 1.0, B_R: 1.0, SG: 0.6}
+  gate: B_L
+  x_range_nm: [-200.0, 200.0]
+  threshold_ev: -0.05
+  width_ev: 0.004
+  i_sat_a: 2.0e-9
+sweep:
+  - {gate: B_L, from: -0.6, to: 1.2, points: 361, unit: V}
+readout: {channel: current, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_gate_v, y: current_a, xlabel: "B_L (V)", ylabel: "current (A)", title: "channel current"}
+    - {kind: line, x: v_gate_v, y: u_channel_max_mev, xlabel: "B_L (V)", ylabel: "highest U along the channel (meV)", title: "derived channel barrier"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 1.0, points: 361, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

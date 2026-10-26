@@ -1,0 +1,29 @@
+id: pinch-off-crosstalk
+name: Pinch-off of one barrier against a neighbouring gate
+step: 2
+description: Current through the channel under the left barrier B_L against B_L and the neighbouring plunger P1, from the layout's potential. The channel is open where the electron energy under the barrier lies below a threshold, so the pinch-off edge is a straight line whose slope is minus the ratio of the two gates' lever arms at the barrier (the cross-capacitance ratio). The step shape is phenomenological (calibration none); the slope is derived.
+layers: [layout, electrostatics, readout]
+runner: step2:pinch_off_crosstalk
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  grid_pitch_nm: 2.0
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6}
+  barrier: B_L
+  neighbour: P1
+  threshold_ev: -0.05
+  width_ev: 0.004
+  i_sat_a: 2.0e-9
+sweep:
+  - {gate: B_L, from: -0.4, to: 0.4, points: 201, unit: V, relative_to: operating_point}
+  - {gate: P1, from: -0.3, to: 0.3, points: 121, unit: V, relative_to: operating_point}
+readout: {channel: current, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_barrier_v, y: v_neighbour_v, z: current_a, xlabel: "B_L (V)", ylabel: "P1 (V)", zlabel: "current (A)", title: "channel current"}
+    - {kind: line, x: v_neighbour_v, y: v_pinch_off_v, xlabel: "P1 (V)", ylabel: "pinch-off voltage of B_L (V)", title: "pinch-off line; slope = -alpha_P1/alpha_BL"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.01, points: 24321, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
