@@ -199,3 +199,19 @@ def singlet_return_probability(tau_s: np.ndarray, j_ev: np.ndarray) -> np.ndarra
     the usual fingerprint regime, where the Zeeman difference between the dots is much larger than J
     and the dynamics is a rotation between S and T₀."""
     return 0.5 * (1 + np.cos(np.asarray(j_ev, dtype=float) * np.asarray(tau_s, dtype=float) / HBAR_EV_S))
+
+
+# --- EDSR driving --------------------------------------------------------------------------------
+
+
+def edsr_rabi_energy_ev(g: float, gradient_t_per_nm: float, displacement_nm: float) -> float:
+    """Rabi energy ħΩ of electric-dipole spin resonance in a micromagnet gradient: the oscillating
+    displacement x_ac of the electron in a field gradient dB/dx gives an oscillating transverse field
+    ½ x_ac dB/dx, so ħΩ = ½ g μ_B (dB/dx) x_ac (`calibration: none`)."""
+    return 0.5 * g * MU_B_EV_PER_T * gradient_t_per_nm * displacement_nm
+
+
+def drive_displacement_nm(v_ac_v: float, lever_arm_ev_per_v: float, orbital_energy_ev: float, radius_nm: float) -> float:
+    """Electron displacement under a gate drive of amplitude V_ac: the dipole estimate α V_ac / E_orb
+    times the orbital radius ℓ (`calibration: none`)."""
+    return lever_arm_ev_per_v * v_ac_v / orbital_energy_ev * radius_nm
