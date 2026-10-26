@@ -1,0 +1,25 @@
+id: gate-hysteresis
+name: One gate swept up and back down
+step: 2
+description: The turn-on of B_L swept upward and then downward over the same range, from the layout. With no charge trapping the two traces coincide exactly; this is the clean baseline. Step 3 adds the trapping that opens a loop between them.
+layers: [layout, electrostatics, readout]
+runner: step2:gate_hysteresis_layout
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  grid_pitch_nm: 2.0
+  operating_point_v: {B_L: 1.0, P1: 1.0, B_M: 1.0, P2: 1.0, B_R: 1.0, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  gate: B_L
+  x_range_nm: [-200.0, 200.0]
+  threshold_ev: -0.05
+  width_ev: 0.004
+  i_sat_a: 2.0e-9
+sweep:
+  - {gate: B_L, from: -0.6, to: 1.2, points: 361, unit: V, direction: up then down}
+readout: {channel: current, unit: A}
+render: {kind: line, x: v_gate_v, y: [current_up_a, current_down_a], xlabel: "B_L (V)", ylabel: "current (A)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 1.0, points: 361, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
