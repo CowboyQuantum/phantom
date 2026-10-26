@@ -7,7 +7,7 @@ Dynamics, not just ground states: lead tunnel rates, rate equations, latching an
 
 ## Deliverables
 - `readout`: WKB tunnel rates to leads from barrier heights (done, `readout.rates`, with `electrostatics.barrier_width_nm` at the lead Fermi level); a master equation over the few-electron states with detailed balance (done, `readout.master_equation`); latching when sweeps outrun rates (emerges from the lag, done); sensor SET with Coulomb-blockade peaks and capacitive shifts (Step 1); RF tank-circuit response (done, `readout.rf`, ADR 0018); single-shot statistics (done, `readout.single_shot`)
-- fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics (Step 1 has the ensemble; tying its rates to the catalog is to do)
+- fluctuator ensemble with a distribution of switching rates producing 1/f and telegraph noise with the right statistics: per-device draws of the 1/f amplitude, the dominant switchers and the white floor from catalog placeholders (done, `disorder.noise_draw`, ADR 0019; real distributions await entries #1 and #12)
 - the textbook layout gained reservoir accumulation gates R_L, R_R so lead barriers are the outer barrier gates (done)
 
 ## P0 tests (CI: analytic limits and invariants)
@@ -27,7 +27,10 @@ Dynamics, not just ground states: lead tunnel rates, rate equations, latching an
 - `rf-sensor-flank`: the DC peak, the sensor resistance and the reflected amplitude at resonance across one Coulomb peak (rendering)
 - `single-shot-histogram`: two thousand 1 ms shots at the flank, bimodal histogram per true state, the shot sequence with a telegraph switch (rendering)
 - `snr-vs-integration-time`: SNR and fidelity against integration time; the square-root law and its breakdown under slow noise (rendering)
-- to come: `switcher-histogram` and `drift-repeated-cuts` with catalog-tied rates; the Step 1 `plunger-vs-barrier-map` and lock-in dynamics re-rendered on the master equation
+- `switcher-histogram`: a 600 s trace on a drawn device and the dwell-time histograms of its dominant switcher (rendering)
+- `drift-repeated-cuts`: one cut repeated every minute for two hours; the transition's drift and jumps (rendering)
+- `plunger-vs-barrier-map` (Step 1) re-rendered on the master equation with WKB rates per barrier row (rendering)
+- to come: the lock-in dynamics on the master equation (cost); the two P1 rows
 
 ## Exit criteria
 - sweep-rate and direction change the measured diagram the way they do on a real device

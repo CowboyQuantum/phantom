@@ -9,7 +9,7 @@ and width), `master_equation` (rate equation over the CI charge states with deta
 histograms, signal-to-noise against integration time).
 """
 
-from phantom.readout.loading import LeadBarrier, LeadRateLandscape, latched_occupation
+from phantom.readout.loading import LeadRateLandscape, latched_occupation
 from phantom.readout.lockin import LockinParams, lockin_sweep_a_per_v, lockin_sweep_dynamic_a_per_v
 from phantom.readout.master_equation import RateEquation
 from phantom.readout.measure import SensedDoubleDot, raster_times_s
@@ -40,7 +40,6 @@ __all__ = [
     "MODEL_VERSION",
     "ChannelTurnOn",
     "Composite",
-    "LeadBarrier",
     "LeadRateLandscape",
     "LockinParams",
     "NoNoise",

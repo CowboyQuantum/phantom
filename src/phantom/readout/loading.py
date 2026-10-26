@@ -8,9 +8,8 @@ gets a chance to equilibrate, including across the flyback of a raster row, whic
 vanishing transition line in a real scan is. At the other extreme a very fast rate broadens the
 transition by the lifetime width ħΓ.
 
-Two forms:
-- `LeadBarrier`: one barrier gate, Γ(V_B), used by `plunger-vs-barrier-map` (dot 2 has no bath of its
-  own there and freezes with dot 1).
+One form remains (the one-barrier `LeadBarrier` of Step 1 is retired; `plunger-vs-barrier-map` now runs on
+`readout.master_equation` with WKB rates, ADR 0019):
 - `LeadRateLandscape`: a rate per dot over the whole gate vector, Γ_i(V) = rate0_i · exp(w_i · V),
   used by the chopped-gate stability maps, where the plungers themselves open and close the lead
   barriers through cross-coupling, so low-voltage corners latch and high-voltage corners broaden.
@@ -32,27 +31,6 @@ from phantom.constants import HBAR_EV_S, K_B_EV_PER_K
 MODEL_VERSION = 2
 """Bumped whenever any output of this module changes for the same parameters and seed (ADR 0003)."""
 
-
-
-@dataclass(frozen=True)
-class LeadBarrier:
-    """A barrier between a dot and its reservoir: tunnel rate Γ(V) = rate0_hz · exp((V − v_ref_v) / v_scale_v).
-
-    `rate0_hz` is the rate at `v_ref_v`; `v_scale_v` is the gate voltage that changes it by a factor e.
-    Range: rates 1 Hz–1 GHz over a few hundred mV of barrier gate; scales 10–100 mV.
-    """
-
-    name: str
-    rate0_hz: float = 1e3
-    v_ref_v: float = 0.0
-    v_scale_v: float = 0.03
-
-    def __post_init__(self) -> None:
-        if self.rate0_hz <= 0 or self.v_scale_v <= 0:
-            raise ValueError("rate0_hz and v_scale_v must be positive")
-
-    def rate_hz(self, v_b: float | np.ndarray) -> np.ndarray:
-        return self.rate0_hz * np.exp((np.asarray(v_b, dtype=float) - self.v_ref_v) / self.v_scale_v)
 
 
 @dataclass(frozen=True)

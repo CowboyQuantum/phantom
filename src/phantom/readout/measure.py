@@ -20,7 +20,15 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from phantom.charge.ci import ConstantInteractionParams
-from phantom.readout.noise import NoiseProcess, NoNoise, OneOverFNoise, TelegraphNoise, WhiteNoise
+from phantom.disorder.noise_draw import NoiseDraw
+from phantom.readout.noise import (
+    Composite,
+    NoiseProcess,
+    NoNoise,
+    OneOverFNoise,
+    TelegraphNoise,
+    WhiteNoise,
+)
 from phantom.readout.sensor import SensorSETParams
 
 MODEL_VERSION = 1
@@ -51,6 +59,20 @@ class SensedDoubleDot:
             readout_noise=WhiteNoise(sigma=15e-12, seed=seed + 2),
             **kwargs,
         )
+
+    @classmethod
+    def from_noise_draw(cls, draw: NoiseDraw, sample_dt_s: float = 1e-3, **kwargs) -> SensedDoubleDot:
+        """The processes a per-device noise draw (disorder.noise_draw) describes: a 1/f ensemble on the
+        gates, the drawn switchers summed at the sensor, and the white floor rescaled to `sample_dt_s`
+        (constant spectral density). Seeds derive from the draw's seed."""
+        gate = OneOverFNoise(draw.one_over_f_amplitude_v, draw.f_min_hz, draw.f_max_hz, draw.n_fluctuators, seed=draw.seed) if draw.one_over_f_amplitude_v > 0 else NoNoise()
+        switchers = tuple(
+            TelegraphNoise(a, up, down, seed=draw.seed + 10 + k)
+            for k, (a, up, down) in enumerate(zip(draw.switcher_amplitudes_v, draw.switcher_rates_up_hz, draw.switcher_rates_down_hz, strict=True))
+        )
+        sensor = Composite(switchers) if switchers else NoNoise()
+        white = WhiteNoise(draw.white_sigma_a_at_1ms * np.sqrt(1e-3 / sample_dt_s), seed=draw.seed + 2)
+        return cls(gate_noise=gate, sensor_noise=sensor, readout_noise=white, **kwargs)
 
     # --- noise-free physics ----------------------------------------------------------------
 

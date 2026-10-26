@@ -26,11 +26,12 @@ from phantom.disorder.geometry_faults import (
     apply_misalignment,
     draw_misalignment,
 )
+from phantom.disorder.noise_draw import NoiseDraw, NoiseParams, draw_noise
 from phantom.disorder.wiring import WiringDraw, WiringFaultParams, draw_wiring_faults
 from phantom.electrostatics.closed_form import GateBasis
 from phantom.layout.geometry import Layout
 
-MODEL_VERSION = 2
+MODEL_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -38,14 +39,15 @@ class ScenarioParams:
     fixed_charges: FixedChargeParams = field(default_factory=FixedChargeParams)
     misalignment: MisalignmentParams = field(default_factory=MisalignmentParams)
     wiring: WiringFaultParams = field(default_factory=WiringFaultParams)
+    noise: NoiseParams = field(default_factory=NoiseParams)
 
     @classmethod
     def for_material(cls, material: str) -> ScenarioParams:
         """Placeholder densities per material class from the catalog draft (`calibration: none`): MOS
         charges sit in the electron plane itself; SiGe charges at the oxide/cap interface above it."""
         if material == "MOS":
-            return cls(FixedChargeParams(density_cm2=3e10, depth_nm=8.0), MisalignmentParams(), WiringFaultParams())
-        return cls(FixedChargeParams(density_cm2=3e9, depth_nm=5.0), MisalignmentParams(), WiringFaultParams())
+            return cls(FixedChargeParams(density_cm2=3e10, depth_nm=8.0), MisalignmentParams(), WiringFaultParams(), NoiseParams.for_material("MOS"))
+        return cls(FixedChargeParams(density_cm2=3e9, depth_nm=5.0), MisalignmentParams(), WiringFaultParams(), NoiseParams.for_material("SiGe"))
 
 
 @dataclass(frozen=True)
@@ -55,6 +57,7 @@ class ScenarioDraw:
     charges: FixedChargeDraw
     misalignment: MisalignmentDraw
     wiring: WiringDraw | None = None
+    noise: NoiseDraw | None = None
     model_version: int = MODEL_VERSION
 
     def to_dict(self) -> dict:
@@ -65,12 +68,14 @@ class ScenarioDraw:
             "charges": self.charges.to_dict(),
             "misalignment": self.misalignment.to_dict(),
             "wiring": self.wiring.to_dict() if self.wiring is not None else None,
+            "noise": self.noise.to_dict() if self.noise is not None else None,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> ScenarioDraw:
         wiring = WiringDraw.from_dict(d["wiring"]) if d.get("wiring") else None
-        return cls(int(d["seed"]), float(d["severity"]), FixedChargeDraw.from_dict(d["charges"]), MisalignmentDraw.from_dict(d["misalignment"]), wiring, int(d.get("model_version", MODEL_VERSION)))
+        noise = NoiseDraw.from_dict(d["noise"]) if d.get("noise") else None
+        return cls(int(d["seed"]), float(d["severity"]), FixedChargeDraw.from_dict(d["charges"]), MisalignmentDraw.from_dict(d["misalignment"]), wiring, noise, int(d.get("model_version", MODEL_VERSION)))
 
 
 def adjacent_gate_pairs(layout: Layout) -> tuple[tuple[str, str], ...]:
@@ -96,7 +101,8 @@ def draw_scenario(layout: Layout, params: ScenarioParams, seed: int, severity: f
     charges = draw_fixed_charges(params.fixed_charges, region, rng, severity)
     misalignment = draw_misalignment(params.misalignment, layout, rng, severity)
     wiring = draw_wiring_faults(params.wiring, layout.gate_names, adjacent_gate_pairs(layout), rng, severity if wiring_faults else 0.0)
-    return ScenarioDraw(seed, severity, charges, misalignment, wiring)
+    noise = draw_noise(params.noise, rng, seed, severity)
+    return ScenarioDraw(seed, severity, charges, misalignment, wiring, noise)
 
 
 def apply_scenario(layout: Layout, draw: ScenarioDraw, pitch_nm: float = 2.0) -> tuple[Layout, GateBasis]:
