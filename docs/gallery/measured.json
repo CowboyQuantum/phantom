@@ -1,7 +1,7 @@
 {
  "meta": {
-  "commit": "ab10b03",
-  "date": "2026-10-25",
+  "commit": "a0dac4b",
+  "date": "2026-10-26",
   "numpy": "2.5.4",
   "platform": "Windows-11-10.0.26200-SP0",
   "python": "3.12.10"
@@ -10,55 +10,55 @@
   {
    "model": "charge.ci.ConstantInteractionParams.mean_occupation",
    "points": 10000,
-   "us_per_point": 1.451,
+   "us_per_point": 1.25,
    "what": "thermal occupation per gate point"
   },
   {
    "model": "charge.hubbard.HubbardParams.mean_occupation",
    "points": 10000,
-   "us_per_point": 10.047,
+   "us_per_point": 10.059,
    "what": "16x16 diagonalisation per gate point"
   },
   {
    "model": "readout.sensor.SensorSETParams.current_a",
    "points": 100000,
-   "us_per_point": 0.12,
+   "us_per_point": 0.095,
    "what": "sensor current per point"
   },
   {
    "model": "readout.noise.TelegraphNoise.trace",
    "points": 100000,
-   "us_per_point": 0.663,
+   "us_per_point": 0.66,
    "what": "one fluctuator per sample"
   },
   {
    "model": "readout.noise.OneOverFNoise.trace",
    "points": 10000,
-   "us_per_point": 16.537,
+   "us_per_point": 16.039,
    "what": "24 fluctuators per sample"
   },
   {
    "model": "readout.measure.SensedDoubleDot.sweep_a (noisy)",
    "points": 10000,
-   "us_per_point": 18.282,
+   "us_per_point": 18.603,
    "what": "occupation + sensor + three noise traces per point"
   },
   {
    "model": "readout.lockin.lockin_sweep_a_per_v",
    "points": 2500,
-   "us_per_point": 149.015,
+   "us_per_point": 146.495,
    "what": "8 evaluations per point, noisy"
   },
   {
    "model": "readout.lockin.lockin_sweep_dynamic_a_per_v",
    "points": 2500,
-   "us_per_point": 154.779,
+   "us_per_point": 154.772,
    "what": "8 evaluations + rate dynamics per point, noisy"
   },
   {
    "model": "readout.loading.latched_occupation",
    "points": 100000,
-   "us_per_point": 0.912,
+   "us_per_point": 0.946,
    "what": "per scan step"
   }
  ],
@@ -67,25 +67,49 @@
    "compile_s": 0.0,
    "model_evals_per_point": 1.0,
    "points": 1201,
-   "run_ms_per_point": 0.00176
+   "run_ms_per_point": 0.00191
+  },
+  "crosstalk-lines": {
+   "compile_s": 0.0898,
+   "model_evals_per_point": 1.0,
+   "points": 57600,
+   "run_ms_per_point": 0.00192
   },
   "diamonds-single-dot": {
    "compile_s": 0.0,
    "model_evals_per_point": 1.0,
    "points": 64521,
+   "run_ms_per_point": 0.00015
+  },
+  "gate-hysteresis": {
+   "compile_s": 0.0479,
+   "model_evals_per_point": 1.0,
+   "points": 361,
+   "run_ms_per_point": 0.08021
+  },
+  "gate-leakage-iv": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 1806,
    "run_ms_per_point": 0.00011
   },
   "noise-psd": {
-   "compile_s": 0.0074,
+   "compile_s": 0.0087,
    "model_evals_per_point": 1.0,
    "points": 30000,
-   "run_ms_per_point": 0.01904
+   "run_ms_per_point": 0.01903
   },
   "noise-time-trace": {
    "compile_s": 0.0004,
    "model_evals_per_point": 1.0,
    "points": 30000,
-   "run_ms_per_point": 0.01843
+   "run_ms_per_point": 0.0185
+  },
+  "ohmic-iv": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 201,
+   "run_ms_per_point": 3e-05
   },
   "pinch-off-barrier": {
    "compile_s": 0.0,
@@ -94,7 +118,7 @@
    "run_ms_per_point": 3e-05
   },
   "pinch-off-crosstalk": {
-   "compile_s": 0.0443,
+   "compile_s": 0.0431,
    "model_evals_per_point": 1.0,
    "points": 24321,
    "run_ms_per_point": 2e-05
@@ -103,16 +127,16 @@
    "compile_s": 0.0001,
    "model_evals_per_point": 1.0,
    "points": 28800,
-   "run_ms_per_point": 0.00293
+   "run_ms_per_point": 0.00277
   },
   "potential-cut-along-channel": {
-   "compile_s": 0.0422,
+   "compile_s": 0.0419,
    "model_evals_per_point": 1.0,
    "points": 1203,
-   "run_ms_per_point": 0.0004
+   "run_ms_per_point": 0.00036
   },
   "potential-map-layout": {
-   "compile_s": 0.0398,
+   "compile_s": 0.0417,
    "model_evals_per_point": 1.0,
    "points": 34578,
    "run_ms_per_point": 0.0
@@ -121,55 +145,67 @@
    "compile_s": 0.0,
    "model_evals_per_point": 1.0,
    "points": 601,
-   "run_ms_per_point": 0.00164
+   "run_ms_per_point": 0.00157
   },
   "stability-coarse-2dot": {
-   "compile_s": 0.0007,
+   "compile_s": 0.0003,
    "model_evals_per_point": 1.0,
    "points": 40000,
-   "run_ms_per_point": 0.01854
+   "run_ms_per_point": 0.0188
   },
   "stability-coarse-2dot-layout": {
-   "compile_s": 0.0835,
+   "compile_s": 0.0834,
    "model_evals_per_point": 1.0,
    "points": 22500,
-   "run_ms_per_point": 0.01827
+   "run_ms_per_point": 0.01872
   },
   "stability-fine-2dot": {
    "compile_s": 0.0005,
    "model_evals_per_point": 1.0,
    "points": 22500,
-   "run_ms_per_point": 0.01847
+   "run_ms_per_point": 0.01951
   },
   "stability-lockin-common": {
    "compile_s": 0.0004,
    "model_evals_per_point": 8.0,
    "points": 40000,
-   "run_ms_per_point": 0.1599
+   "run_ms_per_point": 0.17205
   },
   "stability-lockin-detuning": {
    "compile_s": 0.0004,
    "model_evals_per_point": 8.0,
    "points": 40000,
-   "run_ms_per_point": 0.15973
+   "run_ms_per_point": 0.16169
   },
   "stability-lockin-p1": {
    "compile_s": 0.0004,
    "model_evals_per_point": 8.0,
    "points": 40000,
-   "run_ms_per_point": 0.15953
+   "run_ms_per_point": 0.15967
   },
   "stability-lockin-p2": {
-   "compile_s": 0.0004,
+   "compile_s": 0.0008,
    "model_evals_per_point": 8.0,
    "points": 40000,
-   "run_ms_per_point": 0.15963
+   "run_ms_per_point": 0.16079
+  },
+  "turn-on-global": {
+   "compile_s": 0.0377,
+   "model_evals_per_point": 1.0,
+   "points": 201,
+   "run_ms_per_point": 0.07718
   },
   "turn-on-single-gate": {
    "compile_s": 0.0,
    "model_evals_per_point": 1.0,
    "points": 601,
-   "run_ms_per_point": 9e-05
+   "run_ms_per_point": 0.00011
+  },
+  "turn-on-single-gate-layout": {
+   "compile_s": 0.0365,
+   "model_evals_per_point": 1.0,
+   "points": 361,
+   "run_ms_per_point": 0.07456
   }
  }
 }

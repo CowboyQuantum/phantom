@@ -47,3 +47,40 @@ def pinch_off_current_a(barrier: Barrier, v_b: float | np.ndarray, i_sat_a: floa
     saturation at `i_sat_a` well above it. The tunnel coupling at `v_ref_v` sets the half-current point."""
     t = barrier.tunnel_coupling_ev(v_b)
     return i_sat_a * t / (t + barrier.t0_ev)
+
+
+# --- shapes derived from a layout's potential (Step 2) ------------------------------------------
+
+
+def channel_transmission_current_a(
+    u_barrier_ev: np.ndarray, threshold_ev: float = -0.05, width_ev: float = 0.004, i_sat_a: float = 2e-9
+) -> np.ndarray:
+    """Current through a channel whose highest point of electron energy along it is `u_barrier_ev`:
+    open (saturated) when that energy lies below `threshold_ev`, closed above, with a soft step of width
+    `width_ev`. The barrier energy comes from the layout's potential, so thresholds and slopes against
+    every gate are derived; the step shape itself is phenomenological (calibration none)."""
+    return i_sat_a / (1.0 + np.exp((np.asarray(u_barrier_ev, dtype=float) - threshold_ev) / width_ev))
+
+
+def gate_leakage_current_a(
+    v_gate: np.ndarray,
+    area_nm2: float,
+    thickness_nm: float,
+    onset_field_v_per_nm: float = 0.08,
+    steepness_v: float = 0.2,
+    i_onset_a_per_um2: float = 1e-9,
+) -> np.ndarray:
+    """Leakage through the gate dielectric: antisymmetric in the voltage, proportional to the gate area,
+    and steeply exponential (scale `steepness_v`) so that it reaches `i_onset_a_per_um2` per square
+    micrometre at the onset voltage onset_field × thickness and is negligible well inside that window.
+    Silicon dioxide breaks down near 1 V/nm; the onset field is set well below it. Phenomenological;
+    calibration none."""
+    v_onset = onset_field_v_per_nm * thickness_nm
+    v = np.asarray(v_gate, dtype=float)
+    return i_onset_a_per_um2 * (area_nm2 * 1e-6) * np.sinh(v / steepness_v) / np.sinh(v_onset / steepness_v)
+
+
+def ohmic_current_a(v_sd: np.ndarray, series_resistance_ohm: float = 20e3) -> np.ndarray:
+    """Source–drain current through an open channel with its contacts: linear, one series resistance
+    (contacts plus the 2DEG squares). Phenomenological; calibration none."""
+    return np.asarray(v_sd, dtype=float) / series_resistance_ohm

@@ -23,13 +23,14 @@ A gate layout and a material stack give V(r; gate vector) in microseconds; dots 
 - `potential-map-layout`: V(x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid; two wells and the barriers between them visible (rendering)
 - `potential-cut-along-channel`: V along the dot-to-dot axis for several barrier voltages; the barrier height falls as the gate opens (rendering)
 - `stability-coarse-2dot-layout`: the coarse map with nothing typed but the layout, the operating point and the sensor's per-electron coupling; the sensor gate is set on its flank first (rendering)
-- `gate-leakage-iv`: leakage current vs. each gate; ~0 in the safe window, onset at the extremes
-- `ohmic-iv`: current vs. source–drain bias with all gates accumulated; linear
-- `turn-on-global`: current vs. all gates swept together; threshold and saturation, MOS vs. SiGe scale
+- `gate-leakage-iv`: leakage current vs. each gate; ~0 in the safe window, onset at the extremes (rendering; proportional to gate area, phenomenological)
+- `ohmic-iv`: current vs. source–drain bias with all gates accumulated; linear (rendering; phenomenological)
+- `turn-on-global`: current vs. all gates swept together; threshold from the layout's channel barrier (rendering)
 - `pinch-off-crosstalk`: pinch-off voltage of one barrier vs. another gate's voltage; a straight line whose slope is the cross-capacitance ratio (rendering; step shape phenomenological)
-- `crosstalk-lines`: sensor signal vs. every gate pair; the full cross-capacitance matrix from the line slopes
-- `gate-hysteresis`: one gate up then down; the two traces overlap for a clean device (the loop appears in Step 3)
-- still to do: `gate-leakage-iv`, `ohmic-iv`, `turn-on-global`, `crosstalk-lines`, `gate-hysteresis`; re-rendering `turn-on-single-gate` and `pinch-off-barrier` from the layout
+- `crosstalk-lines`: sensor signal vs. four gate pairs; the lever-arm matrix from the line slopes (rendering)
+- `gate-hysteresis`: one gate up then down; the two traces overlap for a clean device (rendering; the loop appears in Step 3)
+- `turn-on-single-gate-layout`: the Step 1 turn-on re-rendered from the layout's channel barrier (rendering)
+- still to do: the P1 reproduction against a published layout (owner names the paper); sign-offs
 Full roster: `docs/gallery/PROTOCOLS.md`. Each carries a `budget`; each is unsigned until the owner has reviewed it in the PR artifact.
 
 ## Exit criteria

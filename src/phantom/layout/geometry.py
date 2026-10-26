@@ -36,6 +36,13 @@ class Gate:
         return np.asarray(self.polygon_nm, dtype=float)
 
     @property
+    def area_nm2(self) -> float:
+        """Polygon area by the shoelace formula."""
+        v = self.vertices
+        x, y = v[:, 0], v[:, 1]
+        return float(0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
+
+    @property
     def centroid_nm(self) -> tuple[float, float]:
         c = self.vertices.mean(axis=0)
         return float(c[0]), float(c[1])

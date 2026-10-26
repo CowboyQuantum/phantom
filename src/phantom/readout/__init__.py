@@ -18,7 +18,13 @@ from phantom.readout.noise import (
     WhiteNoise,
 )
 from phantom.readout.sensor import SensorSETParams
-from phantom.readout.transport import ChannelTurnOn, pinch_off_current_a
+from phantom.readout.transport import (
+    ChannelTurnOn,
+    channel_transmission_current_a,
+    gate_leakage_current_a,
+    ohmic_current_a,
+    pinch_off_current_a,
+)
 
 MODEL_VERSION = 2
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
@@ -37,9 +43,12 @@ __all__ = [
     "SensorSETParams",
     "TelegraphNoise",
     "WhiteNoise",
+    "channel_transmission_current_a",
+    "gate_leakage_current_a",
     "latched_occupation",
     "lockin_sweep_a_per_v",
     "lockin_sweep_dynamic_a_per_v",
+    "ohmic_current_a",
     "pinch_off_current_a",
     "raster_times_s",
 ]
