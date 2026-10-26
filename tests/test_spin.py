@@ -63,6 +63,10 @@ def test_exchange_grows_toward_the_anticrossing_and_exponentially_with_the_barri
     j = exchange_j_ev(hub, detuning_voltages(hub, v0, eps))
     assert np.all(np.diff(j) > 0), "J rises monotonically toward (0,2)"
     assert exchange_sensitivity_ev_per_ev(hub, v0, np.array([0.0]))[0] == pytest.approx(0.0, abs=1e-9), "sweet spot"
+    e_probe = np.array([0.4e-3, 0.8e-3, 1.1e-3])
+    d = 1e-7
+    fd = (exchange_j_ev(hub, detuning_voltages(hub, v0, e_probe + d)) - exchange_j_ev(hub, detuning_voltages(hub, v0, e_probe - d))) / (2 * d)
+    np.testing.assert_allclose(exchange_sensitivity_ev_per_ev(hub, v0, e_probe), fd, rtol=1e-4), "Hellmann–Feynman dJ/dε equals the finite difference"
     vb = np.array([-0.05, 0.0, 0.05])
     vv = np.broadcast_to(v0, (3, 4)).copy()
     vv[:, 3] = vb

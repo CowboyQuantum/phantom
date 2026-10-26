@@ -101,6 +101,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `exchange-vs-barrier` | J extracted vs. B_interdot at the symmetric point | J | exponential |
 | `charge-noise-spectroscopy-cpmg` | number of π pulses at fixed total τ, on a charge-sensitive qubit state (exchange or detuning) | coherence vs. filter frequency | S_ε(f) over the kHz–MHz decades, with the exponent of the 1/f^α law; must join the sensor `noise-psd` at low frequency with the same amplitude scaling |
 | `charge-noise-spectroscopy-j-vs-ramsey` | Ramsey T₂* vs. ε (through dJ/dε) | T₂* | T₂* ∝ 1/(dJ/dε) × noise amplitude; a direct check that the same charge-noise draw governs the qubit and the sensor |
+| `exchange-gate-fidelity` | operating ε of a SWAP gate (J on for πħ/J), noiseless and for two noise draws | average gate fidelity | the sweet spot at the symmetric point; infidelity growing as (dJ/dε σ_ε)² toward the anticrossing; the two draws differ by their 1/f amplitude (Step 6 exit criterion) |
 
 ## H. Disorder draws (layout, electrostatics, disorder) — Step 3
 | id | sweep | readout | must show |

@@ -85,12 +85,18 @@ def detuning_noise_sigma_ev(hub: HubbardParams, sigma_gate_v: float, gates: tupl
     return float(sigma_gate_v * np.sqrt(np.sum(diff**2)))
 
 
-def exchange_sensitivity_ev_per_ev(hub: HubbardParams, v_center: np.ndarray, eps_ev: np.ndarray, d_eps_ev: float = 1e-7) -> np.ndarray:
-    """dJ/dε by a centred difference along the detuning axis."""
-    eps = np.asarray(eps_ev, dtype=float)
-    jp = exchange_j_ev(hub, detuning_voltages(hub, v_center, eps + d_eps_ev))
-    jm = exchange_j_ev(hub, detuning_voltages(hub, v_center, eps - d_eps_ev))
-    return (jp - jm) / (2 * d_eps_ev)
+def exchange_sensitivity_ev_per_ev(hub: HubbardParams, v_center: np.ndarray, eps_ev: np.ndarray, plungers: tuple[str, str] = ("P1", "P2")) -> np.ndarray:
+    """dJ/dε by the Hellmann–Feynman theorem. Along the detuning axis the Hamiltonian changes as
+    dH/dε = ½(N₁ − N₂) (the plungers move so that ε₁ gains +ε/2 and ε₂ gains −ε/2; the barrier gate
+    does not move). The triplet |↑↑⟩ has N₁ = N₂, so dJ/dε = −⟨S|½(N₁ − N₂)|S⟩ = ½⟨N₂ − N₁⟩_S: half the
+    charge polarisation of the singlet ground state. Exact, and free of the digit cancellation of a
+    finite difference of eigenvalues (which differed between platforms beyond ADR 0014's tolerance)."""
+    v = detuning_voltages(hub, v_center, eps_ev, plungers)
+    block = hub.hamiltonian(v)[..., _TWO[:, None], _TWO[None, :]]
+    _, psi = np.linalg.eigh(block)
+    weight = np.abs(psi[..., :, 0]) ** 2  # (..., 6) over the two-electron Fock states
+    polarisation = weight @ (N2[_TWO] - N1[_TWO])
+    return 0.5 * polarisation
 
 
 def quasi_static_average(f, sigma: float, n_nodes: int = 31) -> np.ndarray:
