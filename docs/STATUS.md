@@ -2,9 +2,9 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** 1 (issue #16, awaiting sign-offs) and 2 (issue #17, in progress) together →
-`docs/steps/01-charge-readout-core.md`, `docs/steps/02-layout-electrostatics.md`. Milestone: "Steps 1-2".
-**Branch:** `step-2/electrical-health` (second Step 2 PR, part of #17). PRs #19–#23 merged.
+**Current step:** 1 (#16) and 2 (#17) complete except the owner's sign-offs and Step 2's P1 row; 3 (#25, disorder
+and the fault models) in progress → `docs/steps/03-disorder-faults.md`. Milestones: "Steps 1-2", "Steps 3-4".
+**Branch:** `step-3/interface-charges-and-misalignment` (first Step 3 PR, part of #25). PRs #19–#24 merged.
 **Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
@@ -31,7 +31,11 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- Second Step 2 PR (`step-2/electrical-health`): `gate-leakage-iv`, `ohmic-iv`, `turn-on-global`,
+- First Step 3 PR: `disorder` layer (interface charges as image-charge energy offsets, misalignment and width error as
+  polygon transforms, seeded serialisable scenario draw, severity 0 bit-identical to clean), `GateBasis.offset_ev`,
+  `phantom.constants` below every layer, ADR 0015, three protocols (`potential-map-disorder`,
+  `stability-coarse-2dot-disorder`, `unintentional-dots`), six P0 tests; catalog draft entry gains `calibration: none`.
+- Merged as PR #24, second Step 2 PR: `gate-leakage-iv`, `ohmic-iv`, `turn-on-global`,
   `turn-on-single-gate-layout`, `gate-hysteresis`, `crosstalk-lines` rendering; `readout.transport` gains
   `channel_transmission_current_a`, `gate_leakage_current_a`, `ohmic_current_a`; `Gate.area_nm2`; 3 tests.
 - Merged as PR #23, first Step 2 PR: `layout` (Gate, Layer, Stack, MaterialClass, Layout JSON, `two_dot_layout`), `electrostatics`
@@ -41,6 +45,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 - Step 1 sign-offs still pending. PRs #21 and #22 merged.
 
 ## Known gaps
+- Step 3 generators run on the catalog draft's placeholder densities (`calibration: none`); the owner's catalog entries
+  (#1–#14) set the real distributions. Strain and g-factor draws wait for `spin`; switcher and drift rates tie to the
+  catalog in Step 4. No screening in the charge potentials (upper bound) until Step 7.
 - ADR 0014: cross-platform tolerance raised from 1e-12 to 1e-9 after the layout-derived stability maps differed by
   2e-11 between platforms (derived chains amplify last-bit differences at sharp steps). Typed chains still agree to 3e-14.
 - Step 2 still owes the P1 reproduction against a published layout (its reference entry does not exist yet; the
@@ -63,9 +70,10 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   `stability-coarse-2dot`, budget 0.1) but not yet confirmed on CI.
 
 ## Next action
-Owner reviews the Step 2 pictures on the preview of the second Step 2 PR and merges; names the published layout for
-the P1 row; signs off protocols from Steps 1 and 2 as reviewed. Then Step 3 (disorder and the fault models, issue to
-be filed) opens, which needs the catalog entries (#1–#14) the owner is writing.
+Owner reviews the three Step 3 pictures on the PR preview and merges; writes or confirms catalog entries so the
+generators get real densities; names the published layout for Step 2's P1 row and a MOS/SiGe unintentional-dot
+comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: fault generators for the entries
+that exist (leaky barrier, open/shorted gate, sensor asymmetry) and the hysteresis loop from trapping.
 
 Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates

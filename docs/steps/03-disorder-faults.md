@@ -6,9 +6,9 @@
 Catalog entries become generators that perturb the compiled potential and parameters, so unintentional dots, leaky barriers, asymmetric lever arms, charge switchers and drift appear for physical reasons and at catalog-set rates.
 
 ## Deliverables
-- `disorder`: static random interface/oxide charges (density per material class) added to the potential basis; gate misalignment and width error as basis transforms; strain and g-factor perturbations as parameter draws
+- `disorder`: static random interface/oxide charges (density per material class) added to the potential basis as image-charge energy offsets (done, ADR 0015); gate misalignment and width error as polygon transforms (done); strain and g-factor perturbations as parameter draws (waits for `spin`)
 - fault generators for every catalog entry marked `runtime`, each with a severity knob
-- a scenario draw: material + catalog + seed → a perturbed device, serialisable
+- a scenario draw: material + catalog + seed → a perturbed device, serialisable (`disorder.scenario`, done; parameters are the catalog draft's placeholders until the entries are written)
 
 ## P0 tests (CI: analytic limits and invariants)
 - each generator's perturbation has the documented sign, scale and spatial extent
@@ -18,7 +18,10 @@ Catalog entries become generators that perturb the compiled potential and parame
 - the density of unintentional dots per unit length vs. interface charge density matches a published MOS/SiGe comparison within an order of magnitude
 
 ## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
-- to be listed before the step starts; each carries a `budget` (ADR 0009)
+- `potential-map-disorder`: the landscape of the clean layout beside three draws, gate outlines overlaid (rendering)
+- `stability-coarse-2dot-disorder`: the layout-derived coarse map, clean beside three draws each re-derived from its own landscape (rendering)
+- `unintentional-dots`: mean extra minima in the channel against charge density over many draws, MOS class (rendering; the P1 row's curve)
+- to come as catalog entries land: leaky barrier, open or shorted gate, sensor-coupling asymmetry; `gate-hysteresis` with a trapping loop; switcher and drift rates tied to the catalog (Step 4)
 
 ## Exit criteria
 - every catalog entry marked `runtime` has a generator and a P0 test showing its signature in a stability diagram
@@ -28,4 +31,4 @@ Catalog entries become generators that perturb the compiled potential and parame
 - which catalog entries need the offline tier (Step 7) rather than a runtime generator
 
 ## Status
-NOT STARTED
+IN PROGRESS

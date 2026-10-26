@@ -80,14 +80,20 @@ class GateBasis:
     y_nm: np.ndarray
     depth_nm: float
     basis: np.ndarray  # (gates, ny, nx)
+    offset_ev: np.ndarray | None = None
+    """Gate-independent electron energy added to `energy_ev` (ny, nx): disorder (Step 3). None = clean."""
 
     @classmethod
-    def from_layout(cls, layout: Layout, pitch_nm: float = 2.0) -> GateBasis:
+    def from_layout(cls, layout: Layout, pitch_nm: float = 2.0, grid: tuple[np.ndarray, np.ndarray] | None = None) -> GateBasis:
         """Evaluate every gate's solid angle on a grid covering the layout's bounding box at the
-        stack's effective depth. Compile-tier work: milliseconds for a few gates on a 300×300 grid."""
-        x0, x1, y0, y1 = layout.bounding_box_nm()
-        x = np.arange(x0, x1 + pitch_nm / 2, pitch_nm)
-        y = np.arange(y0, y1 + pitch_nm / 2, pitch_nm)
+        stack's effective depth, or on the given `grid` = (x_nm, y_nm) so that perturbed layouts share
+        the clean one's grid. Compile-tier work: milliseconds for a few gates on a 300×300 grid."""
+        if grid is not None:
+            x, y = (np.asarray(grid[0], dtype=float), np.asarray(grid[1], dtype=float))
+        else:
+            x0, x1, y0, y1 = layout.bounding_box_nm()
+            x = np.arange(x0, x1 + pitch_nm / 2, pitch_nm)
+            y = np.arange(y0, y1 + pitch_nm / 2, pitch_nm)
         depth = layout.stack.effective_depth_nm
         basis = np.stack([polygon_solid_angle(g.vertices, x[None, :], y[:, None], depth) / (2 * np.pi) for g in layout.gates])
         return cls(layout.gate_names, x, y, depth, basis)
@@ -97,8 +103,9 @@ class GateBasis:
         return np.tensordot(np.asarray(voltages_v, dtype=float), self.basis, axes=([-1], [0]))
 
     def energy_ev(self, voltages_v: np.ndarray) -> np.ndarray:
-        """Electron potential energy U = −eφ in eV, same shape as `potential_v`."""
-        return -self.potential_v(voltages_v)
+        """Electron potential energy U = −eφ in eV plus any disorder offset, same shape as `potential_v`."""
+        u = -self.potential_v(voltages_v)
+        return u if self.offset_ev is None else u + self.offset_ev
 
     def at(self, x_nm: float, y_nm: float) -> np.ndarray:
         """Basis of every gate at one point by bilinear interpolation: the lever-arm vector there (gates,)."""
