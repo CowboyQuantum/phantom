@@ -4,7 +4,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-ORDER = ["layout", "electrostatics", "disorder", "valley", "charge", "readout", "spin", "optimum", "compile"]
+ORDER = ["layout", "electrostatics", "disorder", "valley", "charge", "readout", "spin", "device", "optimum", "compile"]
 FORBIDDEN = re.compile(r"^\s*(from|import)\s+(qdt_\w+|qdt\b|qcodes|pyvisa|qm\b|qm\.|qdevil)")
 bad = []
 for layer in ORDER:

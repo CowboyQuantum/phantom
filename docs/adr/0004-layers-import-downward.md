@@ -10,7 +10,7 @@ different cost and a different source of truth. Without a dependency order the l
 the two-tier split (ADR 0001) would erode.
 
 ## Decision
-`layout` ← `electrostatics` ← `disorder` ← `valley` ← `charge` ← `readout` ← `spin` ← `optimum`, each
+`layout` ← `electrostatics` ← `disorder` ← `valley` ← `charge` ← `readout` ← `spin` ← `device` ← `optimum` (`device`, the compiled-device record, added by ADR 0023), each
 importing only layers below it; `compile` may import everything; nothing imports `compile`.
 `scripts/check_imports.py` enforces it, and the no-qdt rule, in CI. Each layer's `__init__` docstring states
 what it owns and its runtime form.

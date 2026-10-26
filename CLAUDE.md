@@ -19,7 +19,7 @@ could ask "why?" about; comment on the issue; commit.
 1. `phantom` imports nothing from qdt, from any measurement software, or from any instrument SDK. Ever.
    It is numpy/scipy in, numpy out. (ADR 0003)
 2. Layers import only downward: `layout` ← `electrostatics` ← `disorder` ← `valley` ← `charge` ←
-   `readout` ← `spin` ← `optimum`; `compile` may import everything; nothing imports `compile`. (ADR 0004)
+   `readout` ← `spin` ← `device` ← `optimum`; `compile` may import everything; nothing imports `compile`. (ADR 0004, 0023)
 3. **Reproducibility contract:** every model takes an explicit seed and carries a `model_version`; the same
    parameters, seed and version give identical output, bit for bit, on the same platform and numpy build, and
    agree within 1e-9 relative across platforms; `ubuntu-latest` in CI is the reference for sign-off hashes. (ADR 0003, 0010, 0014)

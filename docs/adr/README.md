@@ -25,5 +25,6 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0019 | Noise is drawn per device: a 1/f amplitude, a Poisson number of dominant switchers, a white floor | Accepted |
 | 0020 | Valley splitting is a Rice draw per dot from alloy disorder, with a deterministic part for MOS; three signatures | Accepted |
 | 0021 | Exchange from the Hubbard two-electron sector; Lindblad spins with quasi-static noise by quadrature; PSB window is the valley draw | Accepted |
+| 0023 | A compiled device is a parameter record in its own layer; the basis is recomputed, not stored; JSON serialisation; the FEM backend is a hook; optimum reads the record | Accepted |
 | 0022 | Blockade transport as sequential cycles; funnel as two-level mixing; Elzerman shots; noise spectroscopy by filter functions; gate fidelity as the Lindblad channel's entanglement fidelity | Accepted |
 | 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
