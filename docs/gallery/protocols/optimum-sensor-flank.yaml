@@ -1,7 +1,7 @@
 id: optimum-sensor-flank
 name: Sensor peak of the compiled device and the optimum's flank
 step: 7
-description: The compiled device's sensor current and the magnitude of its slope against the sensor gate over about one Coulomb-peak period around the compiled set-point, with the point the optimum chooses, the steepest flank found by a coarse scan, a fine scan and a parabolic interpolation, marked by a spike in the marker trace. The compiled set-point itself sits 0.9 peak widths from the peak centre (ADR 0023).
+description: The compiled device's sensor current and the magnitude of its slope against the sensor gate over about one Coulomb-peak period around the compiled set-point, with the point the optimum chooses, the steepest flank found by a coarse scan and a fine scan, marked by a spike in the marker trace. The compiled set-point itself sits 0.9 peak widths from the peak centre (ADR 0023).
 layers: [readout, device, optimum, compile]
 runner: step7:optimum_sensor_flank
 instance:

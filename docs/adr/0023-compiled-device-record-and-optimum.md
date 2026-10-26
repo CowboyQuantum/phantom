@@ -30,8 +30,8 @@ must read a compiled device.
 - **Backends** (plan §8 #1 stays open): `closed_form` is the only one; `fem` is a hook behind the
   `[fem]` extra that raises with the open decision's name until a solver is chosen. Everything
   downstream of the basis is backend-agnostic.
-- **`optimum`** reads the record and answers per layer: sensor flank by a coarse scan, a fine scan and a parabolic
-  interpolation of |dI/dV| (a golden-section search differed between platforms); the virtual-gate matrix from the inverse of the plunger block of the
+- **`optimum`** reads the record and answers per layer: sensor flank by a coarse scan and a fine scan of |dI/dV|, the answer a grid
+  point (a golden-section search and a parabolic interpolation both differed between platforms); the virtual-gate matrix from the inverse of the plunger block of the
   lever-arm matrix scaled to the raw plungers' lever arms, with cross-talk compensation for the other
   gates and the sensor gate holding the sensor potential fixed; the barrier voltage for a target
   t from the compiled exponential; the Pauli-blockade read point from the receiving dot's valley draw
