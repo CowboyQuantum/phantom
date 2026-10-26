@@ -532,6 +532,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#h-disorder-draws-layout-electrostatics-disorder-step-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H. Disorder draws (layout, electrostatics, disorder) — Step 3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#candidates-not-included-for-the-owner-to-decide" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1003,6 +1014,37 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td>Ramsey T₂* vs. ε (through dJ/dε)</td>
 <td>T₂*</td>
 <td>T₂* ∝ 1/(dJ/dε) × noise amplitude; a direct check that the same charge-noise draw governs the qubit and the sensor</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h-disorder-draws-layout-electrostatics-disorder-step-3">H. Disorder draws (layout, electrostatics, disorder) — Step 3</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>(x, y) landscape, clean beside three seeded draws</td>
+<td>potential energy (meV), gate outlines</td>
+<td>the gate layer shifted and resized; charge dips and bumps (visible at MOS densities, below a meV for SiGe)</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>(P1, P2) coarse map, clean beside three draws, each re-derived</td>
+<td>sensor_conductance</td>
+<td>lines tilt and shift, periods change between draws; an extra family of lines when a draw has an unintentional minimum</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>charge-density severity, many draws</td>
+<td>extra minima in the channel (count)</td>
+<td>the mean and 90th percentile of extra minima and the fraction of affected draws rising with density; the P1 row compares with a published MOS/SiGe comparison</td>
 </tr>
 </tbody>
 </table>

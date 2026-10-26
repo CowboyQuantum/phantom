@@ -567,9 +567,9 @@
 <p>Catalog entries become generators that perturb the compiled potential and parameters, so unintentional dots, leaky barriers, asymmetric lever arms, charge switchers and drift appear for physical reasons and at catalog-set rates.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li><code>disorder</code>: static random interface/oxide charges (density per material class) added to the potential basis; gate misalignment and width error as basis transforms; strain and g-factor perturbations as parameter draws</li>
+<li><code>disorder</code>: static random interface/oxide charges (density per material class) added to the potential basis as image-charge energy offsets (done, ADR 0015); gate misalignment and width error as polygon transforms (done); strain and g-factor perturbations as parameter draws (waits for <code>spin</code>)</li>
 <li>fault generators for every catalog entry marked <code>runtime</code>, each with a severity knob</li>
-<li>a scenario draw: material + catalog + seed → a perturbed device, serialisable</li>
+<li>a scenario draw: material + catalog + seed → a perturbed device, serialisable (<code>disorder.scenario</code>, done; parameters are the catalog draft's placeholders until the entries are written)</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
@@ -582,7 +582,10 @@
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li>to be listed before the step starts; each carries a <code>budget</code> (ADR 0009)</li>
+<li><code>potential-map-disorder</code>: the landscape of the clean layout beside three draws, gate outlines overlaid (rendering)</li>
+<li><code>stability-coarse-2dot-disorder</code>: the layout-derived coarse map, clean beside three draws each re-derived from its own landscape (rendering)</li>
+<li><code>unintentional-dots</code>: mean extra minima in the channel against charge density over many draws, MOS class (rendering; the P1 row's curve)</li>
+<li>to come as catalog entries land: leaky barrier, open or shorted gate, sensor-coupling asymmetry; <code>gate-hysteresis</code> with a trapping loop; switcher and drift rates tied to the catalog (Step 4)</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
@@ -594,7 +597,7 @@
 <li>which catalog entries need the offline tier (Step 7) rather than a runtime generator</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS</p>
 
 
 

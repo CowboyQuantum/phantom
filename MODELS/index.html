@@ -662,8 +662,14 @@ step replaces (the step is named).</p>
     LAY["geometry.Layout&lt;br/&gt;gate polygons, Stack (effective depth), MaterialClass; JSON file"]
   end
 
+  subgraph disorder
+    SCN["scenario.draw_scenario / apply_scenario&lt;br/&gt;material params + seed + severity → perturbed layout and basis; serialisable; severity 0 = clean"]
+    CHG["charges.draw_fixed_charges, charge_energy_ev&lt;br/&gt;Poisson interface charges → image-charge energy offset (placeholder density)"]
+    MIS["geometry_faults.draw_misalignment, apply_misalignment&lt;br/&gt;gate-layer shift and per-gate edge error as polygon transforms"]
+  end
+
   subgraph electrostatics
-    BASIS["closed_form.GateBasis&lt;br/&gt;solid angle of each gate polygon / 2π on a grid: potential per volt"]
+    BASIS["closed_form.GateBasis (+ offset_ev)&lt;br/&gt;solid angle of each gate polygon / 2π on a grid: potential per volt"]
     DOTS["dots.find_dots, barrier_between&lt;br/&gt;minima → dot positions, harmonic radii, lever arms; saddles → barrier heights"]
     SCH["schrodinger.dot_levels_ev&lt;br/&gt;offline check of the harmonic estimate (compile tier)"]
   end
@@ -688,6 +694,11 @@ step replaces (the step is named).</p>
   OUT["arrays: current (A), demodulated dI/dV (A/V), N present"]
 
   LAY --&gt; BASIS
+  LAY --&gt; SCN
+  SCN --&gt; CHG
+  SCN --&gt; MIS
+  MIS --&gt; BASIS
+  CHG --&gt; BASIS
   BASIS --&gt; DOTS
   DOTS --&gt; DER
   DOTS -.-&gt; SCH
@@ -713,7 +724,9 @@ step replaces (the step is named).</p>
 
   style RATES stroke-dasharray: 4 3
   style TR stroke-dasharray: 4 3
-  style SCH stroke-dasharray: 4 3</code></pre>
+  style SCH stroke-dasharray: 4 3
+  style CHG stroke-dasharray: 4 3
+  style MIS stroke-dasharray: 4 3</code></pre>
 <p>Which protocol uses which path (Step 1):</p>
 <table>
 <thead>
@@ -771,6 +784,18 @@ step replaces (the step is named).</p>
 <td><code>crosstalk-lines</code></td>
 <td>Layout → derived CI and sensor α → noise-free maps against four gate pairs (Step 2)</td>
 </tr>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>Layout → scenario draw (charges, misalignment) → perturbed basis → U(x, y), clean beside draws (Step 3)</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>Layout → scenario draw → perturbed basis → dots → derived CI and sensor α → sensor flank → sweep, per draw (Step 3)</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>Layout (MOS) → many scenario draws → minima count in the channel vs. density (Step 3)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="module-dependency-graph-generated-do-not-edit-by-hand">Module dependency graph (generated; do not edit by hand)</h2>
@@ -783,6 +808,11 @@ step replaces (the step is named).</p>
     electrostatics_closed_form["closed_form"]
     electrostatics_dots["dots"]
     electrostatics_schrodinger["schrodinger"]
+  end
+  subgraph disorder
+    disorder_charges["charges"]
+    disorder_geometry_faults["geometry_faults"]
+    disorder_scenario["scenario"]
   end
   subgraph charge
     charge_ci["ci"]
@@ -798,18 +828,26 @@ step replaces (the step is named).</p>
     readout_sensor["sensor"]
     readout_transport["transport"]
   end
+  charge_ci --&gt; constants
   charge_derived --&gt; charge_ci
   charge_derived --&gt; charge_dot
   charge_derived --&gt; electrostatics_closed_form
   charge_derived --&gt; electrostatics_dots
   charge_derived --&gt; layout_geometry
-  charge_dot --&gt; charge_ci
+  charge_dot --&gt; constants
   charge_hubbard --&gt; charge_ci
   charge_hubbard --&gt; charge_dot
+  disorder_charges --&gt; constants
+  disorder_geometry_faults --&gt; layout_geometry
+  disorder_scenario --&gt; disorder_charges
+  disorder_scenario --&gt; disorder_geometry_faults
+  disorder_scenario --&gt; electrostatics_closed_form
+  disorder_scenario --&gt; layout_geometry
   electrostatics_closed_form --&gt; layout_geometry
+  electrostatics_dots --&gt; constants
   electrostatics_dots --&gt; electrostatics_closed_form
   electrostatics_schrodinger --&gt; electrostatics_dots
-  readout_loading --&gt; charge_ci
+  readout_loading --&gt; constants
   readout_lockin --&gt; readout_loading
   readout_lockin --&gt; readout_measure
   readout_measure --&gt; charge_ci
@@ -839,6 +877,22 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>charge.hubbard</code></td>
 <td>Two-site extended Hubbard model of a few-electron double dot.</td>
+</tr>
+<tr>
+<td><code>constants</code></td>
+<td>Physical constants (CODATA 2018), below every layer so any layer may import them (ADR 0004).</td>
+</tr>
+<tr>
+<td><code>disorder.charges</code></td>
+<td>Random fixed charges at an interface, as a perturbation of the electron energy landscape.</td>
+</tr>
+<tr>
+<td><code>disorder.geometry_faults</code></td>
+<td>Gate misalignment and width error as transforms of the layout polygons.</td>
+</tr>
+<tr>
+<td><code>disorder.scenario</code></td>
+<td>A scenario draw: material + catalog parameters + seed → a perturbed device, serialisable.</td>
 </tr>
 <tr>
 <td><code>electrostatics.closed_form</code></td>
@@ -886,7 +940,7 @@ step replaces (the step is named).</p>
 
 <h2 id="runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand">Runtimes (generated from <code>docs/gallery/measured.json</code> and the protocol files; do not edit by hand)</h2>
 <!-- runtimes:start -->
-<p>Last recorded on 2026-10-26 at commit <code>a0dac4b</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
+<p>Last recorded on 2026-10-26 at commit <code>f182950</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
 <h3 id="per-model-microseconds-per-point-or-sample">Per model (microseconds per point or sample)</h3>
 <table>
 <thead>
@@ -902,55 +956,55 @@ step replaces (the step is named).</p>
 <td><code>charge.ci.ConstantInteractionParams.mean_occupation</code></td>
 <td>thermal occupation per gate point</td>
 <td>10,000</td>
-<td>1.25</td>
+<td>1.353</td>
 </tr>
 <tr>
 <td><code>charge.hubbard.HubbardParams.mean_occupation</code></td>
 <td>16x16 diagonalisation per gate point</td>
 <td>10,000</td>
-<td>10.059</td>
+<td>10.069</td>
 </tr>
 <tr>
 <td><code>readout.sensor.SensorSETParams.current_a</code></td>
 <td>sensor current per point</td>
 <td>100,000</td>
-<td>0.095</td>
+<td>0.113</td>
 </tr>
 <tr>
 <td><code>readout.noise.TelegraphNoise.trace</code></td>
 <td>one fluctuator per sample</td>
 <td>100,000</td>
-<td>0.66</td>
+<td>0.655</td>
 </tr>
 <tr>
 <td><code>readout.noise.OneOverFNoise.trace</code></td>
 <td>24 fluctuators per sample</td>
 <td>10,000</td>
-<td>16.039</td>
+<td>16.056</td>
 </tr>
 <tr>
 <td><code>readout.measure.SensedDoubleDot.sweep_a (noisy)</code></td>
 <td>occupation + sensor + three noise traces per point</td>
 <td>10,000</td>
-<td>18.603</td>
+<td>18.105</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_a_per_v</code></td>
 <td>8 evaluations per point, noisy</td>
 <td>2,500</td>
-<td>146.495</td>
+<td>146.252</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_dynamic_a_per_v</code></td>
 <td>8 evaluations + rate dynamics per point, noisy</td>
 <td>2,500</td>
-<td>154.772</td>
+<td>153.511</td>
 </tr>
 <tr>
 <td><code>readout.loading.latched_occupation</code></td>
 <td>per scan step</td>
 <td>100,000</td>
-<td>0.946</td>
+<td>0.923</td>
 </tr>
 </tbody>
 </table>
@@ -970,49 +1024,49 @@ step replaces (the step is named).</p>
 <td><code>coulomb-oscillations-single-dot</code></td>
 <td>1,201</td>
 <td>0.5 / 0.0</td>
-<td>0.05 / 0.00191</td>
+<td>0.05 / 0.0018</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>crosstalk-lines</code></td>
 <td>57,600</td>
-<td>0.5 / 0.0898</td>
-<td>0.05 / 0.00192</td>
+<td>0.5 / 0.0859</td>
+<td>0.05 / 0.00181</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>diamonds-single-dot</code></td>
 <td>64,521</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00015</td>
+<td>0.02 / 0.00011</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis</code></td>
 <td>361</td>
-<td>0.5 / 0.0479</td>
-<td>1.0 / 0.08021</td>
+<td>0.5 / 0.0437</td>
+<td>1.0 / 0.08083</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-leakage-iv</code></td>
 <td>1,806</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00011</td>
+<td>0.02 / 0.0001</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-psd</code></td>
 <td>30,000</td>
-<td>0.5 / 0.0087</td>
-<td>0.1 / 0.01903</td>
+<td>0.5 / 0.0078</td>
+<td>0.1 / 0.0186</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-time-trace</code></td>
 <td>30,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.1 / 0.0185</td>
+<td>0.1 / 0.01864</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1032,7 +1086,7 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>pinch-off-crosstalk</code></td>
 <td>24,321</td>
-<td>0.5 / 0.0431</td>
+<td>0.5 / 0.0412</td>
 <td>0.01 / 2e-05</td>
 <td>1</td>
 </tr>
@@ -1040,20 +1094,27 @@ step replaces (the step is named).</p>
 <td><code>plunger-vs-barrier-map</code></td>
 <td>28,800</td>
 <td>0.5 / 0.0001</td>
-<td>0.05 / 0.00277</td>
+<td>0.05 / 0.00264</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-cut-along-channel</code></td>
 <td>1,203</td>
-<td>0.5 / 0.0419</td>
+<td>0.5 / 0.0397</td>
 <td>0.01 / 0.00036</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>138,312</td>
+<td>1.0 / 0.1556</td>
+<td>0.001 / 0.0</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-layout</code></td>
 <td>34,578</td>
-<td>0.5 / 0.0417</td>
+<td>0.5 / 0.0419</td>
 <td>0.001 / 0.0</td>
 <td>1</td>
 </tr>
@@ -1061,77 +1122,91 @@ step replaces (the step is named).</p>
 <td><code>sensor-coulomb-peak</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00157</td>
+<td>0.02 / 0.00167</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>57,600</td>
+<td>2.0 / 0.1608</td>
+<td>0.1 / 0.01843</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-layout</code></td>
 <td>22,500</td>
-<td>0.5 / 0.0834</td>
-<td>0.1 / 0.01872</td>
+<td>0.5 / 0.0844</td>
+<td>0.1 / 0.01896</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0003</td>
-<td>0.1 / 0.0188</td>
+<td>0.1 / 0.01847</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-fine-2dot</code></td>
 <td>22,500</td>
 <td>0.5 / 0.0005</td>
-<td>0.1 / 0.01951</td>
+<td>0.1 / 0.01856</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-lockin-common</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.17205</td>
+<td>0.5 / 0.16047</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-detuning</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.16169</td>
+<td>0.5 / 0.16146</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p1</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0004</td>
-<td>0.5 / 0.15967</td>
+<td>0.5 / 0.0006</td>
+<td>0.5 / 0.16265</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p2</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0008</td>
-<td>0.5 / 0.16079</td>
+<td>0.5 / 0.0004</td>
+<td>0.5 / 0.16143</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>turn-on-global</code></td>
 <td>201</td>
-<td>0.5 / 0.0377</td>
-<td>1.0 / 0.07718</td>
+<td>0.5 / 0.0388</td>
+<td>1.0 / 0.08178</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate-layout</code></td>
 <td>361</td>
-<td>0.5 / 0.0365</td>
-<td>1.0 / 0.07456</td>
+<td>0.5 / 0.0384</td>
+<td>1.0 / 0.08061</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00011</td>
+<td>0.02 / 5e-05</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>125</td>
+<td>1.0 / 0.0</td>
+<td>400.0 / 84.10135</td>
 <td>1</td>
 </tr>
 </tbody>
