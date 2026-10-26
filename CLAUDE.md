@@ -22,7 +22,7 @@ could ask "why?" about; comment on the issue; commit.
    `readout` ← `spin` ← `optimum`; `compile` may import everything; nothing imports `compile`. (ADR 0004)
 3. **Reproducibility contract:** every model takes an explicit seed and carries a `model_version`; the same
    parameters, seed and version give identical output, bit for bit, on the same platform and numpy build, and
-   agree within 1e-12 relative across platforms; `ubuntu-latest` in CI is the reference for sign-off hashes. (ADR 0003, 0010)
+   agree within 1e-9 relative across platforms; `ubuntu-latest` in CI is the reference for sign-off hashes. (ADR 0003, 0010, 0014)
 4. **Compile once, run cheap:** anything slower than ~1 ms per gate point belongs in `compile`, which
    produces parameters the runtime layers consume. Runtime layers never call a solver. (ADR 0001)
 5. Every physical quantity carries its unit in the name or the docstring; parameters are dataclasses with

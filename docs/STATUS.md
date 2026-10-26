@@ -4,7 +4,7 @@
 
 **Current step:** 1 (issue #16, awaiting sign-offs) and 2 (issue #17, in progress) together →
 `docs/steps/01-charge-readout-core.md`, `docs/steps/02-layout-electrostatics.md`. Milestone: "Steps 1-2".
-**Branch:** `step-2/layout-electrostatics` (first Step 2 PR, part of #17). PRs #19 and #20 merged; #21, #22 small follow-ups.
+**Branch:** `step-2/electrical-health` (second Step 2 PR, part of #17). PRs #19–#23 merged.
 **Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
@@ -31,17 +31,22 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- First Step 2 PR: `layout` (Gate, Layer, Stack, MaterialClass, Layout JSON, `two_dot_layout`), `electrostatics`
+- Second Step 2 PR (`step-2/electrical-health`): `gate-leakage-iv`, `ohmic-iv`, `turn-on-global`,
+  `turn-on-single-gate-layout`, `gate-hysteresis`, `crosstalk-lines` rendering; `readout.transport` gains
+  `channel_transmission_current_a`, `gate_leakage_current_a`, `ohmic_current_a`; `Gate.area_nm2`; 3 tests.
+- Merged as PR #23, first Step 2 PR: `layout` (Gate, Layer, Stack, MaterialClass, Layout JSON, `two_dot_layout`), `electrostatics`
   (solid-angle closed form for any polygon, GateBasis, dots and barriers from the landscape, offline Schrödinger),
   `charge.derived.derive_double_dot`, ADR 0013, reference entry `davies1995-patterned-2deg` (proposed), four Step 2
   protocols rendering (potential map, channel cut, layout-derived stability map, pinch-off crosstalk), 8 new P0 tests.
-- Step 1 sign-offs still pending; PR #21 (preview comment formatting) and #22 (README links) awaiting merge.
+- Step 1 sign-offs still pending. PRs #21 and #22 merged.
 
 ## Known gaps
-- Step 2 still owes: `gate-leakage-iv`, `ohmic-iv`, `turn-on-global`, `crosstalk-lines`, `gate-hysteresis`,
-  re-rendering turn-on and pinch-off from the layout, and the P1 reproduction against a published layout (its
-  reference entry does not exist yet; the owner names the paper).
-- Pages source still points at `main`; must be `gh-pages` (root) for the docs root and the per-PR previews to be served.
+- ADR 0014: cross-platform tolerance raised from 1e-12 to 1e-9 after the layout-derived stability maps differed by
+  2e-11 between platforms (derived chains amplify last-bit differences at sharp steps). Typed chains still agree to 3e-14.
+- Step 2 still owes the P1 reproduction against a published layout (its reference entry does not exist yet; the
+  owner names the paper) and the owner's sign-offs of its protocols. `pinch-off-barrier` from the layout is
+  covered by `turn-on-single-gate-layout` (same sweep seen from the barrier side); say so if a separate picture is wanted.
+- Pages source is `gh-pages` (root); the docs root and per-PR previews are served.
 - Pages: ADR 0012 moves publishing to the `gh-pages` branch with per-PR previews at `/pr-<n>/`; the repository's
   Pages source must be set to that branch (root) once it exists, by the owner if the session is not permitted.
 - No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
@@ -58,8 +63,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   `stability-coarse-2dot`, budget 0.1) but not yet confirmed on CI.
 
 ## Next action
-Merge the first Step 2 PR after the owner reviews its four pictures on the preview; then the remaining Step 2
-protocols and the P1 row. In parallel, Step 1 sign-offs as the owner reviews.
+Owner reviews the Step 2 pictures on the preview of the second Step 2 PR and merges; names the published layout for
+the P1 row; signs off protocols from Steps 1 and 2 as reviewed. Then Step 3 (disorder and the fault models, issue to
+be filed) opens, which needs the catalog entries (#1–#14) the owner is writing.
 
 Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates

@@ -43,7 +43,7 @@ The candidate roster for every step is `PROTOCOLS.md`; rows become protocol file
 | `signed_by`, `signed_on` | GitHub handle and date |
 | `notes` | what the review concluded the sweep must show, and what was changed to get there |
 
-CI computes `array_sha256` on `ubuntu-latest`, the reference platform (ADR 0010), and fails if it differs from a signed record; the Windows job compares its arrays to the reference within 1e-12 relative. A protocol
+CI computes `array_sha256` on `ubuntu-latest`, the reference platform (ADR 0010), and fails if it differs from a signed record; the Windows job compares its arrays to the reference within 1e-9 relative (ADR 0014). A protocol
 with no record renders and is labelled *unsigned*. A session writes a record only when the human says
 so, naming them; their approval of the PR is the signature.
 

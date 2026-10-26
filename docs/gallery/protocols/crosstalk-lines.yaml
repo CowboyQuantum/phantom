@@ -1,0 +1,28 @@
+id: crosstalk-lines
+name: Charge-transition lines against gate pairs
+step: 2
+description: The layout-derived double dot's sensor signal against four gate pairs, noise-free, plus or minus 60 mV around the operating point. In each plane a dot's transition lines have slope equal to minus the ratio of that dot's lever arms to the two gates, so the four maps together read out the cross-capacitance matrix, which is returned alongside as the lever-arm matrix. The sensor gate is set on its flank first.
+layers: [layout, electrostatics, charge, readout]
+runner: step2:crosstalk_lines
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6}
+  temperature_k: 0.15
+  seed: 0
+  noise: none
+  pairs: [[P1, P2], [P1, B_M], [P2, B_M], [P1, B_L]]
+sweep:
+  - {gates: pairs, half_span_v: 0.06, points: 120, unit: V, relative_to: operating_point}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_P1_v, y: v_P2_P1_v, z: current_P1_P2_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "P1 vs P2"}
+    - {kind: map, x: v_P1_v, y: v_B_M_P1_v, z: current_P1_B_M_a, xlabel: "P1 (V)", ylabel: "B_M (V)", zlabel: "sensor current (A)", title: "P1 vs B_M"}
+    - {kind: map, x: v_P2_v, y: v_B_M_P2_v, z: current_P2_B_M_a, xlabel: "P2 (V)", ylabel: "B_M (V)", zlabel: "sensor current (A)", title: "P2 vs B_M"}
+    - {kind: map, x: v_P1_v, y: v_B_L_P1_v, z: current_P1_B_L_a, xlabel: "P1 (V)", ylabel: "B_L (V)", zlabel: "sensor current (A)", title: "P1 vs B_L"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.05, points: 57600, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

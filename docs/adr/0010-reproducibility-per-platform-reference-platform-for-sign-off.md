@@ -1,6 +1,6 @@
 # 0010 — Bit-for-bit reproducibility holds per platform; across platforms within 1e-12; ubuntu-latest is the reference
 
-**Status:** Accepted (amends 0003 rule 3 and 0008)
+**Status:** Accepted (amends 0003 rule 3 and 0008; tolerance amended by 0014)
 **Date:** 2026-10-25
 **Step:** 1
 

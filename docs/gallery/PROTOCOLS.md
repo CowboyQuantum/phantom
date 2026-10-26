@@ -24,6 +24,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `ohmic-iv` | V_sd, all gates accumulated | current | linear; series resistance |
 | `turn-on-global` | all gates together | current | threshold, then saturation; MOS vs. SiGe threshold scale |
 | `turn-on-single-gate` | one P, others fixed accumulated | current | threshold and saturation for that gate |
+| `turn-on-single-gate-layout` | one barrier swept with every other gate open, from the layout | current | the channel opens where the energy under that barrier, the highest point along the channel, crosses the threshold; threshold and slope from the lever arms (Step 2) |
 | `pinch-off-barrier` | one B, others fixed | current | exponential pinch-off; pinch-off voltage |
 | `pinch-off-crosstalk` | B_i pinch-off repeated vs. V of gate j | pinch-off voltage of i | straight line; slope is the cross-capacitance ratio |
 | `gate-hysteresis` | one gate up then down | current | overlap for a clean device; a loop when charge trapping is present (Step 3) |

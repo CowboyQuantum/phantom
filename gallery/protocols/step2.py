@@ -18,6 +18,10 @@ def _layout(p: Protocol) -> Layout:
     return two_dot_layout(inst.get("material", "SiGe"), float(inst.get("pitch_nm", 80.0)))
 
 
+def _axis(spec: dict) -> np.ndarray:
+    return np.linspace(float(spec["from"]), float(spec["to"]), int(spec["points"]))
+
+
 def _operating_point(layout: Layout, p: Protocol) -> np.ndarray:
     op = p.instance["operating_point_v"]
     return np.array([float(op[name]) for name in layout.gate_names])
@@ -155,3 +159,128 @@ def pinch_off_crosstalk(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
         "v_pinch_off_v": v_po,
         "slope_v_per_v": np.array(-lever[inb] / lever[ib]),
     }
+
+
+# --- electrical health from the layout -----------------------------------------------------------
+
+from phantom.readout import channel_transmission_current_a, gate_leakage_current_a, ohmic_current_a
+
+
+def _channel_barrier_ev(basis: GateBasis, v: np.ndarray, x0: float, x1: float, samples: int = 201) -> np.ndarray:
+    """Highest electron energy along the channel line y = 0 between x0 and x1, for gate vectors v (..., gates)."""
+    v = np.asarray(v, dtype=float)
+    flat = v.reshape(-1, v.shape[-1])
+    out = np.empty(len(flat))
+    for k, vk in enumerate(flat):
+        _, u = line_cut(basis, vk, x0, 0.0, x1, 0.0, samples)
+        out[k] = u.max()
+    return out.reshape(v.shape[:-1])
+
+
+def _transmission_params(p: Protocol) -> dict:
+    inst = p.instance
+    return {
+        "threshold_ev": float(inst.get("threshold_ev", -0.05)),
+        "width_ev": float(inst.get("width_ev", 0.004)),
+        "i_sat_a": float(inst.get("i_sat_a", 2e-9)),
+    }
+
+
+def turn_on_global_layout(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """All gates raised together: the channel opens once the highest point of the electron energy
+    along it falls below the threshold. The turn-on voltage is derived from the layout's lever arms."""
+    with ctx.compile():
+        lay = _layout(p)
+        basis = GateBasis.from_layout(lay, float(p.instance.get("grid_pitch_nm", 2.0)))
+        x0, x1 = (float(x) for x in p.instance.get("x_range_nm", [-200.0, 200.0]))
+    vg = _axis(p.sweep[0])
+    with ctx.run(len(vg)):
+        v = np.repeat(vg[:, None], len(lay.gates), axis=1)
+        u = _channel_barrier_ev(basis, v, x0, x1)
+        i = channel_transmission_current_a(u, **_transmission_params(p))
+        ctx.count(model_evals=len(vg))
+    return {"v_all_gates_v": vg, "current_a": i, "u_channel_max_mev": u * 1e3}
+
+
+def turn_on_single_gate_layout(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    with ctx.compile():
+        lay = _layout(p)
+        basis = GateBasis.from_layout(lay, float(p.instance.get("grid_pitch_nm", 2.0)))
+        v0 = _operating_point(lay, p)
+        j = lay.gate_names.index(p.instance["gate"])
+        x0, x1 = (float(x) for x in p.instance.get("x_range_nm", [-200.0, 200.0]))
+    vg = _axis(p.sweep[0])
+    with ctx.run(len(vg)):
+        v = np.repeat(v0[None, :], len(vg), axis=0)
+        v[:, j] = vg
+        u = _channel_barrier_ev(basis, v, x0, x1)
+        i = channel_transmission_current_a(u, **_transmission_params(p))
+        ctx.count(model_evals=len(vg))
+    return {"v_gate_v": vg, "current_a": i, "u_channel_max_mev": u * 1e3}
+
+
+def gate_hysteresis_layout(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """One gate swept up and then back down. With no charge trapping (Step 3 adds it) the two traces
+    coincide; the picture is the clean baseline a loop will be judged against."""
+    out = turn_on_single_gate_layout(ctx, p)
+    return {
+        "v_gate_v": out["v_gate_v"],
+        "current_up_a": out["current_a"],
+        "current_down_a": out["current_a"][::-1][::-1],
+    }
+
+
+def gate_leakage_iv(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Leakage of every gate against its own voltage, all others grounded: proportional to the gate's
+    area and exponential in the field across the stack."""
+    with ctx.compile():
+        lay = _layout(p)
+        t = lay.stack.depth_nm
+    vg = _axis(p.sweep[0])
+    out: dict[str, np.ndarray] = {"v_gate_v": vg}
+    with ctx.run(len(vg) * len(lay.gates)):
+        for g in lay.gates:
+            out[f"leak_{g.name}_a"] = gate_leakage_current_a(
+                vg,
+                g.area_nm2,
+                t,
+                float(p.instance.get("onset_field_v_per_nm", 0.08)),
+                float(p.instance.get("steepness_v", 0.2)),
+                float(p.instance.get("i_onset_a_per_um2", 1e-9)),
+            )
+            out[f"abs_leak_{g.name}_a"] = np.abs(out[f"leak_{g.name}_a"])
+        ctx.count(model_evals=len(vg) * len(lay.gates))
+    return out
+
+
+def ohmic_iv(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    vsd = _axis(p.sweep[0])
+    with ctx.run(len(vsd)):
+        i = ohmic_current_a(vsd, float(p.instance.get("series_resistance_ohm", 20e3)))
+        ctx.count(model_evals=len(vsd))
+    return {"v_sd_v": vsd, "v_sd_mv": vsd * 1e3, "current_a": i}
+
+
+def crosstalk_lines(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """Charge-transition lines against several gate pairs of the layout-derived double dot (noise-free):
+    the slope of a dot's lines in each plane is the ratio of that dot's lever arms to the two gates. The
+    full lever-arm matrix is returned alongside."""
+    with ctx.compile():
+        lay, v0, derived, dev = _sensed_from_layout(p)
+    n = int(p.sweep[0]["points"])
+    half = float(p.sweep[0]["half_span_v"])
+    pairs = [tuple(pair) for pair in p.instance["pairs"]]
+    out: dict[str, np.ndarray] = {"lever_arms": derived.ci.lever_arms_ev_per_v(), "operating_point_v": v0}
+    with ctx.run(n * n * len(pairs)):
+        for a, b in pairs:
+            ia, ib = lay.gate_names.index(a), lay.gate_names.index(b)
+            va = v0[ia] + np.linspace(-half, half, n)
+            vb = v0[ib] + np.linspace(-half, half, n)
+            v = np.broadcast_to(v0, (n, n, len(v0))).copy()
+            v[..., ia] = va[:, None]
+            v[..., ib] = vb[None, :]
+            out[f"v_{a}_v"] = va
+            out[f"v_{b}_{a}_v"] = vb
+            out[f"current_{a}_{b}_a"] = dev.current_a(v)
+        ctx.count(model_evals=n * n * len(pairs))
+    return out
