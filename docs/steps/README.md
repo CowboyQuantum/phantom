@@ -10,6 +10,6 @@ One file per roadmap step, fixed headings. `STATUS.md` names the current one.
 | 3 | [Disorder and the fault models](03-disorder-faults.md) | IN PROGRESS |
 | 4 | [Readout physics](04-readout.md) | IN PROGRESS |
 | 5 | [Valley](05-valley.md) | IN PROGRESS |
-| 6 | [Spin](06-spin.md) | NOT STARTED |
+| 6 | [Spin](06-spin.md) | IN PROGRESS |
 | 7 | [Compile and optimum](07-compile-optimum.md) | NOT STARTED |
 | 8 | [qdt cutover](08-qdt-cutover.md) | NOT STARTED |

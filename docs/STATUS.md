@@ -3,50 +3,52 @@
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
 **Current step:** 1 (#16), 2 (#17), 3 (#25), 4 (#28) complete except the owner's sign-offs, catalog entries and P1
-rows (and Step 4's lock-in dynamics on the master equation); 5 (#32, valley) in progress → `docs/steps/05-valley.md`.
-Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin".
-**Branch:** `step-5/valley-draws` (first Step 5 PR, part of #32). PRs #19–#31 merged.
-**Last session:** 2026-10-26 — Step 4 closed with its third PR (#31: noise draws, switcher and drift protocols,
-plunger-vs-barrier on the master equation); Step 5 opened: `valley` layer, ADR 0020, four protocols, six P0 tests.
+rows (and Step 4's lock-in dynamics on the master equation); 5 (#32, valley) built, its P1 row open; 6 (#34, spin)
+in progress → `docs/steps/06-spin.md`. Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin".
+**Branch:** `step-6/exchange-and-psb` (first Step 6 PR, part of #34). PRs #19–#33 merged.
+**Last session:** 2026-10-26 — Step 4 closed (#31), Step 5 opened and merged (#33: `valley` layer, ADR 0020, four
+protocols), Step 6 opened: `spin` layer (exchange, Lindblad dynamics, PSB), ADR 0021, eight protocols, ten P0 tests.
 
 ## Done
-- `valley` (Step 5): `splitting.ValleyParams` with the alloy-disorder scalings (σ ∝ 1/radius, √(x̄(1−x̄)),
-  √(interface width), a `step_factor` hook), a deterministic part that for MOS grows with the vertical field,
-  `draw_valley_splitting_uev` (Rice draw per dot, seeded), `rice_mean`; `signatures` (second-electron
-  magnetospectroscopy shift with the kink at g μ_B B = E_V, Lorentzian T₁ hot spot, pulsed-gate spectroscopy
-  occupation with the excited-state line at E_V/α, its weight vanishing smoothly at zero amplitude). ADR 0020.
-  Protocols `valley-splitting-draws`, `magnetospectroscopy-transition`, `t1-hot-spot`, `pulsed-gate-spectroscopy`
-  (all unsigned, within budget). Proposed reference entries `paqueletwuetz2022-valley-alloy`, `yang2013-mos-valley`
-  (written from memory; the owner confirms DOI, authors and figures). The reference values of both material
-  classes are placeholders (`calibration: none`) until those entries are confirmed.
-- Steps 1–4: `layout`, `electrostatics`, `disorder` (charges, geometry faults, wiring faults, trapping, noise draws,
-  scenario draw), `charge` (CI, Hubbard, derived from a layout), `readout` (SET sensor, noise processes, lock-in
-  channel, WKB rates, master equation, RF tank, single shot, transport placeholders); 39 protocols rendering; 89 P0
-  tests; `check_references.py`, `gallery.py` with budgets, sign-off hashes, `--record`; `model_graph.py --check`;
-  CI with the ubuntu reference and the Windows comparison within 1e-9 (ADR 0010, 0014); per-PR gallery previews
-  on Pages (ADR 0012); `docs/MODELS.md` measurement-flow diagram, module graph and runtime ledger (ADR 0011).
+- `spin` (Step 6, first PR): `exchange` (J from the Hubbard two-electron block, the detuning axis through the
+  plunger lever arms, the symmetric point, dJ/dε, σ_ε from gate noise, Gauss–Hermite quasi-static averaging),
+  `dynamics` (rotating-frame Hamiltonians, `Lindblad` with T₁ and T_φ collapse operators and `expm` stepping,
+  `SpinParams`/`SpinDraw`/`draw_spin`, Rabi, Ramsey and singlet-return formulas, T₂* = √2ħ/σ_E), `psb` (singlet
+  and triplet charge steps, the window at the receiving dot's valley splitting, visibility). ADR 0021. Protocols
+  `exchange-vs-detuning`, `exchange-vs-barrier`, `exchange-fingerprint`, `exchange-house-cells`, `esr-line`,
+  `rabi-chevron`, `ramsey-fringes`, `psb-readout-window` (unsigned, within budget). Proposed reference entries
+  `petta2005-singlet-triplet`, `reed2016-symmetric-exchange`, `yoneda2018-coherence-charge-noise` (from memory).
+- `valley` (Step 5): Rice draw per dot with the alloy-disorder scalings, MOS deterministic part, interface-step
+  hook; magnetospectroscopy kink, T₁ hot spot, pulsed-gate spectroscopy; ADR 0020; four protocols; two proposed
+  entries (`paqueletwuetz2022-valley-alloy`, `yang2013-mos-valley`).
+- Steps 1–4: `layout`, `electrostatics`, `disorder`, `charge`, `readout`; 43 protocols; tooling (`check_references`,
+  `gallery.py` with budgets, sign-offs, `--record`; `model_graph.py --check`); CI with the ubuntu reference and the
+  Windows comparison within 1e-9; per-PR gallery previews on Pages; `docs/MODELS.md` map, graph and ledger.
 
 ## In flight
-- First Step 5 PR (this branch): everything under "Done" for `valley`, plus `docs/MODELS.md` (valley subgraph in the
-  hand-drawn map; generated graph and ledger refreshed), the step file, the ADR index, `measured.json`.
+- First Step 6 PR (this branch): everything under "Done" for `spin`, `docs/MODELS.md` (spin subgraph; graph and
+  ledger refreshed), the step file, the indexes, `measured.json`. 99 P0 tests.
 
 ## Next action
-- After this PR merges: Step 6 (`spin`): Zeeman and g-factor draws, Pauli spin blockade consuming the valley draw
-  (the Step 5 exit criterion "PSB readout quality varies between draws" is tested there), exchange J(ε, V_B),
-  the house-cell and fingerprint protocols the owner asked for (axes P1, P2 at the evolve coordinate with J held
-  high; detuning vs J), relaxation background for the hot spot. File the Step 6 issue under "Steps 5-6: valley, spin".
+- Second Step 6 PR: `psb-bias-triangles` (transport with blockade on the master equation or the Hubbard
+  thermal state), `spin-funnel` (S–T₋ mixing against (ε, B) with the g draw), `elzerman-trace` (spin-dependent
+  tunnel-out on the lead rate), `charge-noise-spectroscopy-cpmg` (filter functions on the draw's 1/f spectrum,
+  must join the sensor `noise-psd`), `charge-noise-spectroscopy-j-vs-ramsey` (T₂* ∝ 1/(dJ/dε)); a two-qubit
+  exchange-gate fidelity from the Lindblad propagator with the draw's noise (exit criterion); EDSR/micromagnet
+  driving term. Then Step 7 (`compile`).
 
 ## Known gaps
-- Owner-dependent, never blocking: sign-offs for all 43 protocols; catalog entries #1–#14; confirmation (or
-  replacement) of the five proposed reference entries (van der Wiel 2003, Connors 2019, Davies 1995, Paquelet Wuetz
-  2022, Yang 2013); the papers for the P1 rows of Steps 2, 3, 4 and 5 (Step 5's P1 needs the digitised distribution
-  figure of the confirmed entry; then σ_ref and Δ_det are fitted and the placeholders retired).
-- Step 4 still owes the lock-in dynamics on the master equation (`readout.loading.LeadRateLandscape` and
-  `latched_occupation` remain for it; a master-equation step per half-cycle costs minutes per map). Amplifier noise
-  is absent from the SNR picture. Noise draws and Step 3 generators run on the catalog draft's placeholder values.
-- Valley: interface steps are a hook (`step_factor`), not a model; the hot-spot background rate is a constant until
-  `spin` supplies its field dependence; the pulsed-spectroscopy weights are fixed (no loading-rate model behind them);
-  `compile` (Step 7) will attach the per-dot draws to a compiled device using the harmonic radii from `electrostatics`.
+- Owner-dependent, never blocking: sign-offs for all 51 protocols; catalog entries #1–#14; confirmation (or
+  replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6 (Step 5 needs
+  the digitised distribution; Step 6 needs J(ε) and T₂*-vs-noise curves).
+- Spin placeholders (`calibration: none`): g spread and dg/dV, hyperfine rms, T₁ and the Markovian T_φ, the PSB
+  triplet T₁ at the read point. The quasi-static detuning noise takes the whole 1/f band of the noise draw
+  (18 µeV rms on the default device), which is on the large side; the band split (quasi-static vs. Markovian)
+  waits for the CPMG protocol. Ramsey traces of the two dots coincide because the hyperfine placeholder dominates
+  and is the same per dot.
+- Step 4 still owes the lock-in dynamics on the master equation. Amplifier noise is absent from the SNR picture.
+  Noise draws and Step 3 generators run on the catalog draft's placeholder values. Valley: interface steps are a
+  hook; the hot-spot background is a constant; pulsed-spectroscopy weights are fixed.
 - A plunger shorted to a neighbouring barrier dissolves the dot; the fault protocol shows a plunger–sensor-gate
   short instead. No screening in the charge potentials until Step 7. Operating points carry `R_L: 0.7, R_R: 0.7`.
 - Pages source is `gh-pages` (root); the docs root and per-PR previews under `/pr-<n>/` are served.
