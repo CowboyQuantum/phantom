@@ -572,27 +572,34 @@
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
-<li>trace preservation and positivity; Rabi and Ramsey in the noiseless limit are analytic</li>
+<li>trace preservation and positivity; Rabi and Ramsey in the noiseless limit are analytic — <code>tests/test_spin.py</code> (also: T₁ and T_φ rates, the quasi-static Gaussian envelope by quadrature, J against second-order perturbation theory at small t, J monotonic toward the anticrossing and exponential in the barrier, the sweet spot dJ/dε = 0, the detuning axis and noise projection, the PSB window at E_V and its draw dependence, the seeded g draw)</li>
 </ul>
 <h2 id="p1-tests-ci-literature-reproduce-an-item-of-a-confirmed-reference-entry-adr-0007">P1 tests (CI, <code>literature</code>: reproduce an item of a <code>confirmed</code> reference entry; ADR 0007)</h2>
 <ul>
-<li>published J(ε) curve; a published T₂* vs. charge-noise relation</li>
+<li>published J(ε) curve — waits for <code>petta2005-singlet-triplet</code> or <code>reed2016-symmetric-exchange</code> (both proposed) to be confirmed and digitised</li>
+<li>a published T₂* vs. charge-noise relation — waits for <code>yoneda2018-coherence-charge-noise</code> (proposed)</li>
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li>to be listed before the step starts; each carries a <code>budget</code> (ADR 0009)</li>
+<li><code>exchange-vs-detuning</code>, <code>exchange-vs-barrier</code> — J from the Hubbard sector with the second-order and exponential laws overlaid, dJ/dε</li>
+<li><code>exchange-fingerprint</code> — singlet return against (ε, τ) with the draw's quasi-static detuning noise</li>
+<li><code>exchange-house-cells</code> — singlet return against (P1, P2) at fixed τ with the barrier open: cells bounded by J contours and the honeycomb lines</li>
+<li><code>esr-line</code>, <code>rabi-chevron</code>, <code>ramsey-fringes</code> — the g draw's two lines, the Lindblad chevron, Ramsey with the draw's T₂*</li>
+<li><code>psb-readout-window</code> — singlet and triplet charge steps for two valley draws</li>
+<li>second PR: <code>psb-bias-triangles</code>, <code>spin-funnel</code>, <code>elzerman-trace</code>, <code>charge-noise-spectroscopy-cpmg</code>, <code>charge-noise-spectroscopy-j-vs-ramsey</code></li>
+<li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
-<li>a two-qubit exchange gate's fidelity depends on the compiled device's noise and valley draws</li>
-<li>both P1 reproductions pass</li>
+<li>a two-qubit exchange gate's fidelity depends on the compiled device's noise and valley draws (gate fidelity waits for the second PR; the fingerprint visibility and the PSB window already do)</li>
+<li>both P1 reproductions pass (need the confirmed entries)</li>
 </ul>
 <h2 id="open-decisions">Open decisions</h2>
 <ul>
-<li>3-qubit cost; which semi-analytic gate models beyond that</li>
+<li>3-qubit cost; which semi-analytic gate models beyond that — the Lindblad step is 4ⁿ × 4ⁿ, so three spins cost 64 × 64 per expm, still cheap; left open until a three-dot layout exists</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS — <code>spin.exchange</code>, <code>spin.dynamics</code>, <code>spin.psb</code> built (ADR 0021), ten P0 tests, eight protocols rendering and within budget; second PR, P1 rows and gate fidelity open.</p>
 
 
 
