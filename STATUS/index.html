@@ -332,10 +332,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#known-gaps" class="md-nav__link">
+  <a href="#next-action" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Known gaps
+        Next action
       
     </span>
   </a>
@@ -343,10 +343,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
+  <a href="#known-gaps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next action
+        Known gaps
       
     </span>
   </a>
@@ -572,10 +572,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#known-gaps" class="md-nav__link">
+  <a href="#next-action" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Known gaps
+        Next action
       
     </span>
   </a>
@@ -583,10 +583,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
+  <a href="#known-gaps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next action
+        Known gaps
       
     </span>
   </a>
@@ -614,110 +614,58 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 1 (#16), 2 (#17), 3 (#25) complete except the owner's sign-offs, catalog entries and P1 rows;
-4 (#28, readout physics) in progress → <code>docs/steps/04-readout.md</code>. Milestones: "Steps 1-2", "Steps 3-4".
-<strong>Branch:</strong> <code>step-4/noise-draws-and-dynamics</code> (third Step 4 PR, part of #28). PRs #19–#30 merged.
-<strong>Last session:</strong> 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
-noise, lock-in channel, qdt-sim reproduction fixture; <code>check_references.py</code>; <code>gallery.py</code> with budgets and
-sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.</p>
+<p><strong>Current step:</strong> 1 (#16), 2 (#17), 3 (#25), 4 (#28) complete except the owner's sign-offs, catalog entries and P1
+rows (and Step 4's lock-in dynamics on the master equation); 5 (#32, valley) in progress → <code>docs/steps/05-valley.md</code>.
+Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin".
+<strong>Branch:</strong> <code>step-5/valley-draws</code> (first Step 5 PR, part of #32). PRs #19–#31 merged.
+<strong>Last session:</strong> 2026-10-26 — Step 4 closed with its third PR (#31: noise draws, switcher and drift protocols,
+plunger-vs-barrier on the master equation); Step 5 opened: <code>valley</code> layer, ADR 0020, four protocols, six P0 tests.</p>
 <h2 id="done">Done</h2>
 <ul>
-<li><code>charge</code>: <code>ConstantInteractionParams</code> (qdt-sim's model migrated, plus exact lever arms, addition energies,
-  triple points), <code>Dot</code>, <code>Barrier</code>, <code>HubbardParams</code> (two-site spinful, t → 0 reproduces CI exactly; P0 tested).</li>
-<li><code>readout</code>: <code>SensorSETParams</code>, noise processes with <code>trace()</code> bit-identical to qdt-sim's <code>sample()</code> sequences,
-  <code>SensedDoubleDot</code> (sweeps with raster times and noise), <code>LockinParams</code> / <code>lockin_sweep_a_per_v</code>
-  (<code>sensor_lockin</code> channel), <code>transport</code> (phenomenological turn-on and pinch-off, <code>calibration: none</code>).</li>
-<li><code>tests/fixtures/qdt_sim_defaults.npz</code> (synthetic, from qdt commit ae6dd2c): maps, diamonds and noise sequences
-  reproduced to 1e-12 / bit for bit. 38 P0 tests green.</li>
-<li><code>scripts/check_references.py</code> in <code>check_all.sh</code>; <code>tests/conftest.py</code> skips <code>literature</code> tests whose entry is
-  not <code>confirmed</code>; two <code>proposed</code> entries (van der Wiel 2003 RMP; Connors 2019 PRB) awaiting the owner's check.</li>
-<li><code>gallery/</code> package + <code>scripts/gallery.py</code>: protocol YAML loader, counters and timing, canonical array hash,
-  sign-off check, budget ledger, PNG + <code>index.html</code>. Fourteen Step 1 protocols in <code>docs/gallery/protocols/</code>, all
-  within budget locally in <code>--strict</code> mode; all <code>unsigned</code>.</li>
-<li>Owner-driven revisions: <code>plunger-vs-barrier-map</code> in the lead-barrier configuration (dot 1 alone has a reservoir)
-  with <code>readout.loading</code> (rate-limited loading, latching); four chopped-gate maps <code>stability-lockin-p1/-p2/-common/
-  -detuning</code> through <code>lockin_sweep_dynamic_a_per_v</code> with a <code>LeadRateLandscape</code> (latching below the chop
-  frequency, lifetime broadening far above it; three limit tests). <code>docs/MODELS.md</code> measurement-flow diagram and
-  generated module graph and the runtime ledger (per-model micro-benchmarks and per-protocol costs recorded in <code>docs/gallery/measured.json</code> by <code>gallery.py --record</code>; <code>scripts/model_graph.py --check</code> in <code>check_all</code>), ADR 0011.</li>
-<li>CI: <code>gallery</code> (ubuntu, the reference, ADR 0010) and <code>gallery-windows</code> (compares its arrays to the reference within
-  1e-12) upload <code>gallery-&lt;os&gt;</code> artifacts; <code>pages</code> job builds mkdocs + rendered gallery from <code>main</code>.</li>
+<li><code>valley</code> (Step 5): <code>splitting.ValleyParams</code> with the alloy-disorder scalings (σ ∝ 1/radius, √(x̄(1−x̄)),
+  √(interface width), a <code>step_factor</code> hook), a deterministic part that for MOS grows with the vertical field,
+  <code>draw_valley_splitting_uev</code> (Rice draw per dot, seeded), <code>rice_mean</code>; <code>signatures</code> (second-electron
+  magnetospectroscopy shift with the kink at g μ_B B = E_V, Lorentzian T₁ hot spot, pulsed-gate spectroscopy
+  occupation with the excited-state line at E_V/α, its weight vanishing smoothly at zero amplitude). ADR 0020.
+  Protocols <code>valley-splitting-draws</code>, <code>magnetospectroscopy-transition</code>, <code>t1-hot-spot</code>, <code>pulsed-gate-spectroscopy</code>
+  (all unsigned, within budget). Proposed reference entries <code>paqueletwuetz2022-valley-alloy</code>, <code>yang2013-mos-valley</code>
+  (written from memory; the owner confirms DOI, authors and figures). The reference values of both material
+  classes are placeholders (<code>calibration: none</code>) until those entries are confirmed.</li>
+<li>Steps 1–4: <code>layout</code>, <code>electrostatics</code>, <code>disorder</code> (charges, geometry faults, wiring faults, trapping, noise draws,
+  scenario draw), <code>charge</code> (CI, Hubbard, derived from a layout), <code>readout</code> (SET sensor, noise processes, lock-in
+  channel, WKB rates, master equation, RF tank, single shot, transport placeholders); 39 protocols rendering; 89 P0
+  tests; <code>check_references.py</code>, <code>gallery.py</code> with budgets, sign-off hashes, <code>--record</code>; <code>model_graph.py --check</code>;
+  CI with the ubuntu reference and the Windows comparison within 1e-9 (ADR 0010, 0014); per-PR gallery previews
+  on Pages (ADR 0012); <code>docs/MODELS.md</code> measurement-flow diagram, module graph and runtime ledger (ADR 0011).</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>Third Step 4 PR: <code>disorder.noise_draw</code> (per-device 1/f amplitude, Poisson switchers, white floor; in the scenario
-  draw), <code>SensedDoubleDot.from_noise_draw</code>, ADR 0019, protocols <code>switcher-histogram</code>, <code>drift-repeated-cuts</code>;
-  <code>plunger-vs-barrier-map</code> re-rendered on the master equation with WKB rates per row; <code>LeadBarrier</code> retired;
-  four P0 tests.</li>
-<li>Merged as PR #30, second Step 4 PR: <code>readout.rf</code> (lumped tank + sensor resistance: reflection, resonance, matching),
-  <code>readout.single_shot</code> (consecutive integrated shots on the noise processes, SNR, fidelity; white noise rescaled by
-  1/√dt), ADR 0018, protocols <code>rf-resonance</code>, <code>rf-sensor-flank</code>, <code>single-shot-histogram</code>, <code>snr-vs-integration-time</code>,
-  five P0 tests.</li>
-<li>Merged as PR #29, first Step 4 PR: <code>readout.rates</code> (WKB), <code>readout.master_equation</code> (RateEquation with detailed balance, sweep
-  propagation), <code>electrostatics.barrier_width_nm</code> at the lead Fermi level, reservoir gates in <code>two_dot_layout</code>,
-  CI MODEL_VERSION 2 (duplicate clipped states no longer over-weighted; qdt-sim fixture compared away from the
-  empty corner), ADR 0017, protocols <code>stability-vs-sweep-rate</code>, <code>stability-direction</code>, <code>lead-rate-time-trace</code>,
-  six P0 tests (detailed balance, latching threshold, direction dependence, metastability without an interdot rate).</li>
-<li>Merged as PR #27, second Step 3 PR: <code>disorder.wiring</code> (open/shorted gates as a gate matrix, leak network, sensor-coupling factors),
-  <code>disorder.trapping</code> (history-dependent trapped fraction, hysteresis loop), both in the scenario draw; ADR 0016;
-  protocols <code>fault-signatures-stability</code>, <code>gate-leakage-pair</code>, <code>gate-hysteresis-trapping</code>; six P0 tests.</li>
-<li>Merged as PR #26, first Step 3 PR: <code>disorder</code> layer (interface charges as image-charge energy offsets, misalignment and width error as
-  polygon transforms, seeded serialisable scenario draw, severity 0 bit-identical to clean), <code>GateBasis.offset_ev</code>,
-  <code>phantom.constants</code> below every layer, ADR 0015, three protocols (<code>potential-map-disorder</code>,
-  <code>stability-coarse-2dot-disorder</code>, <code>unintentional-dots</code>), six P0 tests; catalog draft entry gains <code>calibration: none</code>.</li>
-<li>Merged as PR #24, second Step 2 PR: <code>gate-leakage-iv</code>, <code>ohmic-iv</code>, <code>turn-on-global</code>,
-  <code>turn-on-single-gate-layout</code>, <code>gate-hysteresis</code>, <code>crosstalk-lines</code> rendering; <code>readout.transport</code> gains
-  <code>channel_transmission_current_a</code>, <code>gate_leakage_current_a</code>, <code>ohmic_current_a</code>; <code>Gate.area_nm2</code>; 3 tests.</li>
-<li>Merged as PR #23, first Step 2 PR: <code>layout</code> (Gate, Layer, Stack, MaterialClass, Layout JSON, <code>two_dot_layout</code>), <code>electrostatics</code>
-  (solid-angle closed form for any polygon, GateBasis, dots and barriers from the landscape, offline Schrödinger),
-  <code>charge.derived.derive_double_dot</code>, ADR 0013, reference entry <code>davies1995-patterned-2deg</code> (proposed), four Step 2
-  protocols rendering (potential map, channel cut, layout-derived stability map, pinch-off crosstalk), 8 new P0 tests.</li>
-<li>Step 1 sign-offs still pending. PRs #21 and #22 merged.</li>
+<li>First Step 5 PR (this branch): everything under "Done" for <code>valley</code>, plus <code>docs/MODELS.md</code> (valley subgraph in the
+  hand-drawn map; generated graph and ledger refreshed), the step file, the ADR index, <code>measured.json</code>.</li>
+</ul>
+<h2 id="next-action">Next action</h2>
+<ul>
+<li>After this PR merges: Step 6 (<code>spin</code>): Zeeman and g-factor draws, Pauli spin blockade consuming the valley draw
+  (the Step 5 exit criterion "PSB readout quality varies between draws" is tested there), exchange J(ε, V_B),
+  the house-cell and fingerprint protocols the owner asked for (axes P1, P2 at the evolve coordinate with J held
+  high; detuning vs J), relaxation background for the hot spot. File the Step 6 issue under "Steps 5-6: valley, spin".</li>
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>All Step 2/3 pictures changed with the reservoir gates and the CI fix (re-rendered, unsigned). Operating points
-  carry <code>R_L: 0.7, R_R: 0.7</code>; the lead rate spans 1e2–1e10 Hz as the outer barrier goes 0.0–0.2 V.</li>
+<li>Owner-dependent, never blocking: sign-offs for all 43 protocols; catalog entries #1–#14; confirmation (or
+  replacement) of the five proposed reference entries (van der Wiel 2003, Connors 2019, Davies 1995, Paquelet Wuetz
+  2022, Yang 2013); the papers for the P1 rows of Steps 2, 3, 4 and 5 (Step 5's P1 needs the digitised distribution
+  figure of the confirmed entry; then σ_ref and Δ_det are fitted and the placeholders retired).</li>
 <li>Step 4 still owes the lock-in dynamics on the master equation (<code>readout.loading.LeadRateLandscape</code> and
-  <code>latched_occupation</code> remain for it; a master-equation step per half-cycle costs minutes per map) and the two P1
-  rows (a charge-noise spectrum, a latching signature) once their entries exist. Amplifier noise is absent from the
-  SNR picture (device-side bound). Noise draws are placeholders until entries #1 and #12 are written.</li>
-<li>A plunger shorted to a neighbouring barrier opens that barrier and dissolves the dot into the reservoir (or merges the
-  dots); the two-dot CI model cannot represent it, so the fault protocol shows a plunger–sensor-gate short instead.</li>
-<li>Step 3 generators run on the catalog draft's placeholder densities (<code>calibration: none</code>); the owner's catalog entries
-  (#1–#14) set the real distributions. Strain and g-factor draws wait for <code>spin</code>; switcher and drift rates tie to the
-  catalog in Step 4. No screening in the charge potentials (upper bound) until Step 7.</li>
-<li>ADR 0014: cross-platform tolerance raised from 1e-12 to 1e-9 after the layout-derived stability maps differed by
-  2e-11 between platforms (derived chains amplify last-bit differences at sharp steps). Typed chains still agree to 3e-14.</li>
-<li>Step 2 still owes the P1 reproduction against a published layout (its reference entry does not exist yet; the
-  owner names the paper) and the owner's sign-offs of its protocols. <code>pinch-off-barrier</code> from the layout is
-  covered by <code>turn-on-single-gate-layout</code> (same sweep seen from the barrier side); say so if a separate picture is wanted.</li>
-<li>Pages source is <code>gh-pages</code> (root); the docs root and per-PR previews are served.</li>
-<li>Pages: ADR 0012 moves publishing to the <code>gh-pages</code> branch with per-PR previews at <code>/pr-&lt;n&gt;/</code>; the repository's
-  Pages source must be set to that branch (root) once it exists, by the owner if the session is not permitted.</li>
-<li>No protocol is signed off. The owner reviews the artifact, we iterate in chat, then a session writes
-  <code>docs/gallery/signoff/&lt;id&gt;.yaml</code> at the owner's instruction (ADR 0008).</li>
-<li>The two reference entries are <code>proposed</code>; no P1 test exists yet. The owner confirms or replaces them.</li>
-<li><code>turn-on-single-gate</code> and <code>pinch-off-barrier</code> are phenomenological shapes until Step 2.</li>
-<li>Cross-platform bit identity failed on the first CI run of PR #19 (ten of eleven protocols; even pure <code>exp</code>/<code>tanh</code>
-  curves differ in the last bit between the Ubuntu and Windows numpy builds). ADR 0010 now makes <code>ubuntu-latest</code>
-  the reference platform for sign-off hashes and requires other platforms to agree within 1e-12 relative; the
-  <code>gallery-windows</code> job compares to the reference artifact. Rule 3 in CLAUDE.md amended accordingly.</li>
-<li><code>docs/catalog/entries/interface-fixed-charge.yaml</code> still has free-text sources and no <code>calibration</code> field
-  (warned, not failed, because it is <code>draft</code>).</li>
-<li>Step 1 exit criteria still open: sign-offs; the benchmark is met locally (0.02 ms/point on
-  <code>stability-coarse-2dot</code>, budget 0.1) but not yet confirmed on CI.</li>
+  <code>latched_occupation</code> remain for it; a master-equation step per half-cycle costs minutes per map). Amplifier noise
+  is absent from the SNR picture. Noise draws and Step 3 generators run on the catalog draft's placeholder values.</li>
+<li>Valley: interface steps are a hook (<code>step_factor</code>), not a model; the hot-spot background rate is a constant until
+  <code>spin</code> supplies its field dependence; the pulsed-spectroscopy weights are fixed (no loading-rate model behind them);
+  <code>compile</code> (Step 7) will attach the per-dot draws to a compiled device using the harmonic radii from <code>electrostatics</code>.</li>
+<li>A plunger shorted to a neighbouring barrier dissolves the dot; the fault protocol shows a plunger–sensor-gate
+  short instead. No screening in the charge potentials until Step 7. Operating points carry <code>R_L: 0.7, R_R: 0.7</code>.</li>
+<li>Pages source is <code>gh-pages</code> (root); the docs root and per-PR previews under <code>/pr-&lt;n&gt;/</code> are served.</li>
 </ul>
-<h2 id="next-action">Next action</h2>
-<p>Owner reviews the three Step 3 pictures on the PR preview and merges; writes or confirms catalog entries so the
-generators get real densities; names the published layout for Step 2's P1 row and a MOS/SiGe unintentional-dot
-comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: open Step 5 (valley: valley splitting draws per material and dot size, magnetospectroscopy and
-pulsed-gate spectroscopy protocols); file its issue and milestone. The lock-in dynamics on the master equation
-wait for a cheaper propagation (a fixed-rate analytic half-cycle update) and are a Step 4 follow-up.</p>
-<p>Previous next action, still valid for Step 1:
-When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates
-on protocols from the review, then writes sign-offs as instructed. In parallel, start Step 2 on
-<code>step-2/layout-electrostatics</code> (issue #17): <code>layout</code> dataclasses, Davies–Larkin–Stern closed-form potential,
-lever arms derived from the layout, <code>potential-map-layout</code> and <code>potential-cut-along-channel</code> protocols first.</p>
 
 
 
