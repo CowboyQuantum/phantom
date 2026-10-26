@@ -572,6 +572,7 @@
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
+<li>blockade: the forward base is suppressed and lifted beyond E_V or at zero field, reverse bias unblocked; funnel at J = E_Z; Elzerman shots average to the analytic curve; filter function Ramsey, echo and CPMG limits and white-noise invariance; the SWAP gate is perfect without noise and degrades with σ_ε, with the sweet spot at the symmetric point — <code>tests/test_spin_blockade_noise.py</code></li>
 <li>trace preservation and positivity; Rabi and Ramsey in the noiseless limit are analytic — <code>tests/test_spin.py</code> (also: T₁ and T_φ rates, the quasi-static Gaussian envelope by quadrature, J against second-order perturbation theory at small t, J monotonic toward the anticrossing and exponential in the barrier, the sweet spot dJ/dε = 0, the detuning axis and noise projection, the PSB window at E_V and its draw dependence, the seeded g draw)</li>
 </ul>
 <h2 id="p1-tests-ci-literature-reproduce-an-item-of-a-confirmed-reference-entry-adr-0007">P1 tests (CI, <code>literature</code>: reproduce an item of a <code>confirmed</code> reference entry; ADR 0007)</h2>
@@ -586,12 +587,16 @@
 <li><code>exchange-house-cells</code> — singlet return against (P1, P2) at fixed τ with the barrier open: cells bounded by J contours and the honeycomb lines</li>
 <li><code>esr-line</code>, <code>rabi-chevron</code>, <code>ramsey-fringes</code> — the g draw's two lines, the Lindblad chevron, Ramsey with the draw's T₂*</li>
 <li><code>psb-readout-window</code> — singlet and triplet charge steps for two valley draws</li>
-<li>second PR: <code>psb-bias-triangles</code>, <code>spin-funnel</code>, <code>elzerman-trace</code>, <code>charge-noise-spectroscopy-cpmg</code>, <code>charge-noise-spectroscopy-j-vs-ramsey</code></li>
+<li><code>psb-bias-triangles</code> — sequential-tunnelling triangles with the blocked base up to the valley draw, lifted at zero field, none in reverse</li>
+<li><code>spin-funnel</code> — S–T₋ funnel along J(ε) = E_Z with the g draw's S–T₀ loss</li>
+<li><code>elzerman-trace</code> — spin-dependent tunnel-out shots and the analytic read window</li>
+<li><code>charge-noise-spectroscopy-cpmg</code>, <code>charge-noise-spectroscopy-j-vs-ramsey</code> — the qubit as a spectrometer of the draw's 1/f noise; T₂*(ε) ∝ 1/(dJ/dε)</li>
+<li><code>exchange-gate-fidelity</code> — SWAP fidelity against operating detuning for the noiseless device and two noise draws</li>
 <li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
-<li>a two-qubit exchange gate's fidelity depends on the compiled device's noise and valley draws (gate fidelity waits for the second PR; the fingerprint visibility and the PSB window already do)</li>
+<li>a two-qubit exchange gate's fidelity depends on the compiled device's noise and valley draws — met for the noise draw (<code>exchange-gate-fidelity</code>, P0 test) and the valley draw through the readout window (<code>psb-readout-window</code>); the compiled device itself is Step 7</li>
 <li>both P1 reproductions pass (need the confirmed entries)</li>
 </ul>
 <h2 id="open-decisions">Open decisions</h2>
@@ -599,7 +604,7 @@
 <li>3-qubit cost; which semi-analytic gate models beyond that — the Lindblad step is 4ⁿ × 4ⁿ, so three spins cost 64 × 64 per expm, still cheap; left open until a three-dot layout exists</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>IN PROGRESS — <code>spin.exchange</code>, <code>spin.dynamics</code>, <code>spin.psb</code> built (ADR 0021), ten P0 tests, eight protocols rendering and within budget; second PR, P1 rows and gate fidelity open.</p>
+<p>IN PROGRESS — <code>spin</code> complete for a pair (ADR 0021, 0022): exchange, dynamics, PSB, blockade transport, funnel, Elzerman, noise spectroscopy, gate fidelity; fifteen P0 tests; fourteen protocols rendering and within budget. Open: the two P1 rows (confirmed entries), the three-qubit cost decision, sign-offs.</p>
 
 
 
