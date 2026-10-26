@@ -1,0 +1,25 @@
+id: lead-rate-time-trace
+name: Charge relaxation after a plunger step, for three lead barriers
+step: 4
+description: P1 is stepped at t = 0 by half a transition period so dot 1 must take up an electron from the left reservoir, for three settings of the left barrier B_L. The mean charge on dot 1 relaxes exponentially toward its new equilibrium at the lead rate, which the layout predicts through the WKB barrier (height and width read off the landscape); the second panel shows the remaining deficit on a logarithmic scale, a straight line whose slope is the lead rate. The time axis of each trace spans six relaxation times, so the rates are read from the recorded arrays. Noise-free.
+layers: [layout, electrostatics, charge, readout]
+runner: step4:lead_rate_time_trace
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.05, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.05, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  barrier_v: [0.0, 0.1, 0.2]
+sweep:
+  - {axis: time, points: 300, unit: "relaxation times (0 to 6)"}
+readout: {channel: charge_state, unit: electrons}
+render:
+  panels:
+    - {kind: line, x: t_case0_s, y: n1_case0, xlabel: "time (s)", ylabel: "N1 (electrons)", title: "B_L = 0.0 V"}
+    - {kind: line, x: t_case1_s, y: n1_case1, xlabel: "time (s)", ylabel: "N1 (electrons)", title: "B_L = 0.1 V"}
+    - {kind: line, x: t_case2_s, y: n1_deficit_case2, xlabel: "time (s)", ylabel: "deficit to equilibrium (electrons)", log_y: true, title: "B_L = 0.2 V, log deficit"}
+budget:
+  compile: {wall_s: 1.0, solver_calls: 0}
+  run: {wall_ms_per_point: 2.0, points: 900, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

@@ -1,0 +1,265 @@
+{
+ "meta": {
+  "commit": "28e8d87",
+  "date": "2026-10-26",
+  "numpy": "2.5.4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10"
+ },
+ "models": [
+  {
+   "model": "charge.ci.ConstantInteractionParams.mean_occupation",
+   "points": 10000,
+   "us_per_point": 2.817,
+   "what": "thermal occupation per gate point"
+  },
+  {
+   "model": "charge.hubbard.HubbardParams.mean_occupation",
+   "points": 10000,
+   "us_per_point": 11.477,
+   "what": "16x16 diagonalisation per gate point"
+  },
+  {
+   "model": "readout.sensor.SensorSETParams.current_a",
+   "points": 100000,
+   "us_per_point": 0.158,
+   "what": "sensor current per point"
+  },
+  {
+   "model": "readout.noise.TelegraphNoise.trace",
+   "points": 100000,
+   "us_per_point": 0.69,
+   "what": "one fluctuator per sample"
+  },
+  {
+   "model": "readout.noise.OneOverFNoise.trace",
+   "points": 10000,
+   "us_per_point": 18.332,
+   "what": "24 fluctuators per sample"
+  },
+  {
+   "model": "readout.measure.SensedDoubleDot.sweep_a (noisy)",
+   "points": 10000,
+   "us_per_point": 21.664,
+   "what": "occupation + sensor + three noise traces per point"
+  },
+  {
+   "model": "readout.lockin.lockin_sweep_a_per_v",
+   "points": 2500,
+   "us_per_point": 184.785,
+   "what": "8 evaluations per point, noisy"
+  },
+  {
+   "model": "readout.lockin.lockin_sweep_dynamic_a_per_v",
+   "points": 2500,
+   "us_per_point": 213.524,
+   "what": "8 evaluations + rate dynamics per point, noisy"
+  },
+  {
+   "model": "readout.loading.latched_occupation",
+   "points": 100000,
+   "us_per_point": 1.016,
+   "what": "per scan step"
+  }
+ ],
+ "protocols": {
+  "coulomb-oscillations-single-dot": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 1201,
+   "run_ms_per_point": 0.00249
+  },
+  "crosstalk-lines": {
+   "compile_s": 0.2673,
+   "model_evals_per_point": 1.0,
+   "points": 57600,
+   "run_ms_per_point": 0.00244
+  },
+  "diamonds-single-dot": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 64521,
+   "run_ms_per_point": 0.00011
+  },
+  "fault-signatures-stability": {
+   "compile_s": 0.1807,
+   "model_evals_per_point": 1.0,
+   "points": 57600,
+   "run_ms_per_point": 0.01905
+  },
+  "gate-hysteresis": {
+   "compile_s": 0.127,
+   "model_evals_per_point": 1.0,
+   "points": 361,
+   "run_ms_per_point": 0.51645
+  },
+  "gate-hysteresis-trapping": {
+   "compile_s": 0.1283,
+   "model_evals_per_point": 1.0,
+   "points": 722,
+   "run_ms_per_point": 0.51118
+  },
+  "gate-leakage-iv": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 2408,
+   "run_ms_per_point": 9e-05
+  },
+  "gate-leakage-pair": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 201,
+   "run_ms_per_point": 0.00027
+  },
+  "lead-rate-time-trace": {
+   "compile_s": 0.1634,
+   "model_evals_per_point": 1.0,
+   "points": 900,
+   "run_ms_per_point": 0.85305
+  },
+  "noise-psd": {
+   "compile_s": 0.0003,
+   "model_evals_per_point": 1.0,
+   "points": 30000,
+   "run_ms_per_point": 0.02608
+  },
+  "noise-time-trace": {
+   "compile_s": 0.0003,
+   "model_evals_per_point": 1.0,
+   "points": 30000,
+   "run_ms_per_point": 0.02682
+  },
+  "ohmic-iv": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 201,
+   "run_ms_per_point": 8e-05
+  },
+  "pinch-off-barrier": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 8e-05
+  },
+  "pinch-off-crosstalk": {
+   "compile_s": 0.1509,
+   "model_evals_per_point": 1.0,
+   "points": 24321,
+   "run_ms_per_point": 2e-05
+  },
+  "plunger-vs-barrier-map": {
+   "compile_s": 0.0001,
+   "model_evals_per_point": 1.0,
+   "points": 28800,
+   "run_ms_per_point": 0.00475
+  },
+  "potential-cut-along-channel": {
+   "compile_s": 0.1984,
+   "model_evals_per_point": 1.0,
+   "points": 1203,
+   "run_ms_per_point": 0.00152
+  },
+  "potential-map-disorder": {
+   "compile_s": 0.6583,
+   "model_evals_per_point": 1.0,
+   "points": 344424,
+   "run_ms_per_point": 0.0
+  },
+  "potential-map-layout": {
+   "compile_s": 0.1924,
+   "model_evals_per_point": 1.0,
+   "points": 86106,
+   "run_ms_per_point": 1e-05
+  },
+  "sensor-coulomb-peak": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 0.00496
+  },
+  "stability-coarse-2dot": {
+   "compile_s": 0.0016,
+   "model_evals_per_point": 1.0,
+   "points": 40000,
+   "run_ms_per_point": 0.02697
+  },
+  "stability-coarse-2dot-disorder": {
+   "compile_s": 0.628,
+   "model_evals_per_point": 1.0,
+   "points": 57600,
+   "run_ms_per_point": 0.02585
+  },
+  "stability-coarse-2dot-layout": {
+   "compile_s": 0.2902,
+   "model_evals_per_point": 1.0,
+   "points": 22500,
+   "run_ms_per_point": 0.02413
+  },
+  "stability-direction": {
+   "compile_s": 0.1584,
+   "model_evals_per_point": 1.0,
+   "points": 12800,
+   "run_ms_per_point": 0.86436
+  },
+  "stability-fine-2dot": {
+   "compile_s": 0.0005,
+   "model_evals_per_point": 1.0,
+   "points": 22500,
+   "run_ms_per_point": 0.02574
+  },
+  "stability-lockin-common": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.20499
+  },
+  "stability-lockin-detuning": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.2142
+  },
+  "stability-lockin-p1": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.2212
+  },
+  "stability-lockin-p2": {
+   "compile_s": 0.0004,
+   "model_evals_per_point": 8.0,
+   "points": 40000,
+   "run_ms_per_point": 0.21606
+  },
+  "stability-vs-sweep-rate": {
+   "compile_s": 0.1528,
+   "model_evals_per_point": 1.0,
+   "points": 19200,
+   "run_ms_per_point": 0.9076
+  },
+  "turn-on-global": {
+   "compile_s": 0.1651,
+   "model_evals_per_point": 1.0,
+   "points": 201,
+   "run_ms_per_point": 0.42984
+  },
+  "turn-on-single-gate": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 601,
+   "run_ms_per_point": 8e-05
+  },
+  "turn-on-single-gate-layout": {
+   "compile_s": 0.1437,
+   "model_evals_per_point": 1.0,
+   "points": 361,
+   "run_ms_per_point": 0.36805
+  },
+  "unintentional-dots": {
+   "compile_s": 0.0,
+   "model_evals_per_point": 1.0,
+   "points": 125,
+   "run_ms_per_point": 563.63218
+  }
+ }
+}
