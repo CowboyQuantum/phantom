@@ -23,4 +23,5 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
 | 0018 | RF reflectometry as a lumped tank loaded by the sensor; single-shot readout as integrated noisy shots | Accepted |
 | 0019 | Noise is drawn per device: a 1/f amplitude, a Poisson number of dominant switchers, a white floor | Accepted |
+| 0020 | Valley splitting is a Rice draw per dot from alloy disorder, with a deterministic part for MOS; three signatures | Accepted |
 | 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
