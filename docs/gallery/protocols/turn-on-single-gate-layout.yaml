@@ -1,7 +1,7 @@
 id: turn-on-single-gate-layout
 name: Channel turn-on under one gate, from the layout
 step: 2
-description: The Step 1 protocol turn-on-single-gate re-rendered from the layout rather than a typed shape. B_L is swept with every other gate at 0.8 V so the rest of the channel is open; the channel opens when the energy under B_L, the highest point along the channel, falls below the threshold. The threshold voltage and the slope come from the lever arms; the step shape is phenomenological (calibration none).
+description: The Step 1 protocol turn-on-single-gate re-rendered from the layout rather than a typed shape. B_L is swept with every other gate at 1.0 V so the rest of the channel is fully open; the channel opens when the energy under B_L, the highest point along the channel, falls below the threshold. The threshold voltage and the slope come from the lever arms; the step shape is phenomenological (calibration none).
 layers: [layout, electrostatics, readout]
 runner: step2:turn_on_single_gate_layout
 instance:
@@ -9,7 +9,7 @@ instance:
   material: SiGe
   pitch_nm: 80.0
   grid_pitch_nm: 2.0
-  operating_point_v: {B_L: 0.8, P1: 0.8, B_M: 0.8, P2: 0.8, B_R: 0.8, SG: 0.6}
+  operating_point_v: {B_L: 1.0, P1: 1.0, B_M: 1.0, P2: 1.0, B_R: 1.0, SG: 0.6}
   gate: B_L
   x_range_nm: [-200.0, 200.0]
   threshold_ev: -0.05

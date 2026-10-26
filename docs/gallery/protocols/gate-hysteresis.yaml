@@ -9,7 +9,7 @@ instance:
   material: SiGe
   pitch_nm: 80.0
   grid_pitch_nm: 2.0
-  operating_point_v: {B_L: 0.8, P1: 0.8, B_M: 0.8, P2: 0.8, B_R: 0.8, SG: 0.6}
+  operating_point_v: {B_L: 1.0, P1: 1.0, B_M: 1.0, P2: 1.0, B_R: 1.0, SG: 0.6}
   gate: B_L
   x_range_nm: [-200.0, 200.0]
   threshold_ev: -0.05
