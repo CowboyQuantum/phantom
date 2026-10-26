@@ -1,17 +1,8 @@
 """P0: rate-limited loading follows equilibrium when the barrier is open and freezes when it is closed."""
 
 import numpy as np
-import pytest
 
-from phantom.readout.loading import LeadBarrier, latched_occupation
-
-
-def test_lead_barrier_rate_is_exponential():
-    b = LeadBarrier("BL", rate0_hz=1e3, v_ref_v=-0.1, v_scale_v=0.03)
-    assert b.rate_hz(-0.1) == pytest.approx(1e3)
-    assert b.rate_hz(-0.1 + 0.03 * np.log(10)) == pytest.approx(1e4, rel=1e-12)
-    with pytest.raises(ValueError):
-        LeadBarrier("BL", rate0_hz=0.0)
+from phantom.readout.loading import latched_occupation
 
 
 def test_open_barrier_follows_equilibrium_and_closed_barrier_freezes():

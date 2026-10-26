@@ -4,7 +4,7 @@
 
 **Current step:** 1 (#16), 2 (#17), 3 (#25) complete except the owner's sign-offs, catalog entries and P1 rows;
 4 (#28, readout physics) in progress → `docs/steps/04-readout.md`. Milestones: "Steps 1-2", "Steps 3-4".
-**Branch:** `step-4/rf-and-single-shot` (second Step 4 PR, part of #28). PRs #19–#29 merged.
+**Branch:** `step-4/noise-draws-and-dynamics` (third Step 4 PR, part of #28). PRs #19–#30 merged.
 **Last session:** 2026-10-25 — Step 1 core and validation tooling built: CI and Hubbard charge models, SET sensor,
 noise, lock-in channel, qdt-sim reproduction fixture; `check_references.py`; `gallery.py` with budgets and
 sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Windows within tolerance), Pages job; ADR 0010.
@@ -31,7 +31,11 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
   1e-12) upload `gallery-<os>` artifacts; `pages` job builds mkdocs + rendered gallery from `main`.
 
 ## In flight
-- Second Step 4 PR: `readout.rf` (lumped tank + sensor resistance: reflection, resonance, matching),
+- Third Step 4 PR: `disorder.noise_draw` (per-device 1/f amplitude, Poisson switchers, white floor; in the scenario
+  draw), `SensedDoubleDot.from_noise_draw`, ADR 0019, protocols `switcher-histogram`, `drift-repeated-cuts`;
+  `plunger-vs-barrier-map` re-rendered on the master equation with WKB rates per row; `LeadBarrier` retired;
+  four P0 tests.
+- Merged as PR #30, second Step 4 PR: `readout.rf` (lumped tank + sensor resistance: reflection, resonance, matching),
   `readout.single_shot` (consecutive integrated shots on the noise processes, SNR, fidelity; white noise rescaled by
   1/√dt), ADR 0018, protocols `rf-resonance`, `rf-sensor-flank`, `single-shot-histogram`, `snr-vs-integration-time`,
   five P0 tests.
@@ -59,10 +63,10 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 ## Known gaps
 - All Step 2/3 pictures changed with the reservoir gates and the CI fix (re-rendered, unsigned). Operating points
   carry `R_L: 0.7, R_R: 0.7`; the lead rate spans 1e2–1e10 Hz as the outer barrier goes 0.0–0.2 V.
-- Step 4 still owes catalog-tied fluctuator statistics (`switcher-histogram`, `drift-repeated-cuts`), re-rendering
-  the Step 1 `plunger-vs-barrier-map` and lock-in dynamics on the master equation (then retiring `readout.loading`),
-  and the two P1 rows (a charge-noise spectrum, a latching signature) once their entries exist. Amplifier noise is
-  absent from the SNR picture (device-side bound).
+- Step 4 still owes the lock-in dynamics on the master equation (`readout.loading.LeadRateLandscape` and
+  `latched_occupation` remain for it; a master-equation step per half-cycle costs minutes per map) and the two P1
+  rows (a charge-noise spectrum, a latching signature) once their entries exist. Amplifier noise is absent from the
+  SNR picture (device-side bound). Noise draws are placeholders until entries #1 and #12 are written.
 - A plunger shorted to a neighbouring barrier opens that barrier and dissolves the dot into the reservoir (or merges the
   dots); the two-dot CI model cannot represent it, so the fault protocol shows a plunger–sensor-gate short instead.
 - Step 3 generators run on the catalog draft's placeholder densities (`calibration: none`); the owner's catalog entries
@@ -92,9 +96,9 @@ sign-off hashes; eleven protocols rendering; CI gallery jobs (reference + Window
 ## Next action
 Owner reviews the three Step 3 pictures on the PR preview and merges; writes or confirms catalog entries so the
 generators get real densities; names the published layout for Step 2's P1 row and a MOS/SiGe unintentional-dot
-comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: fluctuator statistics tied to the catalog (`switcher-histogram`, `drift-repeated-cuts`, noise
-parameters in the scenario draw), then re-render `plunger-vs-barrier-map` and the lock-in dynamics on the master
-equation and retire `readout.loading`; then Step 5 (valley) opens.
+comparison for Step 3's P1 row; signs off protocols from Steps 1–3. Next session: open Step 5 (valley: valley splitting draws per material and dot size, magnetospectroscopy and
+pulsed-gate spectroscopy protocols); file its issue and milestone. The lock-in dynamics on the master equation
+wait for a cheaper propagation (a fixed-rate analytic half-cycle update) and are a Step 4 follow-up.
 
 Previous next action, still valid for Step 1:
 When CI on PR #19 is green: owner reviews the gallery artifact and the two reference entries; the session iterates

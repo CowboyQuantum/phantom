@@ -3,7 +3,8 @@
 Modules: `charges` (random interface charges as image-charge energy offsets), `geometry_faults` (gate
 misalignment and width error as polygon transforms), `scenario` (seeded draw of all generators,
 serialisable; severity 0 reproduces the clean device bit for bit), `wiring` (open and shorted gates,
-gate-to-gate leakage, sensor-coupling asymmetry), `trapping` (history-dependent trapped charge: the hysteresis loop).
+gate-to-gate leakage, sensor-coupling asymmetry), `trapping` (history-dependent trapped charge: the hysteresis loop), `noise_draw` (per-device 1/f amplitude,
+dominant switchers and white floor from catalog placeholders).
 """
 
 from phantom.disorder.charges import (
@@ -18,11 +19,12 @@ from phantom.disorder.geometry_faults import (
     apply_misalignment,
     draw_misalignment,
 )
+from phantom.disorder.noise_draw import NoiseDraw, NoiseParams, draw_noise
 from phantom.disorder.scenario import ScenarioDraw, ScenarioParams, apply_scenario, draw_scenario
 from phantom.disorder.trapping import TrappingParams, effective_gate_voltage, trapped_fraction
 from phantom.disorder.wiring import WiringDraw, WiringFaultParams, draw_wiring_faults
 
-MODEL_VERSION = 2
+MODEL_VERSION = 3
 
 __all__ = [
     "MODEL_VERSION",
@@ -30,6 +32,8 @@ __all__ = [
     "FixedChargeParams",
     "MisalignmentDraw",
     "MisalignmentParams",
+    "NoiseDraw",
+    "NoiseParams",
     "ScenarioDraw",
     "ScenarioParams",
     "TrappingParams",
@@ -40,6 +44,7 @@ __all__ = [
     "charge_energy_ev",
     "draw_fixed_charges",
     "draw_misalignment",
+    "draw_noise",
     "draw_scenario",
     "draw_wiring_faults",
     "effective_gate_voltage",

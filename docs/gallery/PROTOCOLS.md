@@ -35,7 +35,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `coulomb-oscillations-single-dot` | P with barriers set | current | periodic peaks; spacing from the addition energy; peak width from temperature and lead coupling |
 | `diamonds-single-dot` | (P, V_sd) | current or dI/dV | Coulomb diamonds; slopes equal the lever arms; height equals the addition energy |
 | `barrier-barrier-map` | (B1, B2) at fixed P | current | the region where a dot forms; diagonal Coulomb lines; pinch-off corners |
-| `plunger-vs-barrier-map` | (P1 fast, lead barrier BL of dot 1 slow); dot 1 is the only dot with a reservoir, dot 2 loads only through dot 1; P2 fixed | sensor_conductance, plus the charge present and the charge at equilibrium | the dot-1 transition lines tilt with the lead barrier's lever arm; as the barrier closes the tunnel rate drops below the inverse dwell time and the lines fade, latch along the row and carry across the flyback; the interdot-barrier variant is a separate protocol when Step 4 adds tunnel-coupling broadening (owner's configuration, 2026-10-25) |
+| `plunger-vs-barrier-map` | (P1 fast, lead barrier B_L slow) on the layout; dot 1's lead swept | sensor_conductance, charge present and at equilibrium, lead rate per row | the dot-1 lines tilt with the lever arm; as the barrier closes the WKB rate drops below the inverse dwell and the lines fade, latch along the row and carry across rows (master equation, Step 4) |
 | `sensor-coulomb-peak` | S | sensor_conductance | one peak; the steep flank where the sensor is operated |
 | `sensor-compensation-map` | (S, P of a dot) | sensor_conductance | tilted peak lines broken at the dot's charge transitions; slope gives the compensation |
 
@@ -65,9 +65,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `noise-time-trace` | t at a fixed sensor flank, seconds to minutes | sensor_conductance | white noise, telegraph switching, slow drift, each visible |
 | `noise-psd` | derived from the trace | PSD | 1/f slope and amplitude at 1 Hz; white floor; Lorentzian bumps from fluctuators |
 | `charge-noise-sensor-referred` | PSD at the sensor flank, divided by the flank slope and by the sensor's lever arm to a dot gate | equivalent gate-voltage noise (V/√Hz) and energy noise (eV/√Hz) vs. f | the charge-noise amplitude at 1 Hz and the 1/f exponent, in gate-referred units that can be compared with published values and with the qubit-side `charge-noise-spectroscopy-cpmg`; the same disorder draw must give both |
-| `drift-repeated-cuts` | one P cut repeated over hours | transition position vs. t | slow drift and occasional jumps |
+| `drift-repeated-cuts` | one P cut repeated over hours on a drawn device | transition position vs. t | slow drift from the 1/f ensemble's slowest fluctuators and jumps when a switcher flips (Step 4) |
 | `stability-repeat-diff` | stability map twice, hours apart | difference | rigid shifts vs. local changes; which lines moved |
-| `switcher-histogram` | long trace | dwell-time histograms | two-level statistics; switching rates |
+| `switcher-histogram` | long trace on a drawn device | dwell-time histograms of the dominant switcher | exponential dwell times in each level with the drawn up and down rates (Step 4) |
 
 ## E. Readout hardware (readout) — Step 4
 | id | sweep | readout | must show |
