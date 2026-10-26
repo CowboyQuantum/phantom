@@ -545,8 +545,8 @@ must read a compiled device.</p>
 <li><strong>Backends</strong> (plan §8 #1 stays open): <code>closed_form</code> is the only one; <code>fem</code> is a hook behind the
   <code>[fem]</code> extra that raises with the open decision's name until a solver is chosen. Everything
   downstream of the basis is backend-agnostic.</li>
-<li><strong><code>optimum</code></strong> reads the record and answers per layer: sensor flank by a coarse scan and golden-
-  section refinement of |dI/dV|; the virtual-gate matrix from the inverse of the plunger block of the
+<li><strong><code>optimum</code></strong> reads the record and answers per layer: sensor flank by a coarse scan, a fine scan and a parabolic
+  interpolation of |dI/dV| (a golden-section search differed between platforms); the virtual-gate matrix from the inverse of the plunger block of the
   lever-arm matrix scaled to the raw plungers' lever arms, with cross-talk compensation for the other
   gates and the sensor gate holding the sensor potential fixed; the barrier voltage for a target
   t from the compiled exponential; the Pauli-blockade read point from the receiving dot's valley draw
