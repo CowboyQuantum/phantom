@@ -6,8 +6,7 @@
 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
 equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
 Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-**Branch:** `step-8/consumer-contract` (pushed; a pull request with `Closes #40` is the next step once the owner
-asks for one). `main` is at the merge of PR #39.
+**Branch:** `step-8/consumer-contract`, PR #42 (`Closes #40`), open and watched. `main` is at the merge of PR #39.
 **Last session:** 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
 the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.
 
@@ -36,11 +35,12 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
 - 66 protocols render within budget, all unsigned; 135 P0 tests; eight reference entries, all `proposed`.
 
 ## In flight
-- `step-8/consumer-contract`: everything under Step 8 above, pushed, no pull request yet.
+- PR #42 (`step-8/consumer-contract`): everything under Step 8 above; waits on review, the gallery preview at
+  `/pr-42/` and the merge.
 
 ## Next action
-- Open the pull request for `step-8/consumer-contract` (`Closes #40`) when the owner asks; after it merges the owner
-  tags `v0.2.0` (the tag is the owner's, never a session's).
+- Drive PR #42 to merge (review, CI); after it merges the owner tags `v0.2.0` (the tag is the owner's, never a
+  session's).
 - The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
   release), then #140 and #142 against the tag (the adapter over `phantom.api.Session`, committed device files with
   SHA-256, `python -m phantom.contract devices/*.json` in qdt's CI). Coordinate there when the owner says so.
