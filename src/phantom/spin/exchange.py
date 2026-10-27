@@ -6,10 +6,19 @@ not (Pauli exclusion). The exchange energy is the splitting
 
     J(V) = E_T(1,1) − E_S(1,1) ≥ 0,
 
-read directly from the two-electron sector of the Hubbard Hamiltonian: the lowest triplet is the
-|↑↑⟩ state, which is diagonal, and the lowest singlet is the ground state of the six-state sector.
-Far from the anticrossings the second-order result is J ≈ 2t²/Δ_R + 2t²/Δ_L with Δ_R = E(0,2) − E(1,1)
-and Δ_L = E(2,0) − E(1,1) (the (1,1)S–(0,2)S matrix element is √2 t); that limit is a P0 test.
+from the two-electron sector of the Hubbard Hamiltonian. The triplets stay at E(1,1) = ε₁ + ε₂ + V₁₂;
+the singlets S(1,1), S(0,2), S(2,0) form a 3 × 3 block with S(1,1) coupled to each doubly occupied
+singlet by √2 t. Measured from E(1,1), with Δ_R = E(0,2) − E(1,1) and Δ_L = E(2,0) − E(1,1), the lowest
+singlet energy x is the root of the secular equation
+
+    x = 2t²/(x − Δ_R) + 2t²/(x − Δ_L)
+
+below min(0, Δ_R, Δ_L), where the right-hand side is monotonic, and J = −x. The root is found by
+bisection in that bracket. Solving the secular equation relative to E(1,1) keeps J's full relative
+precision even where J is twelve decades below the charging energy; the difference of two
+eigenvalues of size U loses those digits and differed between platforms (ADR 0014). The six-state
+diagonalisation is kept as `exchange_j_eigen_ev` for the P0 comparison. Far from the anticrossings
+the second-order result is J ≈ 2t²/Δ_R + 2t²/Δ_L; that limit is a P0 test.
 
 Detuning ε is the on-site energy difference ε = ε₁ − ε₂ measured from the symmetric point, so ε > 0
 pushes the pair toward (0,2). `detuning_voltages` moves the two plungers by the inverse of their
@@ -23,14 +32,46 @@ import numpy as np
 
 from phantom.charge.hubbard import N1, N2, HubbardParams
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: J from the singlet secular equation (full relative precision), not an eigenvalue difference."""
 
 _TWO = np.flatnonzero(N1 + N2 == 2)  # the six two-electron Fock states
 _UPUP = 0b0101  # dot 1 up, dot 2 up: a pure triplet, diagonal in H
 
 
-def exchange_j_ev(hub: HubbardParams, v: np.ndarray) -> np.ndarray:
-    """J (..., ) in eV for gate voltages `v` (..., gates): E(|↑↑⟩) − E(lowest two-electron singlet)."""
+def _sector_energies(hub: HubbardParams, v: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(t, Δ_R, Δ_L) at gate voltages `v` (..., gates), energies relative to E(1,1)."""
+    v = np.asarray(v, dtype=float)
+    eps = hub.epsilon_0_ev - v @ hub.lever_arms_ev_per_v.T
+    t = hub.barrier.tunnel_coupling_ev(v[..., hub.gate_names.index(hub.barrier_gate)])
+    # Δ_R = (2ε₂ + U₂) − (ε₁ + ε₂ + V₁₂), written without forming E(1,1)
+    d_r = eps[..., 1] - eps[..., 0] + hub.onsite_u_ev[1] - hub.mutual_v_ev
+    d_l = eps[..., 0] - eps[..., 1] + hub.onsite_u_ev[0] - hub.mutual_v_ev
+    return np.broadcast_to(t, d_r.shape), d_r, d_l
+
+
+def exchange_j_ev(hub: HubbardParams, v: np.ndarray, iterations: int = 200) -> np.ndarray:
+    """J (..., ) in eV for gate voltages `v` (..., gates): E(1,1 triplet) − E(lowest singlet), from the
+    singlet sector's secular equation solved by bisection relative to E(1,1)."""
+    t, d_r, d_l = _sector_energies(hub, v)
+    c = 2.0 * t * t
+    top = np.minimum(np.minimum(d_r, d_l), 0.0)
+    lo = top - 3.0 * np.abs(t) - 1e-300
+    hi = top.copy()
+    for _ in range(iterations):
+        mid = 0.5 * (lo + hi)
+        f = mid - c / (mid - d_r) - c / (mid - d_l)
+        neg = f < 0
+        lo = np.where(neg, mid, lo)
+        hi = np.where(neg, hi, mid)
+        if np.all(hi - lo <= 0.0):
+            break
+    return -0.5 * (lo + hi)
+
+
+def exchange_j_eigen_ev(hub: HubbardParams, v: np.ndarray) -> np.ndarray:
+    """J by diagonalising the six-state two-electron block: E(|↑↑⟩) − E(lowest eigenvalue). Loses the
+    digits of J below ~1e-16 U; kept as the reference for `exchange_j_ev`."""
     h = hub.hamiltonian(v)
     block = h[..., _TWO[:, None], _TWO[None, :]]
     e_s = np.linalg.eigvalsh(block)[..., 0]

@@ -56,6 +56,23 @@ def test_exchange_matches_second_order_perturbation_theory_for_small_tunnel_coup
     np.testing.assert_allclose(j, j2, rtol=2e-2)
 
 
+def test_secular_exchange_equals_the_diagonalisation_and_keeps_its_precision_at_tiny_coupling():
+    from phantom.spin.exchange import exchange_j_eigen_ev
+
+    hub = _hub()
+    v0 = symmetric_point_v(hub)
+    eps = np.linspace(-1.2e-3, 1.2e-3, 25)
+    v = detuning_voltages(hub, v0, eps)
+    np.testing.assert_allclose(exchange_j_ev(hub, v), exchange_j_eigen_ev(hub, v), rtol=1e-8, atol=1e-18)
+    # beyond the anticrossing the singlet ground state is (0,2) and J is the full splitting to the (1,1) triplet
+    past = detuning_voltages(hub, v0, np.array([2.5e-3]))
+    np.testing.assert_allclose(exchange_j_ev(hub, past), exchange_j_eigen_ev(hub, past), rtol=1e-8)
+    tiny = _hub(t0_ev=1e-12)
+    j = exchange_j_ev(tiny, v)
+    np.testing.assert_allclose(j, exchange_second_order_ev(tiny, v), rtol=1e-12), "J ∝ t² to full precision at t = 1 peV"
+    assert np.all(exchange_j_ev(_hub(t0_ev=0.0), v) == 0.0)
+
+
 def test_exchange_grows_toward_the_anticrossing_and_exponentially_with_the_barrier():
     hub = _hub()
     v0 = symmetric_point_v(hub)

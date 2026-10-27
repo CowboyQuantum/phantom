@@ -22,6 +22,10 @@ The offline tier: FEM electrostatics for real stacks and overlapping gates throu
 - `compiled-device-roundtrip` — the coarse map from the compiled and from the reloaded device, and their (zero) difference
 - `virtual-gates-map` — the coarse map in raw and in virtual plunger coordinates
 - `optimum-sensor-flank` — the sensor peak and the flank the optimum chooses
+- `optimum-coupling-target` — t against the barrier gate at the compile tier and from the runtime exponential; the optimum's choice for three targets beside the compile-tier crossing
+- `optimum-readout-point` — the blockade contrast with the chosen read point; the Elzerman empty probability with the chosen read time
+- `optimum-sweet-spot` — SWAP infidelity through the chosen sweet spot, and J
+- `compiled-device-draws` — twelve devices from one layout: coupling, lead rates, valley draws, and what the optimum reaches; devices that do not form are recorded
 - each carries a `budget` (ADR 0009); all unsigned
 
 ## Exit criteria
@@ -33,4 +37,4 @@ The offline tier: FEM electrostatics for real stacks and overlapping gates throu
 - #3 serialisation format — decided (ADR 0023): canonical JSON, basis recomputed, format and model versions recorded
 
 ## Status
-IN PROGRESS — `compile`, `device` and `optimum` built (ADR 0023), ten P0 tests, three protocols rendering. Open: the solver choice and its agreement test; moving the Step 2–6 protocols onto compiled devices.
+IN PROGRESS — `compile`, `device` and `optimum` built (ADR 0023), twelve P0 tests, seven protocols rendering; the Step 4 dynamics protocols use the compiled device's WKB action. Open: the solver choice and its agreement test (plan §8 #1), the owner's sign-offs.

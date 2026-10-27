@@ -24,8 +24,9 @@ def render_protocol(r: Result, path: pathlib.Path) -> None:
         x = r.arrays[panel["x"]]
         if kind == "line":
             ys = panel["y"] if isinstance(panel["y"], list) else [panel["y"]]
+            style = {"marker": "o", "ms": 4, "ls": "none"} if panel.get("markers") else {"lw": 1.0}
             for key in ys:
-                ax.plot(x, r.arrays[key], lw=1.0, label=key if len(ys) > 1 else None)
+                ax.plot(x, r.arrays[key], label=key if len(ys) > 1 else None, **style)
             if len(ys) > 1:
                 ax.legend(fontsize=8)
             if panel.get("log_x"):

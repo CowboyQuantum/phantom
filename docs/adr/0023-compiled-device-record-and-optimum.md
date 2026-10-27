@@ -44,8 +44,10 @@ must read a compiled device.
 ## Consequences
 - Easier: one call compiles a device; one file carries it; every runtime object comes from it; the
   layer rule stays checkable.
-- Harder: a tenth layer; two WKB estimates coexist (rectangular in Step 4's protocols, the action in
-  the compiled device) until Step 4's protocols move to the compiled device.
+- Harder: a tenth layer. The rectangular WKB estimate of ADR 0017 remains only as the bound in
+  `readout.rates` and its P0 limits; the Step 4 dynamics protocols moved to the action integral
+  (`readout.wkb_rate_from_action_hz`) in the second Step 7 PR, with two operating points shifted so
+  their pictures keep the same rate-times-dwell regimes.
 - Must now: P0 round trip (text-identical after reload; identical stability map from the reloaded
   device), the clean device bit-identical to the Step 2 derivation, `optimum` attained by brute force;
   protocols `compiled-device-roundtrip`, `virtual-gates-map`, `optimum-sensor-flank`.

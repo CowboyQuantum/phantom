@@ -159,3 +159,38 @@ def test_coherence_optimum_is_the_sweet_spot_of_a_brute_force_scan(device: Devic
     assert c.t2_star_single_spin_s > 0
     o = optimum(device)
     assert o.to_dict()["coherence"]["swap_fidelity_at_sweet_spot"] == c.swap_fidelity_at_sweet_spot
+
+
+def test_action_rate_is_never_below_the_rectangular_bound():
+    from phantom.charge import derive_double_dot as _derive
+    from phantom.electrostatics import GateBasis, barrier_action, barrier_width_nm
+    from phantom.readout import wkb_rate_from_action_hz, wkb_tunnel_rate_hz
+    from phantom.readout.rates import attempt_rate_hz
+
+    lay = two_dot_layout("SiGe", 80.0)
+    basis = GateBasis.from_layout(lay)
+    res = lay.reservoir_points_nm()
+    for b_l in (-0.1, 0.0, 0.1):
+        op = {**OP, "B_L": b_l}
+        v = np.array([op[g] for g in lay.gate_names])
+        d1 = _derive(lay, v, basis=basis).dots[0]
+        h, w = barrier_width_nm(basis, v, d1, res["R_L"])
+        _, _, s = barrier_action(basis, v, d1, res["R_L"], 0.19)
+        rect = float(wkb_tunnel_rate_hz(h, w, d1.curvature_ev_per_nm2, 0.19))
+        act = float(wkb_rate_from_action_hz(s, d1.curvature_ev_per_nm2, 0.19))
+        assert act >= rect, "a shaped barrier transmits at least as much as the rectangle that bounds it"
+        assert act == pytest.approx(attempt_rate_hz(d1.curvature_ev_per_nm2, 0.19) * np.exp(-2 * s), rel=1e-12)
+
+
+def test_coupling_optimum_agrees_with_the_compile_tier_near_the_operating_point(device: Device):
+    from phantom.compile import interdot_tunnel_coupling_ev
+
+    lay, basis = device.basis()
+    v0 = device.operating_point()
+    d1, d2 = derive_double_dot(lay, v0, basis=basis).dots
+    jb = device.gate_names.index(device.barrier_gate)
+    for target in (10e-6, 30e-6, 100e-6):
+        v = v0.copy()
+        v[jb] = coupling_optimum(device, target).v_barrier_v
+        t = interdot_tunnel_coupling_ev(basis, v, d1, d2, 0.19)[0]
+        assert t == pytest.approx(target, rel=0.15), "the compiled exponential holds within a decade of the operating point"
