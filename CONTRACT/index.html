@@ -897,7 +897,8 @@ voltages and the sensor set point compilation chose. A consumer that hides truth
   the surface shows in <code>docs/api/surface.json</code> and is listed in <code>CHANGELOG.md</code>.</li>
 <li>A change of output for the same parameters, seed and calls bumps the <code>MODEL_VERSION</code> of the module
   that changed. <code>Device.provenance</code> records the compile-time versions; <code>model_versions()</code> gives them all.</li>
-<li>The owner tags releases; a consumer pins a tag. How often phantom releases and consumers move their
+<li>A release is an annotated tag <code>vX.Y.Z</code> on a green <code>main</code> commit, made by the owner or by a session the owner
+  tells to (ADR 0025); a consumer pins a tag. How often phantom releases and consumers move their
   pins is an open decision (Step 8).</li>
 </ul>
 <h2 id="running-the-contract-test">Running the contract test</h2>

@@ -594,7 +594,7 @@
 <p>qdt's <code>qdt-sim</code> becomes an adapter that pins a phantom release and contains no physics; qdt's golden files are regenerated once; the seam is enforced on both sides.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li>in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API — <code>phantom.api</code> (ADR 0024), <code>docs/CONTRACT.md</code>, <code>CHANGELOG.md</code>, version 0.2.0, the surface snapshot <code>docs/api/surface.json</code> checked in <code>check_all.sh</code>; the runtime surface <code>Device.at</code> → <code>State</code>, <code>Device.session</code> → <code>Session</code> (<code>sense</code> with bias and samples, <code>hold</code>, <code>wait</code>, <code>spin_readout</code>; a noise seed apart from the device seed; one sample's charge stated), <code>Device.truth</code> (charge lattice, sensor peak and wing) and <code>Device.knowable</code>; the tag is the owner's</li>
+<li>in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API — <code>phantom.api</code> (ADR 0024), <code>docs/CONTRACT.md</code>, <code>CHANGELOG.md</code>, version 0.2.0, the surface snapshot <code>docs/api/surface.json</code> checked in <code>check_all.sh</code>; the runtime surface <code>Device.at</code> → <code>State</code>, <code>Device.session</code> → <code>Session</code> (<code>sense</code> with bias and samples, <code>hold</code>, <code>wait</code>, <code>spin_readout</code>; a noise seed apart from the device seed; one sample's charge stated), <code>Device.truth</code> (charge lattice, sensor peak and wing) and <code>Device.knowable</code>; the release is <code>v0.2.0</code> at <code>f72daac</code> (who tags: ADR 0025)</li>
 <li>in qdt (coordinated issue): <code>qdt-sim</code> maps <code>StandConfig</code>/<code>ChannelMap</code> onto <code>phantom.Device</code>, implements the protocols over it, pins the release; the physics modules deleted; <code>make_sim_fixtures.py</code> regenerated; the vocabulary and import checks updated</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
@@ -622,7 +622,7 @@
 <li>cadence of phantom releases vs. qdt pins</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>IN PROGRESS — phantom side built (ADR 0024): the consumer surface, the contract test, the snapshot, the changelog and 0.2.0; two protocols unsigned. Open: the owner's tag <code>v0.2.0</code>, the release cadence, the qdt side.</p>
+<p>IN PROGRESS — phantom side built (ADR 0024): the consumer surface, the contract test, the snapshot, the changelog and 0.2.0; two protocols unsigned. Open: the tag <code>v0.2.0</code> on <code>f72daac</code> (the owner's: this session's environment refused the tag push), the release cadence, the qdt side.</p>
 
 
 

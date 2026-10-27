@@ -320,39 +320,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#known-gaps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Known gaps
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -587,39 +554,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#known-gaps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Known gaps
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -641,13 +575,14 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side merged (PR #42); the tag <code>v0.2.0</code> is the owner's. Steps 1–4
+<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side merged (PRs #42, #44); <code>v0.2.0</code> goes on <code>f72daac</code>. Steps 1–4
 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
 equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
 Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-<strong>Branch:</strong> <code>issue-43/sensor-asymmetry</code> (fix before the tag). <code>main</code> is at the merge of PR #42.
+<strong>Branch:</strong> <code>issue-45/release-tagging</code> (ADR 0025). <code>main</code> is at <code>f72daac</code>, the merge of PR #44, CI green.
 <strong>Last session:</strong> 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
-the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.</p>
+the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in; the
+sensor-asymmetry fix (#43, PR #44); who tags a release (ADR 0025).</p>
 <h2 id="done">Done</h2>
 <ul>
 <li>Steps 1–7 as before: <code>layout</code>, <code>electrostatics</code>, <code>disorder</code>, <code>charge</code>, <code>readout</code>, <code>valley</code>, <code>spin</code>, <code>compile</code>,
@@ -671,17 +606,20 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
 <li><code>RateEquation.rate_matrix</code> vectorised, bit-identical (checked on 1,200 matrices and four sweeps): a session with
     dynamics costs about 0.6–0.9 ms per sample.</li>
 <li>Protocols <code>session-charge-trace</code>, <code>session-hold-relaxation</code> (unsigned, within budget).</li>
-<li>66 protocols render within budget, all unsigned; 135 P0 tests; eight reference entries, all <code>proposed</code>.</li>
+<li>
+<h1 id="43-pr-44-the-compiled-sensor-carries-the-wiring-draws-coupling-asymmetry-devicecompiled_sensor-used-by">43 (PR #44): the compiled sensor carries the wiring draw's coupling asymmetry (<code>device.compiled_sensor</code>, used by</h1>
+  compile's set point and <code>Device.runtime_sensor</code>); <code>device</code> and <code>compile</code> MODEL_VERSION 2.</li>
+<li>66 protocols render within budget, all unsigned; 136 P0 tests; eight reference entries, all <code>proposed</code>.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li><code>issue-43/sensor-asymmetry</code> (#43): the compiled sensor applies the wiring draw's coupling asymmetry
-  (<code>device.compiled_sensor</code>, used by compile's set point and <code>Device.runtime_sensor</code>); <code>device</code> and <code>compile</code>
-  MODEL_VERSION 2; changelog under 0.2.0; gallery re-recorded.</li>
+<li><code>issue-45/release-tagging</code> (#45): ADR 0025 (a session tags a release when the owner says so, on a green <code>main</code>
+  with the changelog entry), the <code>CLAUDE.md</code> line, ADR 0024's status line, the documents that repeated the rule.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
 <ul>
-<li>Merge #43's pull request, then the owner tags <code>v0.2.0</code> on <code>main</code> (the tag is the owner's, never a session's).</li>
+<li>The owner tags <code>v0.2.0</code> on <code>f72daac</code> (2026-10-27: this session's environment refused the tag push with HTTP 403;
+  its branch pushes work). Merge #45's pull request.</li>
 <li>The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
   release), then #140 and #142 against the tag (the adapter over <code>phantom.api.Session</code>, committed device files with
   SHA-256, <code>python -m phantom.contract devices/*.json</code> in qdt's CI). Coordinate there when the owner says so.</li>
