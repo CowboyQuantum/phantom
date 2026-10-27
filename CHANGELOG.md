@@ -7,7 +7,15 @@ the `MODEL_VERSION` of the module that changed and is listed here. The owner tag
 
 ## 0.2.0 — the consumer contract (Step 8; to be tagged `v0.2.0` by the owner)
 
-First release a consumer can pin. Nothing below changes the output of any 0.1.0 model.
+First release a consumer can pin. Only the fix below changes the output of a 0.1.0 model.
+
+### Fixed
+- The compiled device applies the wiring draw's sensor-coupling asymmetry (ADR 0016, catalog #11; #43):
+  `device.compiled_sensor` scales each dot's per-electron sensor coupling by the draw's factor, and both
+  `Device.runtime_sensor` and compile's sensor set point use it. Every compiled device with a wiring draw
+  reads a different sensor current and sits at a different compiled sensor set point; device files
+  compiled before this change keep their old set point and are off the flank of the new sensor.
+  `device` MODEL_VERSION 2, `compile` MODEL_VERSION 2; `Device.provenance` records the `device` version.
 
 ### Added
 - `phantom.api`: the one import surface for consumers, and `model_versions()`, the `MODEL_VERSION` of
@@ -32,7 +40,7 @@ First release a consumer can pin. Nothing below changes the output of any 0.1.0 
 - `phantom.contract`: `run(device)` and `python -m phantom.contract [device.json ...]`, exit status 0 or 1.
 - `scripts/api_surface.py` and `docs/api/surface.json`, checked by `scripts/check_all.sh`.
 - Gallery protocols `session-charge-trace` and `session-hold-relaxation` (unsigned).
-- Model versions: `device.session` 1, `device.truth` 1.
+- Model versions: `device.session` 1, `device.truth` 1; `Device.sensor_beta_factors()`.
 
 ### Changed
 - Rule 2: `phantom.api` and `phantom.contract` sit above `compile` and may import it; no layer or root

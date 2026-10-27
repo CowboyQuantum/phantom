@@ -30,9 +30,18 @@ from phantom.readout.measure import SensedDoubleDot
 from phantom.readout.sensor import SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43)."""
 DEVICE_FORMAT_VERSION = 1
 """Bumped when the serialised layout of a `Device` changes incompatibly."""
+
+
+def compiled_sensor(alpha_v_per_v: np.ndarray, beta_factors: tuple[float, float] = (1.0, 1.0)) -> SensorSETParams:
+    """The SET sensor of a compiled device: its lever arms on the gates from the basis, and the nominal
+    per-electron coupling to each dot scaled by the wiring draw's sensor-coupling asymmetry (ADR 0016,
+    catalog #11). Compile places the set point with it and every runtime object reads through it."""
+    beta = SensorSETParams().beta_v_per_e * np.asarray(beta_factors, dtype=float)
+    return SensorSETParams(alpha_v_per_v=np.asarray(alpha_v_per_v, dtype=float), beta_v_per_e=beta)
 
 
 @dataclass(frozen=True)
@@ -170,8 +179,13 @@ class Device:
     def runtime_ci(self) -> ConstantInteractionParams:
         return ConstantInteractionParams(gate_names=self.gate_names, c_dot_af=np.array(self.c_dot_af), c_gate_af=np.array(self.c_gate_af), temperature_k=self.temperature_k)
 
+    def sensor_beta_factors(self) -> tuple[float, float]:
+        """The wiring draw's sensor-coupling factors per dot ((1, 1) without a wiring draw)."""
+        wiring = self.scenario_draw().wiring
+        return tuple(wiring.sensor_beta_factors) if wiring is not None else (1.0, 1.0)
+
     def runtime_sensor(self) -> SensorSETParams:
-        return SensorSETParams(alpha_v_per_v=np.array(self.sensor_alpha_v_per_v))
+        return compiled_sensor(np.array(self.sensor_alpha_v_per_v), self.sensor_beta_factors())
 
     def runtime_barrier(self) -> Barrier:
         j = self.gate_names.index(self.barrier_gate)
@@ -259,4 +273,5 @@ __all__ = [
     "SpinOutcome",
     "State",
     "Truth",
+    "compiled_sensor",
 ]

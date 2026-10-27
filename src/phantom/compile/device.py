@@ -37,7 +37,14 @@ from phantom.charge import derived as charge_derived
 from phantom.charge.derived import derive_double_dot
 from phantom.compile.backends import Backend, basis_for
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2
-from phantom.device import DEVICE_FORMAT_VERSION, CompiledBarrier, CompiledDot, Device
+from phantom.device import (
+    DEVICE_FORMAT_VERSION,
+    CompiledBarrier,
+    CompiledDot,
+    Device,
+    compiled_sensor,
+)
+from phantom.device import MODEL_VERSION as device_model_version
 from phantom.disorder import scenario as disorder_scenario
 from phantom.disorder.scenario import ScenarioParams, draw_scenario
 from phantom.electrostatics import closed_form as electrostatics_closed_form
@@ -46,13 +53,13 @@ from phantom.electrostatics.dots import barrier_action
 from phantom.layout.geometry import Layout, MaterialClass
 from phantom.readout import rates as readout_rates
 from phantom.readout.rates import attempt_rate_hz
-from phantom.readout.sensor import SensorSETParams
 from phantom.spin import dynamics as spin_dynamics
 from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43)."""
 
 
 @dataclass(frozen=True)
@@ -88,9 +95,10 @@ def _programmed_vector(layout: Layout, op: dict[str, float]) -> np.ndarray:
     return np.array([float(op[g]) for g in layout.gate_names])
 
 
-def _sensor_set_point(layout: Layout, derived, v: np.ndarray, p: CompileParams, basis: GateBasis):
-    """Move the sensor gate so the sensor sits `sensor_flank_widths` from a peak centre, then re-derive."""
-    sensor = SensorSETParams(alpha_v_per_v=derived.sensor_alpha_v_per_v)
+def _sensor_set_point(layout: Layout, derived, v: np.ndarray, p: CompileParams, basis: GateBasis, beta_factors: tuple[float, float] = (1.0, 1.0)):
+    """Move the sensor gate so the sensor sits `sensor_flank_widths` from a peak centre, then re-derive.
+    The sensor is the one the runtime reads (`device.compiled_sensor`, with the draw's asymmetry)."""
+    sensor = compiled_sensor(derived.sensor_alpha_v_per_v, beta_factors)
     if p.sensor_gate not in layout.gate_names:
         return derived, v
     j = layout.gate_names.index(p.sensor_gate)
@@ -128,7 +136,8 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     v_prog = _programmed_vector(layout, params.operating_point_v)
     v = draw.wiring.apply(v_prog) if draw.wiring is not None else v_prog.copy()
     derived = derive_double_dot(perturbed, v, temperature_k=params.temperature_k, basis=basis)
-    derived, v = _sensor_set_point(perturbed, derived, v, params, basis)
+    beta_factors = tuple(draw.wiring.sensor_beta_factors) if draw.wiring is not None else (1.0, 1.0)
+    derived, v = _sensor_set_point(perturbed, derived, v, params, basis, beta_factors)
     d1, d2 = derived.dots
     res = perturbed.reservoir_points_nm()
     r_l, r_r = params.reservoir_gates
@@ -166,6 +175,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
             "readout.rates": readout_rates.MODEL_VERSION,
             "valley.splitting": valley_splitting.MODEL_VERSION,
             "spin.dynamics": spin_dynamics.MODEL_VERSION,
+            "device": device_model_version,
         },
     }
     return Device(
