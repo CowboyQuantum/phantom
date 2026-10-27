@@ -1,7 +1,7 @@
 id: plunger-vs-barrier-map
 name: Plunger against the lead barrier of dot 1
 step: 1
-description: Sensor current against P1 (fast axis) and the barrier B_L between dot 1 and its reservoir (slow axis), on the textbook layout. For every barrier setting the lead rate is the WKB rate of the landscape (ADR 0017) and the charge follows the master equation along the row at 1 ms per point, carried across the flyback. The dot-1 transition lines tilt with the barrier's lever arm; as the barrier closes the rate falls below the inverse dwell, the lines fade, latch along the row and carry across rows, while the equilibrium panel keeps clean lines. The fourth panel is the derived lead rate per row. Noise-free. Re-rendered on the master equation in Step 4 (the Step 1 placeholder is retired).
+description: Sensor current against P1 (fast axis) and the barrier B_L between dot 1 and its reservoir (slow axis), on the textbook layout. For every barrier setting the lead rate is the WKB rate of the landscape from the action integral along the barrier (ADR 0017, 0023) and the charge follows the master equation along the row at 1 ms per point, carried across the flyback. The dot-1 transition lines tilt with the barrier's lever arm; as the barrier closes the rate falls below the inverse dwell, the lines fade, latch along the row and carry across rows, while the equilibrium panel keeps clean lines. The fourth panel is the derived lead rate per row. Noise-free. Re-rendered on the master equation in Step 4 (the Step 1 placeholder is retired).
 layers: [layout, electrostatics, charge, readout]
 runner: step1:plunger_vs_barrier_map
 instance:
@@ -12,7 +12,7 @@ instance:
   temperature_k: 0.15
 sweep:
   - {gate: P1, from: -0.06, to: 0.06, points: 200, unit: V, relative_to: operating_point, axis_role: fast}
-  - {gate: B_L, from: -0.15, to: 0.2, points: 60, unit: V, axis_role: slow}
+  - {gate: B_L, from: -0.25, to: 0.2, points: 60, unit: V, axis_role: slow}
 readout: {channel: sensor_conductance, unit: A, dt_s: 1.0e-3}
 render:
   panels:

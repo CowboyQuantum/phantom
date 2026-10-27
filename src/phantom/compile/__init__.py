@@ -5,7 +5,12 @@ Modules: `device` (`CompileParams`, `compile_device`; the record itself is `phan
 """
 
 from phantom.compile.backends import Backend, basis_for, closed_form_basis, fem_basis
-from phantom.compile.device import CompileParams, compile_device, replace_params
+from phantom.compile.device import (
+    CompileParams,
+    compile_device,
+    interdot_tunnel_coupling_ev,
+    replace_params,
+)
 from phantom.device import DEVICE_FORMAT_VERSION, CompiledBarrier, CompiledDot, Device
 
 MODEL_VERSION = 1
@@ -22,5 +27,6 @@ __all__ = [
     "closed_form_basis",
     "compile_device",
     "fem_basis",
+    "interdot_tunnel_coupling_ev",
     "replace_params",
 ]

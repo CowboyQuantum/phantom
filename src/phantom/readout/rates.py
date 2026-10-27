@@ -6,10 +6,12 @@ confinement, so
 
     Γ = f_attempt · exp(−2 κ w),   f_attempt ≈ ħω / h = ω / 2π   (ω from the dot's curvature).
 
-This is the rectangular-barrier WKB estimate of ADR 0017; a smooth barrier of the same height and width
-transmits more, so these rates are lower bounds within an order of magnitude. Rates span many decades
-over a few hundred millivolts of barrier gate, which is the physics the sweep-rate and latching
-protocols need. Screening and the exact barrier shape wait for Step 7's solver.
+`wkb_tunnel_rate_hz` is the rectangular-barrier estimate of ADR 0017 (height × width); a smooth barrier
+of the same height and width transmits more, by one to two decades at the layouts used here.
+`wkb_rate_from_action_hz` takes the WKB action S = ∫ κ ds along the actual barrier
+(`electrostatics.barrier_action`) and gives Γ = f_attempt · exp(−2S); the compiled device and the
+gallery's dynamics protocols use it (ADR 0023), and the rectangular form remains as its bound and for
+the P0 limits. Screening waits for the FEM backend.
 """
 
 from __future__ import annotations
@@ -37,6 +39,12 @@ def attempt_rate_hz(curvature_ev_per_nm2: float, effective_mass_me: float) -> fl
     hbar_omega_ev = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(curvature_ev_per_nm2, 1e-12) / effective_mass_me)
     f = hbar_omega_ev / (2 * np.pi * HBAR_EV_S)
     return float(np.clip(f, ATTEMPT_RATE_FLOOR_HZ, ATTEMPT_RATE_CEILING_HZ))
+
+
+def wkb_rate_from_action_hz(action: np.ndarray, curvature_ev_per_nm2: float, effective_mass_me: float) -> np.ndarray:
+    """Γ = f_attempt · exp(−2S) for the WKB action S (dimensionless) of the barrier seen from a dot of
+    the given curvature."""
+    return attempt_rate_hz(curvature_ev_per_nm2, effective_mass_me) * np.exp(-2.0 * np.asarray(action, dtype=float))
 
 
 def wkb_tunnel_rate_hz(

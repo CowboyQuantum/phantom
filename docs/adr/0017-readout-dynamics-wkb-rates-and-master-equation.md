@@ -1,6 +1,6 @@
 # 0017 — Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag
 
-**Status:** Accepted
+**Status:** Accepted; the rectangular rate estimate is superseded by the WKB action integral (ADR 0023)
 **Date:** 2026-10-26
 **Step:** 4
 

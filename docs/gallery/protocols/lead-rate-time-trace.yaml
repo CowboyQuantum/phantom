@@ -1,7 +1,7 @@
 id: lead-rate-time-trace
 name: Charge relaxation after a plunger step, for three lead barriers
 step: 4
-description: P1 is stepped at t = 0 by half a transition period so dot 1 must take up an electron from the left reservoir, for three settings of the left barrier B_L. The mean charge on dot 1 relaxes exponentially toward its new equilibrium at the lead rate, which the layout predicts through the WKB barrier (height and width read off the landscape); the second panel shows the remaining deficit on a logarithmic scale, a straight line whose slope is the lead rate. The time axis of each trace spans six relaxation times, so the rates are read from the recorded arrays. Noise-free.
+description: P1 is stepped at t = 0 by half a transition period so dot 1 must take up an electron from the left reservoir, for three settings of the left barrier B_L. The mean charge on dot 1 relaxes exponentially toward its new equilibrium at the lead rate, which the layout predicts through the WKB action integral along the barrier read off the landscape (ADR 0023); the second panel shows the remaining deficit on a logarithmic scale, a straight line whose slope is the lead rate. The time axis of each trace spans six relaxation times, so the rates are read from the recorded arrays. Noise-free.
 layers: [layout, electrostatics, charge, readout]
 runner: step4:lead_rate_time_trace
 instance:

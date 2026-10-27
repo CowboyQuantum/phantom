@@ -112,7 +112,7 @@ def _barrier(basis: GateBasis, v: np.ndarray, d, point_nm: tuple[float, float], 
     return float(h), float(w), float(np.exp(-2.0 * action)), attempt_rate_hz(d.curvature_ev_per_nm2, mass)
 
 
-def _tunnel_coupling_ev(basis: GateBasis, v: np.ndarray, d1, d2, mass: float, lead_fermi_ev: float) -> tuple[float, float, float, float]:
+def interdot_tunnel_coupling_ev(basis: GateBasis, v: np.ndarray, d1, d2, mass: float, lead_fermi_ev: float = 2e-3) -> tuple[float, float, float, float]:
     """(t, height, width, rate) for the interdot barrier: t ≈ ħω₀ √T / π with T the WKB transmission."""
     h, w, trans, f_attempt = _barrier(basis, v, d1, (d2.x_nm, d2.y_nm), mass, lead_fermi_ev)
     hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(d1.curvature_ev_per_nm2, 1e-12) / mass)
@@ -134,7 +134,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     r_l, r_r = params.reservoir_gates
     h_l, w_l, t_l, f_l = _barrier(basis, v, d1, res[r_l], mat.effective_mass_me, params.lead_fermi_ev)
     h_r, w_r, t_r, f_r = _barrier(basis, v, d2, res[r_r], mat.effective_mass_me, params.lead_fermi_ev)
-    t, h_m, w_m, g_m = _tunnel_coupling_ev(basis, v, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)
+    t, h_m, w_m, g_m = interdot_tunnel_coupling_ev(basis, v, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)
     g_l, g_r = f_l * t_l, f_r * t_r
     # the barrier gate's exponential scale: t at ±10 mV on the barrier gate, same dots
     jb = layout.gate_names.index(params.barrier_gate)
@@ -142,8 +142,8 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     vp, vm = v.copy(), v.copy()
     vp[jb] += dv
     vm[jb] -= dv
-    t_p = _tunnel_coupling_ev(basis, vp, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
-    t_m = _tunnel_coupling_ev(basis, vm, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
+    t_p = interdot_tunnel_coupling_ev(basis, vp, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
+    t_m = interdot_tunnel_coupling_ev(basis, vm, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
     v_scale = float(2 * dv / np.log(max(t_p, 1e-300) / max(t_m, 1e-300))) if t_p > t_m > 0 else 0.05
     valley_params = params.valley or ValleyParams.for_material(material)
     radii = np.array([d1.radius_nm, d2.radius_nm] + ([derived.sensor_dot.radius_nm] if derived.sensor_dot else []))

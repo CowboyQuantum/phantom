@@ -21,7 +21,12 @@ from phantom.readout.noise import (
     TelegraphNoise,
     WhiteNoise,
 )
-from phantom.readout.rates import attempt_rate_hz, wkb_transmission, wkb_tunnel_rate_hz
+from phantom.readout.rates import (
+    attempt_rate_hz,
+    wkb_rate_from_action_hz,
+    wkb_transmission,
+    wkb_tunnel_rate_hz,
+)
 from phantom.readout.rf import TankCircuit, sensor_resistance_ohm
 from phantom.readout.sensor import SensorSETParams
 from phantom.readout.single_shot import ShotResult, noisy_device_for_sampling, single_shots
@@ -64,6 +69,7 @@ __all__ = [
     "raster_times_s",
     "sensor_resistance_ohm",
     "single_shots",
+    "wkb_rate_from_action_hz",
     "wkb_transmission",
     "wkb_tunnel_rate_hz",
 ]

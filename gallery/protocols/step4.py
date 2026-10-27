@@ -8,24 +8,25 @@ import numpy as np
 from gallery.protocols.step2 import _axis, _layout, _operating_point
 from gallery.runner import Context, Protocol
 from phantom.charge import derive_double_dot
-from phantom.electrostatics import GateBasis, barrier_width_nm
+from phantom.electrostatics import GateBasis, barrier_action
 from phantom.layout import MaterialClass
-from phantom.readout import RateEquation, SensorSETParams, wkb_tunnel_rate_hz
+from phantom.readout import RateEquation, SensorSETParams, wkb_rate_from_action_hz
 
 
 def derive_dynamics(lay, v, basis, temperature_k: float = 0.15):
     """The derived double dot at `v` plus the WKB rates to the left and right reservoirs and across the
-    middle barrier, all read off the landscape at the operating point."""
+    middle barrier, all read off the landscape at the operating point, from the action integral along
+    each barrier (the same estimate as the compiled device, ADR 0023)."""
     d = derive_double_dot(lay, v, temperature_k=temperature_k, basis=basis)
     m = MaterialClass.by_name(lay.material).effective_mass_me
     res = lay.reservoir_points_nm()
     d1, d2 = d.dots
-    h_l, w_l = barrier_width_nm(basis, v, d1, res["R_L"])
-    h_r, w_r = barrier_width_nm(basis, v, d2, res["R_R"])
-    h_m, w_m = barrier_width_nm(basis, v, d1, (d2.x_nm, d2.y_nm))
-    g_l = float(wkb_tunnel_rate_hz(h_l, w_l, d1.curvature_ev_per_nm2, m))
-    g_r = float(wkb_tunnel_rate_hz(h_r, w_r, d2.curvature_ev_per_nm2, m))
-    g_m = float(wkb_tunnel_rate_hz(h_m, w_m, d1.curvature_ev_per_nm2, m))
+    h_l, w_l, s_l = barrier_action(basis, v, d1, res["R_L"], m)
+    h_r, w_r, s_r = barrier_action(basis, v, d2, res["R_R"], m)
+    h_m, w_m, s_m = barrier_action(basis, v, d1, (d2.x_nm, d2.y_nm), m)
+    g_l = float(wkb_rate_from_action_hz(s_l, d1.curvature_ev_per_nm2, m))
+    g_r = float(wkb_rate_from_action_hz(s_r, d2.curvature_ev_per_nm2, m))
+    g_m = float(wkb_rate_from_action_hz(s_m, d1.curvature_ev_per_nm2, m))
     return d, RateEquation(d.ci, g_l, g_r, g_m), {"left": (h_l, w_l, g_l), "right": (h_r, w_r, g_r), "interdot": (h_m, w_m, g_m)}
 
 

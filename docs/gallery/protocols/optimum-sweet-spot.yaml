@@ -1,0 +1,25 @@
+id: optimum-sweet-spot
+name: SWAP infidelity against detuning through the optimum's sweet spot
+step: 7
+description: For the seed-2 compiled device with its noise draw, the infidelity of a SWAP gate (exchange on for pi hbar / J) against detuning through the symmetric point of the operating (1,1) cell that the optimum chooses, marked by a spike, and the exchange energy along the same cut. The infidelity is lowest at the chosen point, where dJ/dε vanishes and the quasi-static detuning noise does least harm (ADR 0023).
+layers: [charge, disorder, spin, device, optimum, compile]
+runner: step7b:optimum_sweet_spot
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {axis: eps_over_anticrossing, from: -0.8, to: 0.8, points: 41, unit: ""}
+readout: {channel: spin_outcome, unit: infidelity}
+render:
+  panels:
+    - {kind: line, x: eps_mev, y: [swap_infidelity, chosen_marker], log_y: true, xlabel: "detuning (meV)", ylabel: "1 - F_avg", title: "SWAP infidelity and the chosen point"}
+    - {kind: line, x: eps_mev, y: j_ghz, log_y: true, xlabel: "detuning (meV)", ylabel: "J/h (GHz)"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 100.0, points: 41, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
