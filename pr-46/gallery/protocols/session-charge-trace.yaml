@@ -1,0 +1,26 @@
+id: session-charge-trace
+name: The charge a session sample sees at a dot-lead degeneracy
+step: 8
+description: A consumer session (`Device.session`, `sense` in `sampled` mode) parked at the point where dot 1 is half-way through a transition to its lead. With the noise off, the dwell is 0.02, 0.5 and 50 times 1/Γ_L; the charge is a Markov trajectory of the rate equation, so at the short dwell it switches rarely and in runs (a telegraph trace), and at the long dwell every sample is an independent Boltzmann draw. The last panel is the same point with the device's noise at a 1 ms dwell, the regime of a real sensor read. The traces of dot 1's charge are offset by 1.5 electrons for clarity (ADR 0024).
+layers: [readout, device]
+runner: step8:session_charge_trace
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: none, from: 0, to: 399, points: 400, unit: sample, relative_to: degeneracy}
+readout: {channel: charge_state, unit: e}
+render:
+  panels:
+    - {kind: line, x: sample, y: [n1_fast_offset, n1_mid_offset, n1_slow_offset], xlabel: "sample", ylabel: "dot 1 charge, offset (e)", title: "Γ·dwell = 0.02, 0.5, 50 (bottom to top)"}
+    - {kind: line, x: sample, y: [current_fast_a, current_slow_a], xlabel: "sample", ylabel: "sensor current (A)", title: "noise-free current, Γ·dwell = 0.02 and 50"}
+    - {kind: line, x: sample, y: current_noisy_1ms_a, xlabel: "sample", ylabel: "sensor current (A)", title: "with the device's noise, 1 ms dwell"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 2.0, points: 1600, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
