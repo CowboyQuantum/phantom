@@ -1,0 +1,15 @@
+id: ohmic-iv
+name: Source-drain current with the channel open
+step: 2
+description: "Current against source-drain bias with every gate accumulated: linear, with one series resistance for the contacts and the electron-gas squares. Phenomenological (calibration none); a bad contact (Step 3) shows as a larger or non-linear resistance."
+layers: [readout]
+runner: step2:ohmic_iv
+instance: {series_resistance_ohm: 2.0e+4}
+sweep:
+  - {gate: V_sd, from: -2.0e-3, to: 2.0e-3, points: 201, unit: V}
+readout: {channel: current, unit: A}
+render: {kind: line, x: v_sd_mv, y: current_a, xlabel: "source-drain bias (mV)", ylabel: "current (A)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 201, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

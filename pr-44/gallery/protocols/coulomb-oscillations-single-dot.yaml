@@ -1,0 +1,15 @@
+id: coulomb-oscillations-single-dot
+name: Coulomb oscillations of a single dot
+step: 1
+description: Current through a single dot (the SET sensor) against its plunger at small bias, plungers of the double dot at 0 V. Periodic thermally broadened peaks spaced by the addition energy over the lever arm. Noise-free.
+layers: [readout, charge]
+runner: step1:coulomb_oscillations_single_dot
+instance: {model: sensed-double-dot, seed: 0, noise: none}
+sweep:
+  - {gate: SG, from: -0.6, to: 0.6, points: 1201, unit: V}
+readout: {channel: current, unit: A}
+render: {kind: line, x: v_sg_v, y: current_a, xlabel: "sensor plunger (V)", ylabel: "current (A)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.05, points: 1201, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
