@@ -9,7 +9,9 @@ Why: `docs/adr/`. What next: `docs/STATUS.md`. The protocol is the one qdt uses 
 docstring in `src/phantom/<layer>/__init__.py`. Restate the task in one sentence; if it differs from the
 issue, stop and say so.
 **During** — one branch per issue: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise; conventional commits scoped by layer
-(`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`.
+(`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`. Whoever opens a PR sets up a
+watcher on it in the same turn (subscribe to its activity), so the session answers review and CI and continues
+once the owner merges.
 **End** — `uv run pytest` and `bash scripts/check_all.sh` green; rewrite `docs/STATUS.md` (never append);
 `docs/MODELS.md` updated if a model was added or rewired, and `scripts/gallery.py --record` re-run if a model or
 protocol changed (ADR 0011); an ADR for any decision a future session
