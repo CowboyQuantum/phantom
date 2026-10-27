@@ -176,3 +176,36 @@ def line_cut(basis: GateBasis, voltages_v: np.ndarray, x0: float, y0: float, x1:
     ix = np.clip(np.rint((xs - basis.x_nm[0]) / (basis.x_nm[1] - basis.x_nm[0])).astype(int), 0, len(basis.x_nm) - 1)
     iy = np.clip(np.rint((ys - basis.y_nm[0]) / (basis.y_nm[1] - basis.y_nm[0])).astype(int), 0, len(basis.y_nm) - 1)
     return np.hypot(xs - x0, ys - y0), u[iy, ix]
+
+
+def barrier_action(
+    basis: GateBasis,
+    voltages_v: np.ndarray,
+    a: DerivedDot,
+    b_point_nm: tuple[float, float],
+    effective_mass_me: float,
+    level_ev: float | None = None,
+    samples: int = 401,
+    lead_fermi_ev: float = 2e-3,
+) -> tuple[float, float, float]:
+    """(height, width, action) of the barrier between dot `a` and `b_point_nm` for an electron at the
+    tunnelling level (chosen as in `barrier_width_nm`): the WKB action S = ∫ κ ds over the first
+    forbidden stretch seen from the dot, with κ = √(2m*(U − E))/ħ, so that the transmission is
+    exp(−2S). Unlike the rectangular estimate (height × width), the action follows the barrier's
+    actual shape and varies smoothly as a gate lowers a rounded barrier top through the level."""
+    s, u = line_cut(basis, voltages_v, a.x_nm, a.y_nm, b_point_nm[0], b_point_nm[1], samples)
+    if level_ev is None:
+        hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(a.curvature_ev_per_nm2, 1e-12) / effective_mass_me)
+        level_ev = max(a.energy_ev + hbar_omega, float(u[-1]) + lead_fermi_ev)
+    above = u > level_ev
+    height = float(u.max() - level_ev)
+    if not above.any():
+        return height, 0.0, 0.0
+    ds = s[1] - s[0]
+    idx = np.flatnonzero(above)
+    start = idx[0]
+    end = start
+    while end + 1 < len(u) and above[end + 1]:
+        end += 1
+    kappa = np.sqrt(np.maximum(u[start : end + 1] - level_ev, 0.0) * effective_mass_me / HBAR2_OVER_2ME_EV_NM2)
+    return height, float((end - start + 1) * ds), float(np.sum(kappa) * ds)

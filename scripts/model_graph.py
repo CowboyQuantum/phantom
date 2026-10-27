@@ -21,7 +21,7 @@ START, END = "<!-- module-graph:start -->", "<!-- module-graph:end -->"
 RT_START, RT_END = "<!-- runtimes:start -->", "<!-- runtimes:end -->"
 PROTOCOLS = ROOT / "docs/gallery/protocols"
 MEASURED = ROOT / "docs/gallery/measured.json"
-LAYERS = ["layout", "electrostatics", "disorder", "valley", "charge", "readout", "spin", "optimum", "compile"]
+LAYERS = ["layout", "electrostatics", "disorder", "valley", "charge", "readout", "spin", "device", "optimum", "compile"]
 
 
 def module_name(path: pathlib.Path) -> str:

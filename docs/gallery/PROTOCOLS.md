@@ -113,6 +113,13 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `gate-leakage-pair` | one gate swept, others grounded, with a finite resistance to a neighbour | leakage current of both gates | equal and opposite linear currents on the pair on top of the dielectric leakage; the healthy curve flat |
 | `gate-hysteresis-trapping` | one gate up then down with trapping | current, trapped fraction | a loop: the downward trace turns off at a shifted voltage; the trapped fraction charges above capture and releases below release |
 
+## I. Compiled device and optimum (device, compile, optimum) — Step 7
+| id | sweep | readout | must show |
+|---|---|---|---|
+| `compiled-device-roundtrip` | (P1, P2) coarse map from a compiled device and from its JSON reload | sensor_conductance, difference | the honeycomb of the compiled device; a difference that is identically zero; a device file of a few kilobytes |
+| `virtual-gates-map` | (P1, P2) raw beside (virtual P1, virtual P2) from the optimum's virtual-gate matrix | sensor_conductance | tilted lines in raw plungers; each dot's lines perpendicular to its own virtual axis |
+| `optimum-sensor-flank` | SG over one peak period around the compiled set-point | sensor current, slope, the optimum's marker | the Coulomb peak; the steepest flank chosen by the optimum |
+
 ## Candidates not included, for the owner to decide
 - Multi-dot arrays (linear 3+ dots): per-pair stability maps and sensor coverage. Deferred until a layout step defines arrays.
 - Anything for germanium holes (ADR 0002 lists it as later): g-tensor anisotropy, spin–orbit field.

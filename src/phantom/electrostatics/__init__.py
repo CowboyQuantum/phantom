@@ -13,6 +13,7 @@ from phantom.electrostatics.closed_form import (
 from phantom.electrostatics.dots import (
     DerivedBarrier,
     DerivedDot,
+    barrier_action,
     barrier_between,
     barrier_width_nm,
     find_dots,
@@ -26,6 +27,7 @@ __all__ = [
     "DerivedBarrier",
     "DerivedDot",
     "GateBasis",
+    "barrier_action",
     "barrier_between",
     "barrier_width_nm",
     "find_dots",
