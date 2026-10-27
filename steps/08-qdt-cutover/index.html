@@ -327,6 +327,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../adr/" class="md-nav__link">
         
   
@@ -567,12 +594,13 @@
 <p>qdt's <code>qdt-sim</code> becomes an adapter that pins a phantom release and contains no physics; qdt's golden files are regenerated once; the seam is enforced on both sides.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li>in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API</li>
+<li>in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API — <code>phantom.api</code> (ADR 0024), <code>docs/CONTRACT.md</code>, <code>CHANGELOG.md</code>, version 0.2.0, the surface snapshot <code>docs/api/surface.json</code> checked in <code>check_all.sh</code>; the runtime surface <code>Device.at</code> → <code>State</code>, <code>Device.session</code> → <code>Session</code> (<code>sense</code> with bias and samples, <code>hold</code>, <code>wait</code>, <code>spin_readout</code>; a noise seed apart from the device seed; one sample's charge stated), <code>Device.truth</code> (charge lattice, sensor peak and wing) and <code>Device.knowable</code>; the tag is the owner's</li>
 <li>in qdt (coordinated issue): <code>qdt-sim</code> maps <code>StandConfig</code>/<code>ChannelMap</code> onto <code>phantom.Device</code>, implements the protocols over it, pins the release; the physics modules deleted; <code>make_sim_fixtures.py</code> regenerated; the vocabulary and import checks updated</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
-<li>phantom's API surface is covered by a contract test that qdt's adapter also runs</li>
+<li>phantom's API surface is covered by a contract test that qdt's adapter also runs — <code>phantom.contract</code> (<code>python -m phantom.contract [device.json ...]</code>), fifteen checks, run by <code>tests/test_contract.py</code> on three draws</li>
+<li>the session against closed forms: Boltzmann draws without dynamics, trajectory switching as the two-state propagator at three dwells, the white floor's density under a dwell change, a noise seed keeping the noise parameters, the sensor truth against the sensor current, the lattice through the wiring, the PSB occupations and relaxation — <code>tests/test_device_session.py</code></li>
 </ul>
 <h2 id="p1-tests-ci-literature-reproduce-an-item-of-a-confirmed-reference-entry-adr-0007">P1 tests (CI, <code>literature</code>: reproduce an item of a <code>confirmed</code> reference entry; ADR 0007)</h2>
 <ul>
@@ -580,11 +608,13 @@
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li>to be listed before the step starts; each carries a <code>budget</code> (ADR 0009)</li>
+<li><code>session-charge-trace</code> — the charge a sample sees at a dot-lead degeneracy at three dwells, and the noisy read at 1 ms</li>
+<li><code>session-hold-relaxation</code> — the mean charge after a hold relaxing on exp(−Γ_L t), and one trajectory</li>
+<li>each carries a <code>budget</code> (ADR 0009); both unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
-<li>qdt CI green against the pinned phantom with <code>qdt-sim</code> under 300 lines</li>
+<li>qdt CI green against the pinned phantom with <code>qdt-sim</code> under 300 lines — qdt side (CowboyQuantum/qdt#140, #141, #142)</li>
 <li>qdt's tune-up on the simulator reproduces its committed scenario outcomes after regeneration</li>
 </ul>
 <h2 id="open-decisions">Open decisions</h2>
@@ -592,7 +622,7 @@
 <li>cadence of phantom releases vs. qdt pins</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS — phantom side built (ADR 0024): the consumer surface, the contract test, the snapshot, the changelog and 0.2.0; two protocols unsigned. Open: the owner's tag <code>v0.2.0</code>, the release cadence, the qdt side.</p>
 
 
 

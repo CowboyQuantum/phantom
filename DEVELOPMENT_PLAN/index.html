@@ -316,10 +316,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-what-a-consumer-gets-adr-0003" class="md-nav__link">
+  <a href="#4-what-a-consumer-gets-adr-0003-0024" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. What a consumer gets (ADR 0003)
+        4. What a consumer gets (ADR 0003, 0024)
       
     </span>
   </a>
@@ -458,6 +458,33 @@
     
   
     Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
   
 
     
@@ -638,10 +665,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-what-a-consumer-gets-adr-0003" class="md-nav__link">
+  <a href="#4-what-a-consumer-gets-adr-0003-0024" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. What a consumer gets (ADR 0003)
+        4. What a consumer gets (ADR 0003, 0024)
       
     </span>
   </a>
@@ -809,18 +836,17 @@ A tune-up never waits on a solver; a scenario is compiled before it is served.</
 </tbody>
 </table>
 <p><code>qdt-sim</code>'s <code>DoubleDotModel</code> and noise models are the seed of <code>charge</code> and <code>readout</code> (Step 1 migrates them).</p>
-<h2 id="4-what-a-consumer-gets-adr-0003">4. What a consumer gets (ADR 0003)</h2>
-<ul>
-<li><code>compile(layout, material, draw, seed) -&gt; Device</code> — a compiled, serialisable device instance with a
-  <code>model_version</code>.</li>
-<li><code>Device.at(gate_vector) -&gt; State</code> (charge configuration, rates, sensor signal); <code>Device.measure(...)</code>
-  for readout and spin outcomes; noise advanced by explicit time steps.</li>
-<li><code>Device.truth</code> — the hidden parameters, and <code>optimum(Device)</code> — the best achievable results. Consumers
-  that must hide truth from a user (a tuning loop, a product) simply do not hand it over.</li>
-<li>Reproducibility: parameters + seed + version → identical output.</li>
-<li>No instruments, no measurement vocabulary, no users: the adapter that turns a <code>Device</code> into a qdt stand
-  lives in qdt and pins a phantom release.</li>
-</ul>
+<h2 id="4-what-a-consumer-gets-adr-0003-0024">4. What a consumer gets (ADR 0003, 0024)</h2>
+<p>The surface as built is documented in <a href="../CONTRACT/"><code>CONTRACT.md</code></a> and imported from <code>phantom.api</code>.
+- <code>compile(layout, material, draw, seed) -&gt; Device</code> — a compiled, serialisable device instance with a
+  <code>model_version</code>.
+- <code>Device.at(gate_vector) -&gt; State</code> (charge configuration, rates, sensor signal); <code>Device.measure(...)</code>
+  for readout and spin outcomes; noise advanced by explicit time steps.
+- <code>Device.truth</code> — the hidden parameters, and <code>optimum(Device)</code> — the best achievable results. Consumers
+  that must hide truth from a user (a tuning loop, a product) simply do not hand it over.
+- Reproducibility: parameters + seed + version → identical output.
+- No instruments, no measurement vocabulary, no users: the adapter that turns a <code>Device</code> into a qdt stand
+  lives in qdt and pins a phantom release.</p>
 <h2 id="5-the-defect-and-material-catalog-adr-0006">5. The defect and material catalog (ADR 0006)</h2>
 <p><code>docs/catalog/</code> is data a human fills in: each entry names a defect or material trait, the layer it
 perturbs, the parameter and its distribution, a severity knob, the signature it leaves in a tune-up, and a

@@ -1,0 +1,1121 @@
+{
+ "module": "phantom.api",
+ "names": {
+  "CoherenceOptimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "sweet_spot_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "t2_star_single_spin_s",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "swap_fidelity_at_sweet_spot",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "swap_gate_time_s",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "CompileParams": {
+   "fields": [
+    {
+     "default": false,
+     "name": "operating_point_v",
+     "type": "dict[str, float]"
+    },
+    {
+     "default": true,
+     "name": "temperature_k",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "grid_pitch_nm",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "severity",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "wiring_faults",
+     "type": "bool"
+    },
+    {
+     "default": true,
+     "name": "backend",
+     "type": "Backend"
+    },
+    {
+     "default": true,
+     "name": "sensor_gate",
+     "type": "str"
+    },
+    {
+     "default": true,
+     "name": "sensor_flank_widths",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "barrier_gate",
+     "type": "str"
+    },
+    {
+     "default": true,
+     "name": "reservoir_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": true,
+     "name": "lead_fermi_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "valley",
+     "type": "ValleyParams | None"
+    },
+    {
+     "default": true,
+     "name": "spin",
+     "type": "SpinParams"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "CompiledBarrier": {
+   "fields": [
+    {
+     "default": false,
+     "name": "between",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": false,
+     "name": "height_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "width_nm",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "rate_hz",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "CompiledDot": {
+   "fields": [
+    {
+     "default": false,
+     "name": "name",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "x_nm",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "y_nm",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "energy_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "curvature_ev_per_nm2",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "radius_nm",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "lever_arms",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "valley_splitting_uev",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "CouplingOptimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "t_target_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "v_barrier_v",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "DEVICE_FORMAT_VERSION": {
+   "kind": "value",
+   "type": "int",
+   "value": 1
+  },
+  "Device": {
+   "fields": [
+    {
+     "default": false,
+     "name": "seed",
+     "type": "int"
+    },
+    {
+     "default": false,
+     "name": "material",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "layout",
+     "type": "dict[str, Any]"
+    },
+    {
+     "default": false,
+     "name": "scenario",
+     "type": "dict[str, Any]"
+    },
+    {
+     "default": false,
+     "name": "programmed_point_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "operating_point_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "gate_names",
+     "type": "tuple[str, ...]"
+    },
+    {
+     "default": false,
+     "name": "dots",
+     "type": "tuple[CompiledDot, ...]"
+    },
+    {
+     "default": false,
+     "name": "sensor_dot",
+     "type": "CompiledDot | None"
+    },
+    {
+     "default": false,
+     "name": "c_dot_af",
+     "type": "tuple[tuple[float, ...], ...]"
+    },
+    {
+     "default": false,
+     "name": "c_gate_af",
+     "type": "tuple[tuple[float, ...], ...]"
+    },
+    {
+     "default": false,
+     "name": "temperature_k",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "sensor_alpha_v_per_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "barriers",
+     "type": "tuple[CompiledBarrier, ...]"
+    },
+    {
+     "default": false,
+     "name": "tunnel_coupling_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "barrier_gate",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "barrier_v_scale_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "g_factors",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "params",
+     "type": "dict[str, Any]"
+    },
+    {
+     "default": false,
+     "name": "provenance",
+     "type": "dict[str, Any]"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "at": {
+     "kind": "method",
+     "signature": "(self, v_programmed: 'np.ndarray', v_sd: 'float | np.ndarray | None' = None) -> 'State'"
+    },
+    "basis": {
+     "kind": "method",
+     "signature": "(self) -> 'tuple[Layout, GateBasis]'"
+    },
+    "dumps": {
+     "kind": "method",
+     "signature": "(self) -> 'str'"
+    },
+    "effective_voltages": {
+     "kind": "method",
+     "signature": "(self, v_programmed: 'np.ndarray') -> 'np.ndarray'"
+    },
+    "from_dict": {
+     "kind": "classmethod",
+     "signature": "(cls, d: 'dict[str, Any]') -> 'Device'"
+    },
+    "from_json": {
+     "kind": "classmethod",
+     "signature": "(cls, path: 'str | pathlib.Path') -> 'Device'"
+    },
+    "knowable": {
+     "kind": "method",
+     "signature": "(self) -> 'Knowable'"
+    },
+    "layout_object": {
+     "kind": "method",
+     "signature": "(self) -> 'Layout'"
+    },
+    "loads": {
+     "kind": "classmethod",
+     "signature": "(cls, text: 'str') -> 'Device'"
+    },
+    "measure": {
+     "kind": "method",
+     "signature": "(self, v_programmed: 'np.ndarray', dwell_s: 'float', samples: 'int | None' = None, v_sd: 'float | np.ndarray | None' = None, noise: 'bool' = True, dynamics: 'bool' = True, charge: 'ChargeMode' = 'sampled', noise_seed: 'int | None' = None) -> 'Measurement'"
+    },
+    "noise_sigma_gate_v": {
+     "kind": "method",
+     "signature": "(self) -> 'float'"
+    },
+    "operating_point": {
+     "kind": "method",
+     "signature": "(self) -> 'np.ndarray'"
+    },
+    "runtime_barrier": {
+     "kind": "method",
+     "signature": "(self) -> 'Barrier'"
+    },
+    "runtime_ci": {
+     "kind": "method",
+     "signature": "(self) -> 'ConstantInteractionParams'"
+    },
+    "runtime_hubbard": {
+     "kind": "method",
+     "signature": "(self) -> 'HubbardParams'"
+    },
+    "runtime_rates": {
+     "kind": "method",
+     "signature": "(self) -> 'RateEquation'"
+    },
+    "runtime_sensed": {
+     "kind": "method",
+     "signature": "(self, sample_dt_s: 'float' = 0.001, noise: 'bool' = True) -> 'SensedDoubleDot'"
+    },
+    "runtime_sensor": {
+     "kind": "method",
+     "signature": "(self) -> 'SensorSETParams'"
+    },
+    "runtime_spin": {
+     "kind": "method",
+     "signature": "(self) -> 'SpinDraw'"
+    },
+    "scenario_draw": {
+     "kind": "method",
+     "signature": "(self) -> 'ScenarioDraw'"
+    },
+    "session": {
+     "kind": "method",
+     "signature": "(self, noise: 'bool' = True, dynamics: 'bool' = True, charge: 'ChargeMode' = 'sampled', noise_seed: 'int | None' = None) -> 'Session'"
+    },
+    "to_dict": {
+     "kind": "method",
+     "signature": "(self) -> 'dict[str, Any]'"
+    },
+    "to_json": {
+     "kind": "method",
+     "signature": "(self, path: 'str | pathlib.Path') -> 'None'"
+    },
+    "truth": {
+     "kind": "method",
+     "signature": "(self, lattice_gates: 'tuple[str, str]' = ('P1', 'P2'), near_v: 'float | None' = None, v_sd: 'float | None' = None, v_programmed: 'np.ndarray | None' = None) -> 'Truth'"
+    },
+    "valley_splittings_uev": {
+     "kind": "method",
+     "signature": "(self) -> 'np.ndarray'"
+    }
+   }
+  },
+  "Gate": {
+   "fields": [
+    {
+     "default": false,
+     "name": "name",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "polygon_nm",
+     "type": "tuple[tuple[float, float], ...]"
+    },
+    {
+     "default": true,
+     "name": "role",
+     "type": "str"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "area_nm2": {
+     "kind": "property"
+    },
+    "centroid_nm": {
+     "kind": "property"
+    },
+    "rectangle": {
+     "kind": "classmethod",
+     "signature": "(cls, name: 'str', x0: 'float', x1: 'float', y0: 'float', y1: 'float', role: 'str' = 'gate') -> 'Gate'"
+    },
+    "vertices": {
+     "kind": "property"
+    }
+   }
+  },
+  "Knowable": {
+   "fields": [
+    {
+     "default": false,
+     "name": "material",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "gate_names",
+     "type": "tuple[str, ...]"
+    },
+    {
+     "default": false,
+     "name": "layout",
+     "type": "dict[str, Any]"
+    },
+    {
+     "default": false,
+     "name": "temperature_k",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "programmed_point_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "sensor_gate",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "barrier_gate",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "reservoir_gates",
+     "type": "tuple[str, ...]"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "to_dict": {
+     "kind": "method",
+     "signature": "(self) -> 'dict[str, Any]'"
+    }
+   }
+  },
+  "LatticeOptimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "virtual_gate_matrix",
+     "type": "tuple[tuple[float, ...], ...]"
+    },
+    {
+     "default": false,
+     "name": "plungers",
+     "type": "tuple[str, str]"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Layer": {
+   "fields": [
+    {
+     "default": false,
+     "name": "name",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "thickness_nm",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "epsilon_r",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Layout": {
+   "fields": [
+    {
+     "default": false,
+     "name": "gates",
+     "type": "tuple[Gate, ...]"
+    },
+    {
+     "default": false,
+     "name": "stack",
+     "type": "Stack"
+    },
+    {
+     "default": true,
+     "name": "material",
+     "type": "str"
+    },
+    {
+     "default": true,
+     "name": "channel_nm",
+     "type": "tuple[float, float, float, float]"
+    },
+    {
+     "default": true,
+     "name": "sensor_nm",
+     "type": "tuple[float, float, float, float] | None"
+    },
+    {
+     "default": true,
+     "name": "margin_nm",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "bounding_box_nm": {
+     "kind": "method",
+     "signature": "(self) -> 'tuple[float, float, float, float]'"
+    },
+    "from_json": {
+     "kind": "classmethod",
+     "signature": "(cls, path: 'str | pathlib.Path') -> 'Layout'"
+    },
+    "gate": {
+     "kind": "method",
+     "signature": "(self, name: 'str') -> 'Gate'"
+    },
+    "gate_names": {
+     "kind": "property"
+    },
+    "reservoir_points_nm": {
+     "kind": "method",
+     "signature": "(self) -> 'dict[str, tuple[float, float]]'"
+    },
+    "to_json": {
+     "kind": "method",
+     "signature": "(self, path: 'str | pathlib.Path') -> 'None'"
+    }
+   }
+  },
+  "Measurement": {
+   "fields": [
+    {
+     "default": false,
+     "name": "times_s",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "current_a",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "n_present",
+     "type": "np.ndarray"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Optimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "sensor",
+     "type": "SensorOptimum"
+    },
+    {
+     "default": false,
+     "name": "lattice",
+     "type": "LatticeOptimum"
+    },
+    {
+     "default": false,
+     "name": "coupling",
+     "type": "CouplingOptimum"
+    },
+    {
+     "default": false,
+     "name": "readout",
+     "type": "ReadoutOptimum"
+    },
+    {
+     "default": false,
+     "name": "coherence",
+     "type": "CoherenceOptimum"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "to_dict": {
+     "kind": "method",
+     "signature": "(self) -> 'dict[str, Any]'"
+    }
+   }
+  },
+  "ReadoutOptimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "psb_detuning_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "psb_contrast",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "elzerman_peak_time_s",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "elzerman_peak_probability",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "SensorOptimum": {
+   "fields": [
+    {
+     "default": false,
+     "name": "v_sensor_gate_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "slope_a_per_v",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "SensorTruth": {
+   "fields": [
+    {
+     "default": false,
+     "name": "gate",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "peak_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "period_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "charging_energy_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "lever_arm_ev_per_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "width_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "wing_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "sensitivity_a_per_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "v_sd_v",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Session": {
+   "init": "(self, device: 'Device', noise: 'bool' = True, dynamics: 'bool' = True, charge: 'ChargeMode' = 'sampled', noise_seed: 'int | None' = None) -> 'None'",
+   "kind": "class",
+   "members": {
+    "hold": {
+     "kind": "method",
+     "signature": "(self, v_programmed: 'np.ndarray', duration_s: 'float') -> 'None'"
+    },
+    "last_point_v": {
+     "kind": "property"
+    },
+    "sense": {
+     "kind": "method",
+     "signature": "(self, v_programmed: 'np.ndarray', dwell_s: 'float', samples: 'int | None' = None, v_sd: 'float | np.ndarray | None' = None) -> 'Measurement'"
+    },
+    "spin_readout": {
+     "kind": "method",
+     "signature": "(self, p_triplet: 'float', detuning_ev: 'float', shots: 'int', t_integration_s: 'float', t1_read_s: 'float') -> 'SpinOutcome'"
+    },
+    "time_s": {
+     "kind": "property"
+    },
+    "wait": {
+     "kind": "method",
+     "signature": "(self, duration_s: 'float') -> 'None'"
+    }
+   }
+  },
+  "SpinOutcome": {
+   "fields": [
+    {
+     "default": false,
+     "name": "prepared_triplet",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "in_02",
+     "type": "np.ndarray"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "SpinParams": {
+   "fields": [
+    {
+     "default": true,
+     "name": "g_mean",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "g_sigma",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "dg_dv_per_v",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "hyperfine_sigma_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "t1_s",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "t_phi_markov_s",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Stack": {
+   "fields": [
+    {
+     "default": false,
+     "name": "layers",
+     "type": "tuple[Layer, ...]"
+    },
+    {
+     "default": true,
+     "name": "epsilon_well",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "depth_nm": {
+     "kind": "property"
+    },
+    "effective_depth_nm": {
+     "kind": "property"
+    }
+   }
+  },
+  "State": {
+   "fields": [
+    {
+     "default": false,
+     "name": "v_programmed_v",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "v_carried_v",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "n_mean",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "n_ground",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "sensor_potential_v",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "sensor_current_a",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "v_sd_v",
+     "type": "float | np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "tunnel_coupling_ev",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "exchange_ev",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
+     "name": "gamma_left_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "gamma_right_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "gamma_interdot_hz",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {}
+  },
+  "Truth": {
+   "fields": [
+    {
+     "default": false,
+     "name": "seed",
+     "type": "int"
+    },
+    {
+     "default": false,
+     "name": "material",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "scenario",
+     "type": "dict[str, Any]"
+    },
+    {
+     "default": false,
+     "name": "operating_point_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "dots",
+     "type": "tuple[CompiledDot, ...]"
+    },
+    {
+     "default": false,
+     "name": "sensor_dot",
+     "type": "CompiledDot | None"
+    },
+    {
+     "default": false,
+     "name": "addition_energies_ev",
+     "type": "tuple[float, float]"
+    },
+    {
+     "default": false,
+     "name": "mutual_charging_energy_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "lever_arms_ev_per_v",
+     "type": "tuple[tuple[float, ...], ...]"
+    },
+    {
+     "default": false,
+     "name": "lattice_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": false,
+     "name": "charge_lattice_e_per_v",
+     "type": "tuple[tuple[float, float], tuple[float, float]]"
+    },
+    {
+     "default": false,
+     "name": "tunnel_coupling_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "barrier_gate",
+     "type": "str"
+    },
+    {
+     "default": false,
+     "name": "barrier_v_scale_v",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "gamma_left_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "gamma_right_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "gamma_interdot_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "valley_splittings_uev",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "g_factors",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "sensor",
+     "type": "SensorTruth | None"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "to_dict": {
+     "kind": "method",
+     "signature": "(self) -> 'dict[str, Any]'"
+    }
+   }
+  },
+  "ValleyParams": {
+   "fields": [
+    {
+     "default": true,
+     "name": "material",
+     "type": "str"
+    },
+    {
+     "default": true,
+     "name": "delta_det_uev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "sigma_ref_uev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "radius_ref_nm",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "ge_ref",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "interface_width_ref_nm",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "field_v_per_nm",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "delta_det_per_field_uev_nm_per_v",
+     "type": "float"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "delta_det_total_uev": {
+     "kind": "method",
+     "signature": "(self) -> 'float'"
+    },
+    "for_material": {
+     "kind": "classmethod",
+     "signature": "(cls, material: 'str') -> 'ValleyParams'"
+    },
+    "mean_uev": {
+     "kind": "method",
+     "signature": "(self, radius_nm: 'float', **kwargs) -> 'float'"
+    },
+    "sigma_uev": {
+     "kind": "method",
+     "signature": "(self, radius_nm: 'float', ge: 'float | None' = None, interface_width_nm: 'float | None' = None, step_factor: 'float' = 1.0) -> 'float'"
+    }
+   }
+  },
+  "__version__": {
+   "kind": "value",
+   "type": "str",
+   "value": "0.2.0"
+  },
+  "compile_device": {
+   "kind": "function",
+   "signature": "(layout: 'Layout', params: 'CompileParams', seed: 'int') -> 'Device'"
+  },
+  "model_versions": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, int]'"
+  },
+  "optimum": {
+   "kind": "function",
+   "signature": "(device: 'Device', t_target_ev: 'float' = 2e-05) -> 'Optimum'"
+  },
+  "two_dot_layout": {
+   "kind": "function",
+   "signature": "(material: 'str' = 'SiGe', pitch_nm: 'float' = 80.0) -> 'Layout'"
+  }
+ }
+}

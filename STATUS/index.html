@@ -422,6 +422,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr/" class="md-nav__link">
         
   
@@ -614,67 +641,78 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 1–4 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in
-dynamics on the master equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37, compile and optimum) built
-except the solver decision → <code>docs/steps/07-compile-optimum.md</code>. Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6:
-valley, spin", "Steps 7-8: compile, cutover".
-<strong>Branch:</strong> <code>step-7/optimum-protocols</code> (second Step 7 PR, part of #37). PRs #19–#38 merged.
-<strong>Last session:</strong> 2026-10-27 — Step 7 first PR merged (#38: <code>compile</code>, <code>device</code>, <code>optimum</code>); second PR: the Step 4
-dynamics protocols on the WKB action, optimum protocols for coupling, read point and sweet spot, and a population of
-twelve compiled devices.</p>
+<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side built on <code>step-8/consumer-contract</code>, not yet merged. Steps 1–4
+complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
+equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
+Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
+<strong>Branch:</strong> <code>step-8/consumer-contract</code>, PR #42 (<code>Closes #40</code>), open and watched. <code>main</code> is at the merge of PR #39.
+<strong>Last session:</strong> 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
+the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.</p>
 <h2 id="done">Done</h2>
 <ul>
-<li><code>compile</code> / <code>device</code> / <code>optimum</code> (Step 7): <code>compile_device(layout, CompileParams, seed)</code> runs the scenario draw,
-  the basis with the draw applied (closed form; <code>fem</code> hook behind <code>[fem]</code>), the wiring map, the dots and CI model with
-  the sensor on its flank, the WKB-action barriers and rates, the interdot t and its gate scale, the valley and g draws,
-  and writes a <code>phantom.device.Device</code> (parameters only, canonical JSON, format and model versions; basis recomputed
-  on demand). <code>Device.runtime_*</code> build the CI model, sensor, barrier, Hubbard model, rate equation, sensed double dot
-  with the noise draw, and spin draw. <code>optimum.optimum(device)</code>: sensor flank (coarse scan + golden section),
-  virtual-gate matrix, barrier voltage for a target t, PSB read point and Elzerman peak time, exchange sweet spot in
-  the operating cell with T₂* and SWAP fidelity. <code>electrostatics.barrier_action</code> (WKB action along the cut). The
-  layer order gains <code>device</code> between <code>spin</code> and <code>optimum</code> (rule 2, checker, ADR 0004 note). ADR 0023. Protocols
-  <code>compiled-device-roundtrip</code>, <code>virtual-gates-map</code>, <code>optimum-sensor-flank</code> (unsigned, within budget).</li>
-<li><code>spin</code> (Step 6): exchange from the Hubbard sector, Lindblad dynamics, PSB, blockade transport, funnel, Elzerman,
-  noise spectroscopy, gate fidelity; ADR 0021, 0022; fourteen protocols; three proposed entries.</li>
-<li><code>valley</code> (Step 5): Rice draw per dot, three signatures; ADR 0020; four protocols; two proposed entries.</li>
-<li>Steps 1–4: <code>layout</code>, <code>electrostatics</code>, <code>disorder</code>, <code>charge</code>, <code>readout</code>; 43 protocols; tooling; CI with the ubuntu
-  reference and the Windows comparison within 1e-9; per-PR previews; <code>docs/MODELS.md</code> map, graph and ledger.</li>
+<li>Steps 1–7 as before: <code>layout</code>, <code>electrostatics</code>, <code>disorder</code>, <code>charge</code>, <code>readout</code>, <code>valley</code>, <code>spin</code>, <code>compile</code>,
+  <code>device</code>, <code>optimum</code> (ADRs 0001–0023); tooling; CI with the ubuntu reference and the Windows comparison.</li>
+<li>Step 8, phantom side (ADR 0024, <code>docs/CONTRACT.md</code>, <code>CHANGELOG.md</code>):</li>
+<li><code>phantom.api</code>, the one consumer import, above <code>compile</code> with <code>phantom.contract</code>; rule 2 amended in <code>CLAUDE.md</code>
+    and enforced by <code>scripts/check_imports.py</code> (no layer or root module imports either); <code>model_versions()</code>.</li>
+<li><code>device.session</code>: <code>Device.at(v, v_sd)</code> → <code>State</code>; <code>Device.session(noise, dynamics, charge, noise_seed)</code> →
+    <code>Session</code> with a forward clock: <code>sense(v, dwell_s, samples, v_sd)</code> (sample k at t₀ + (k+1)·dwell), <code>hold(v,
+    duration_s)</code>, <code>wait(duration_s)</code>, <code>spin_readout(...)</code>; <code>Device.measure</code>. One sample's charge: a Markov jump
+    trajectory or an independent Boltzmann draw (<code>sampled</code>, default) or ⟨N⟩ (<code>mean</code>). <code>noise_seed</code> gives a new
+    realisation with the device's noise parameters; <code>None</code> replays the device's own.</li>
+<li><code>device.truth</code>: <code>Device.truth()</code> (charge lattice through the wiring, <code>SensorTruth</code>: peak, period, charging
+    energy, lever arm, width, wing, sensitivity at a bias, as qdt's tune-up nodes name them) and
+    <code>Device.knowable()</code> (material, gate names, layout, temperature, programmed point, sensor/barrier/reservoir gates).</li>
+<li><code>python -m phantom.contract [device.json ...]</code>: fifteen checks, exit 0 or 1; <code>tests/test_contract.py</code> (three
+    draws), <code>tests/test_device_session.py</code> (closed forms: Boltzmann draws, trajectory switching against the
+    two-state propagator, white floor under a dwell change, sensor truth against the sensor current, lattice
+    through the wiring, PSB occupations). The contract holds on every compilable seed 0–11 (6 does not compile).</li>
+<li><code>scripts/api_surface.py</code> → <code>docs/api/surface.json</code>, <code>--check</code> in <code>check_all.sh</code>.</li>
+<li><code>RateEquation.rate_matrix</code> vectorised, bit-identical (checked on 1,200 matrices and four sweeps): a session with
+    dynamics costs about 0.6–0.9 ms per sample.</li>
+<li>Protocols <code>session-charge-trace</code>, <code>session-hold-relaxation</code> (unsigned, within budget).</li>
+<li>66 protocols render within budget, all unsigned; 135 P0 tests; eight reference entries, all <code>proposed</code>.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>Second Step 7 PR (this branch): <code>readout.wkb_rate_from_action_hz</code>; the gallery's Step 4 dynamics helper uses the
-  action integral (operating points of <code>stability-vs-sweep-rate</code> and <code>stability-direction</code> moved to B_L = B_R = −0.02 V
-  to keep a 16 kHz lead rate; <code>plunger-vs-barrier-map</code> sweeps B_L from −0.25 V); <code>compile.interdot_tunnel_coupling_ev</code>
-  public; render option <code>markers</code>; protocols <code>optimum-coupling-target</code>, <code>optimum-readout-point</code>, <code>optimum-sweet-spot</code>,
-  <code>compiled-device-draws</code>; <code>spin.exchange</code> MODEL_VERSION 2 (J from the singlet secular equation by bisection, full
-  relative precision at tiny coupling; the eigenvalue difference kept as <code>exchange_j_eigen_ev</code>), after the Windows
-  gallery differed on a 0.003 µeV device; three P0 tests; ADR 0017, 0021 and 0023 notes. 117 P0 tests.</li>
+<li>PR #42 (<code>step-8/consumer-contract</code>): everything under Step 8 above; waits on review, the gallery preview at
+  <code>/pr-42/</code> and the merge.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
 <ul>
-<li>Step 8 (<code>qdt</code> cutover), phantom side: a changelog and the consumer contract (plan §4) documented as the public API,
-  a contract test over that surface that qdt's adapter can also run, and a release candidate for the owner to tag.
-  The qdt side (the <code>qdt-sim</code> adapter over <code>phantom.device.Device</code>, its fixtures regenerated) lives in the qdt
-  repository and is coordinated there. File the Step 8 issue under "Steps 7-8: compile, cutover".</li>
-<li>Open decisions: plan §8 #1 (solver) stays open; the <code>fem</code> backend raises until it is made. Step 8: the cadence of
-  phantom releases against qdt pins.</li>
+<li>Drive PR #42 to merge (review, CI); after it merges the owner tags <code>v0.2.0</code> (the tag is the owner's, never a
+  session's).</li>
+<li>The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
+  release), then #140 and #142 against the tag (the adapter over <code>phantom.api.Session</code>, committed device files with
+  SHA-256, <code>python -m phantom.contract devices/*.json</code> in qdt's CI). Coordinate there when the owner says so.</li>
+<li>Later, separate: spin driven by gate voltages over time (#41).</li>
+<li>Open decisions: plan §8 #1 (solver); Step 8's cadence of phantom releases against qdt pins (held by the owner).</li>
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>Owner-dependent, never blocking: sign-offs for all 64 protocols; catalog entries #1–#14; confirmation (or
+<li>Owner-dependent, never blocking: sign-offs for all 66 protocols; catalog entries #1–#14; confirmation (or
   replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6.</li>
-<li>The clean textbook layout's interdot barrier is high: at B_M = 0.2 V the clean t is 0.03 µeV while draws with
-  interface charges give 4–370 µeV (seeds 1–3); the gallery device is seed 2 (t = 52 µeV, lead rates 1e9–1e11 Hz).
-  The barrier gate's exponential scale comes out 7–10 mV per factor e (steeper than the 10–100 mV the <code>Barrier</code>
-  docstring quotes), a property of the closed-form potential without screening.</li>
-<li>The rectangular WKB estimate remains only as the bound in <code>readout.rates</code>; every rate the gallery and the compiled
-  device use comes from the action integral. No screening until the FEM backend exists.</li>
-<li>Across seeds 0–11 at the gallery operating point the compiled interdot coupling spans 0.003–900 µeV and seed 6's
-  interface charges stop the sensor dot from forming: the placeholder charge density near a high clean barrier
-  dominates the spread until catalog entry #1 sets it.</li>
+<li>The compiled lead and interdot rates are constant over voltage at runtime (<code>State</code> says so); a session's charge
+  dynamics use them everywhere.</li>
+<li>The wiring draw's sensor-coupling asymmetry (<code>sensor_beta_factors</code>) is recorded in the scenario but
+  <code>Device.runtime_sensor</code> does not apply it; applying it changes every compiled device's sensor output (a
+  <code>device</code> MODEL_VERSION bump and a changelog entry).</li>
+<li><code>spin_readout</code> takes a prepared triplet probability and does not read the session's charge or voltages (#41).</li>
+<li>A point evaluated alone and inside a batch agree within 1e-12 relative, not bit for bit (numpy's kernels); the
+  contract states it.</li>
+<li>The clean textbook layout's interdot barrier is high: at B_M = 0.2 V the clean t is 0.03 µeV. Across seeds 0–11 at
+  the gallery operating point the compiled t spans 0.003–900 µeV and seed 6's interface charges stop the sensor dot
+  from forming; the placeholder charge density dominates the spread until catalog entry #1 sets it. The gallery
+  device is seed 2 (t = 52 µeV, lead rates 1e9–1e11 Hz). The barrier gate's exponential scale is 7–10 mV per factor e,
+  a property of the closed-form potential without screening.</li>
+<li>No screening until the FEM backend exists. Trapping hysteresis (<code>disorder.trapping</code>) is not part of the compiled
+  device.</li>
 <li>Spin, valley, noise and disorder placeholders (<code>calibration: none</code>) as listed in the step files; the quasi-static
   detuning noise takes the whole 1/f band; Step 4's lock-in dynamics on the master equation still owed; amplifier
   noise absent from the SNR picture; the two-dot CI model cannot represent a plunger–barrier short.</li>
+<li>Cross-platform agreement (ADR 0014, 1e-9 relative): quantities that cancel digits (eigenvalue differences, finite
+  differences, argmax ties on a flat maximum, interpolation through near-equal values) have each broken the Windows
+  gallery comparison once; use closed forms, Hellmann–Feynman derivatives, grid points or secular equations instead.</li>
 <li>Pages source is <code>gh-pages</code> (root); the docs root and per-PR previews under <code>/pr-&lt;n&gt;/</code> are served.</li>
 </ul>
 

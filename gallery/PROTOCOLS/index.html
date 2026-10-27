@@ -327,6 +327,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../adr/" class="md-nav__link">
         
   
@@ -547,6 +574,17 @@
     <span class="md-ellipsis">
       
         I. Compiled device and optimum (device, compile, optimum) — Step 7
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#j-the-consumer-session-device-step-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        J. The consumer session (device) — Step 8
       
     </span>
   </a>
@@ -1147,6 +1185,31 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td>seed (twelve devices from one layout)</td>
 <td>t, lead rates, valley splittings, contrast, infidelity</td>
 <td>a population with decades of spread in t and the lead rates; the trade between blockade contrast and gate fidelity; devices that do not form</td>
+</tr>
+</tbody>
+</table>
+<h2 id="j-the-consumer-session-device-step-8">J. The consumer session (device) — Step 8</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session-charge-trace</code></td>
+<td>samples at a dot-lead degeneracy, dwell 0.02, 0.5 and 50 times 1/Γ_L, and 1 ms with noise</td>
+<td>charge present, sensor current</td>
+<td>runs of one charge state at the short dwell; independent draws at the long dwell; the noisy read at 1 ms</td>
+</tr>
+<tr>
+<td><code>session-hold-relaxation</code></td>
+<td>time after a step from a held point to one an electron away</td>
+<td>mean charge, exp(−Γ_L t), one trajectory</td>
+<td>the mean on the exponential; one trajectory stepping once</td>
 </tr>
 </tbody>
 </table>
