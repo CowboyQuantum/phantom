@@ -1,8 +1,8 @@
 {
  "charge-noise-spectroscopy-cpmg": "f193a58b076fc661eda13e64cfed16f09f6a91a710bdb68d4bf7a74909713e2e",
  "charge-noise-spectroscopy-j-vs-ramsey": "8dfbecfe6103daed3b0a942a6e79dbf723492b01741c57452b37ab7776afe4e2",
- "compiled-device-draws": "30f890235c37118352e71a3f1104667d89163fb36e93585a9122a6bf6fcb4f8e",
- "compiled-device-roundtrip": "a4b6024df751ec91638fce5e408a251517ed5ef75ef3469626b76714bea378ab",
+ "compiled-device-draws": "b7beaf91f4f090720e4941f32290cedcb2868858c087673da8fa0841d4018310",
+ "compiled-device-roundtrip": "adb82d8b545dc40b0adcd018a30afb98b4acfd8521d1f3c8440a53fb92c6ad07",
  "coulomb-oscillations-single-dot": "bc52e74a2a09dde262906a4e2c39fbfe13b7c0d4c4e5358c0618d0559759dd9e",
  "crosstalk-lines": "02959f47d5ca5ceff29d1f1dadc5e93a7721745f83c28c9c659a2c96a47a21e1",
  "diamonds-single-dot": "03b5146bc2f7e67714d940ac406166c1aec608b525fe4061ea0041102614a612",
@@ -24,10 +24,10 @@
  "noise-psd": "e27e6c1296dccc8104e202c984eb36d3f563bd1b467513cbbdeceeee2165766d",
  "noise-time-trace": "84d46b4e41efdf0a77596e7fec892718a530b1e67b9ac1057508b987399af0ea",
  "ohmic-iv": "81042b7d67ece5d2c4f97f7567f01605428e1fe06f6ac74c5406993f1aad1dd7",
- "optimum-coupling-target": "10d9f977d2eda1e8e9e871daf74b0c29d1d5d829e33120d40ba17993360bab0d",
- "optimum-readout-point": "9fa5de0b470b4256847b51c671229fa3b206562660bf9a097ba3adfb8cf2d61a",
- "optimum-sensor-flank": "1d8c69bb812f2decc6f440c42330096a374adf198565a9b7e21601b5ed0c1f32",
- "optimum-sweet-spot": "1c767c51f6c9f17cd47c10fb3fcd585def0c7f94da1c3c599980b7c43b98bf96",
+ "optimum-coupling-target": "9088c6f2985c11335541e17cd5cbc2c2b93a19124207de5fb9923790611c9b66",
+ "optimum-readout-point": "8259c51bda889196e0b26fff84ae94438c5b34f8f4bb82c0119e3678eb3f657b",
+ "optimum-sensor-flank": "18d546169830c1f3cd39c6fec3ba5bd4a521ddc05a591e90d02f7ebd68cf3b73",
+ "optimum-sweet-spot": "9b89d3e11ffc22010b5fefe1d36654e459ba1bb5ea1dff979dbd5dff74f8f0fc",
  "pinch-off-barrier": "a5b596c4574ccc0c11fb6d3e15d9d5b940c5ec8dfb321bd350f303782442a95c",
  "pinch-off-crosstalk": "f0ee0bf1bd50f32d15c2b2feb781af74d62f289a85fdbfc44b58c68d9f2dbee0",
  "plunger-vs-barrier-map": "7c791cdb74d11f8178547f5653d8ffc6c35ff3bfcdb72b1c1fd9201088a0fef4",
@@ -42,8 +42,8 @@
  "rf-resonance": "82ff910406143dbfe67482743142b64229a687dbdc2d5a63f93d394c0afaa9eb",
  "rf-sensor-flank": "a78bbfaa2a7cd2f958cff8c1c78d9ce317a8a29cde25216381fa52ee6566734a",
  "sensor-coulomb-peak": "8b9038343c48b8598ece4f64d0c5afbd96741c13cfb03b0608acf97441777f53",
- "session-charge-trace": "71eb46f5b5a335eb21eac58912bed0a0c939ed304dff91a2618c0f93bf0eef0f",
- "session-hold-relaxation": "aa4df2721be919fd4ff63aa19e78523ea94275a550857692dcf113c7d467d1f6",
+ "session-charge-trace": "23424c876400461728046ba3d9bacf26cf1eb5636832ba576084314723fe47fe",
+ "session-hold-relaxation": "0b262c4db576431d33554ad204eec6d98a683edde86b16d46d10c45c5b25d7b8",
  "single-shot-histogram": "7812574dd5b40952fd8fa685549b07f7a9af7cc920cb63f18c1406b16e72fc57",
  "snr-vs-integration-time": "6f100f512bb2de2e873b1383ee2475c9ddb2fc690607ce2549b1a1a9cb2a5a82",
  "spin-funnel": "6c6d0b5c776a9fcec2adb1e01963453e58a834ea1a83a9a4de3bad05ea3f16de",
@@ -64,5 +64,5 @@
  "turn-on-single-gate-layout": "f546ed4aa702b03d6a419be22548e87735c6acbaf63523c972937357a2c6aa49",
  "unintentional-dots": "a8c8b1ad08da7f684975fda9f279f83ab4737307b78c4aee0f0b20d9f7b1890d",
  "valley-splitting-draws": "fa71b9dee7394d70f3358a7efa8f77f74d61e8ccd4cadfa54647dc14124fc639",
- "virtual-gates-map": "ce54c99b439ef1e9ba8b55c104c9c040e7445dc4b7999ca15629eced7a003161"
+ "virtual-gates-map": "1cfb9995ab827b851894fcd22662a6ede7ae1ac9b3c46dd2872803d8721342f6"
 }

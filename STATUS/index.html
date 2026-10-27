@@ -641,11 +641,11 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side built on <code>step-8/consumer-contract</code>, not yet merged. Steps 1–4
+<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side merged (PR #42); the tag <code>v0.2.0</code> is the owner's. Steps 1–4
 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
 equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
 Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-<strong>Branch:</strong> <code>step-8/consumer-contract</code>, PR #42 (<code>Closes #40</code>), open and watched. <code>main</code> is at the merge of PR #39.
+<strong>Branch:</strong> <code>issue-43/sensor-asymmetry</code> (fix before the tag). <code>main</code> is at the merge of PR #42.
 <strong>Last session:</strong> 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
 the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.</p>
 <h2 id="done">Done</h2>
@@ -675,13 +675,13 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>PR #42 (<code>step-8/consumer-contract</code>): everything under Step 8 above; waits on review, the gallery preview at
-  <code>/pr-42/</code> and the merge.</li>
+<li><code>issue-43/sensor-asymmetry</code> (#43): the compiled sensor applies the wiring draw's coupling asymmetry
+  (<code>device.compiled_sensor</code>, used by compile's set point and <code>Device.runtime_sensor</code>); <code>device</code> and <code>compile</code>
+  MODEL_VERSION 2; changelog under 0.2.0; gallery re-recorded.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
 <ul>
-<li>Drive PR #42 to merge (review, CI); after it merges the owner tags <code>v0.2.0</code> (the tag is the owner's, never a
-  session's).</li>
+<li>Merge #43's pull request, then the owner tags <code>v0.2.0</code> on <code>main</code> (the tag is the owner's, never a session's).</li>
 <li>The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
   release), then #140 and #142 against the tag (the adapter over <code>phantom.api.Session</code>, committed device files with
   SHA-256, <code>python -m phantom.contract devices/*.json</code> in qdt's CI). Coordinate there when the owner says so.</li>
@@ -694,9 +694,8 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
   replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6.</li>
 <li>The compiled lead and interdot rates are constant over voltage at runtime (<code>State</code> says so); a session's charge
   dynamics use them everywhere.</li>
-<li>The wiring draw's sensor-coupling asymmetry (<code>sensor_beta_factors</code>) is recorded in the scenario but
-  <code>Device.runtime_sensor</code> does not apply it; applying it changes every compiled device's sensor output (a
-  <code>device</code> MODEL_VERSION bump and a changelog entry).</li>
+<li>Compile moves the sensor gate onto its flank in one step and re-derives the dots, so a draw whose charge shifts
+  with the sensor gate lands off the 0.9-width target (seeds 0 and 3: 0.87 and 0.79 widths).</li>
 <li><code>spin_readout</code> takes a prepared triplet probability and does not read the session's charge or voltages (#41).</li>
 <li>A point evaluated alone and inside a batch agree within 1e-12 relative, not bit for bit (numpy's kernels); the
   contract states it.</li>
