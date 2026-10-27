@@ -125,4 +125,3 @@ parts; `spin_readout` shapes and clock.
 - Rates are compiled at the operating point and are constant over voltage at runtime.
 - `spin_readout` takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.
-- The wiring draw's sensor-coupling asymmetry is recorded in the scenario but not applied to the sensor.

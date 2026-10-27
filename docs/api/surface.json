@@ -382,6 +382,10 @@
      "kind": "method",
      "signature": "(self) -> 'ScenarioDraw'"
     },
+    "sensor_beta_factors": {
+     "kind": "method",
+     "signature": "(self) -> 'tuple[float, float]'"
+    },
     "session": {
      "kind": "method",
      "signature": "(self, noise: 'bool' = True, dynamics: 'bool' = True, charge: 'ChargeMode' = 'sampled', noise_seed: 'int | None' = None) -> 'Session'"

@@ -194,3 +194,23 @@ def test_coupling_optimum_agrees_with_the_compile_tier_near_the_operating_point(
         v[jb] = coupling_optimum(device, target).v_barrier_v
         t = interdot_tunnel_coupling_ev(basis, v, d1, d2, 0.19)[0]
         assert t == pytest.approx(target, rel=0.15), "the compiled exponential holds within a decade of the operating point"
+
+
+def test_the_compiled_sensor_carries_the_coupling_asymmetry_and_sits_on_its_flank(device: Device):
+    """#43, ADR 0016: each dot's per-electron sensor coupling is the nominal one times the wiring draw's
+    factor, and compile places the set point on the flank of that same sensor."""
+    from phantom.readout.sensor import SensorSETParams
+
+    factors = np.array(device.scenario["wiring"]["sensor_beta_factors"])
+    assert not np.allclose(factors, 1.0), "the gallery device draws an asymmetry"
+    sensor = device.runtime_sensor()
+    np.testing.assert_array_equal(sensor.beta_v_per_e, SensorSETParams().beta_v_per_e * factors)
+    v = device.operating_point()
+    phi = float(sensor.potential(v, device.runtime_ci().mean_occupation(v)))
+    offset = (phi - sensor.phase_v) / sensor.period_v
+    offset = (offset - np.rint(offset)) * sensor.period_v
+    # compile moves the sensor gate in one step and re-derives the dots, so the set point lands within a
+    # few hundredths of a width here (further on draws whose charge shifts with the sensor gate)
+    assert abs(offset - device.params["sensor_flank_widths"] * sensor.width_v) < 0.02 * sensor.width_v
+    clean = compile_device(two_dot_layout("SiGe", 80.0), CompileParams(operating_point_v=OP, severity=0.0, wiring_faults=False), seed=0)
+    np.testing.assert_array_equal(clean.runtime_sensor().beta_v_per_e, SensorSETParams().beta_v_per_e)

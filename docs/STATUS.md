@@ -2,11 +2,11 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** 8 (qdt cutover, #40), phantom side built on `step-8/consumer-contract`, not yet merged. Steps 1–4
+**Current step:** 8 (qdt cutover, #40), phantom side merged (PR #42); the tag `v0.2.0` is the owner's. Steps 1–4
 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
 equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
 Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-**Branch:** `step-8/consumer-contract`, PR #42 (`Closes #40`), open and watched. `main` is at the merge of PR #39.
+**Branch:** `issue-43/sensor-asymmetry` (fix before the tag). `main` is at the merge of PR #42.
 **Last session:** 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
 the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.
 
@@ -35,12 +35,12 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
 - 66 protocols render within budget, all unsigned; 135 P0 tests; eight reference entries, all `proposed`.
 
 ## In flight
-- PR #42 (`step-8/consumer-contract`): everything under Step 8 above; waits on review, the gallery preview at
-  `/pr-42/` and the merge.
+- `issue-43/sensor-asymmetry` (#43): the compiled sensor applies the wiring draw's coupling asymmetry
+  (`device.compiled_sensor`, used by compile's set point and `Device.runtime_sensor`); `device` and `compile`
+  MODEL_VERSION 2; changelog under 0.2.0; gallery re-recorded.
 
 ## Next action
-- Drive PR #42 to merge (review, CI); after it merges the owner tags `v0.2.0` (the tag is the owner's, never a
-  session's).
+- Merge #43's pull request, then the owner tags `v0.2.0` on `main` (the tag is the owner's, never a session's).
 - The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
   release), then #140 and #142 against the tag (the adapter over `phantom.api.Session`, committed device files with
   SHA-256, `python -m phantom.contract devices/*.json` in qdt's CI). Coordinate there when the owner says so.
@@ -52,9 +52,8 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
   replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6.
 - The compiled lead and interdot rates are constant over voltage at runtime (`State` says so); a session's charge
   dynamics use them everywhere.
-- The wiring draw's sensor-coupling asymmetry (`sensor_beta_factors`) is recorded in the scenario but
-  `Device.runtime_sensor` does not apply it; applying it changes every compiled device's sensor output (a
-  `device` MODEL_VERSION bump and a changelog entry).
+- Compile moves the sensor gate onto its flank in one step and re-derives the dots, so a draw whose charge shifts
+  with the sensor gate lands off the 0.9-width target (seeds 0 and 3: 0.87 and 0.79 widths).
 - `spin_readout` takes a prepared triplet probability and does not read the session's charge or voltages (#41).
 - A point evaluated alone and inside a batch agree within 1e-12 relative, not bit for bit (numpy's kernels); the
   contract states it.
