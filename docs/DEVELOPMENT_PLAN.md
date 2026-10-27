@@ -36,7 +36,8 @@ A tune-up never waits on a solver; a scenario is compiled before it is served.
 
 `qdt-sim`'s `DoubleDotModel` and noise models are the seed of `charge` and `readout` (Step 1 migrates them).
 
-## 4. What a consumer gets (ADR 0003)
+## 4. What a consumer gets (ADR 0003, 0024)
+The surface as built is documented in [`CONTRACT.md`](CONTRACT.md) and imported from `phantom.api`.
 - `compile(layout, material, draw, seed) -> Device` — a compiled, serialisable device instance with a
   `model_version`.
 - `Device.at(gate_vector) -> State` (charge configuration, rates, sensor signal); `Device.measure(...)`

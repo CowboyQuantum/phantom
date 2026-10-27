@@ -19,7 +19,8 @@ could ask "why?" about; comment on the issue; commit.
 1. `phantom` imports nothing from qdt, from any measurement software, or from any instrument SDK. Ever.
    It is numpy/scipy in, numpy out. (ADR 0003)
 2. Layers import only downward: `layout` ← `electrostatics` ← `disorder` ← `valley` ← `charge` ←
-   `readout` ← `spin` ← `device` ← `optimum`; `compile` may import everything; nothing imports `compile`. (ADR 0004, 0023)
+   `readout` ← `spin` ← `device` ← `optimum`; `compile` may import everything; only the consumer surface (`phantom.api`,
+   `phantom.contract`) imports `compile`, and nothing below imports the surface. (ADR 0004, 0023, 0024)
 3. **Reproducibility contract:** every model takes an explicit seed and carries a `model_version`; the same
    parameters, seed and version give identical output, bit for bit, on the same platform and numpy build, and
    agree within 1e-9 relative across platforms; `ubuntu-latest` in CI is the reference for sign-off hashes. (ADR 0003, 0010, 0014)
@@ -55,7 +56,8 @@ could ask "why?" about; comment on the issue; commit.
 ```
 uv sync --all-extras                      # dev install
 uv run pytest                             # P0 + P1 (what CI runs)
-bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + references + model graph + lock + lint
+bash scripts/check_all.sh                 # layer imports + no-qdt + provenance + references + model graph + API surface + lock + lint
+uv run python -m phantom.contract          # the consumer contract (what qdt's adapter runs)
 uv run python scripts/gallery.py          # render protocols to build/gallery/ and verify sign-offs (Step 1+)
 uv run mkdocs serve                       # browse docs and the rendered gallery
 ```
@@ -70,4 +72,4 @@ uv run mkdocs serve                       # browse docs and the rendered gallery
 | How the models chain into a measurement | `docs/MODELS.md` (ADR 0011) |
 | The papers that are the standard | `docs/references/` (schema in `SCHEMA.md`) |
 | The protocols, sign-offs and budgets | `docs/gallery/` |
-| How qdt consumes phantom | ADR 0003 |
+| How qdt consumes phantom | ADR 0003, 0024; `docs/CONTRACT.md` (the public API); `CHANGELOG.md` |

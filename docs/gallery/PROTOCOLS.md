@@ -124,6 +124,12 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 | `optimum-sweet-spot` | detuning through the symmetric point | SWAP infidelity, J | the infidelity minimum at the chosen sweet spot |
 | `compiled-device-draws` | seed (twelve devices from one layout) | t, lead rates, valley splittings, contrast, infidelity | a population with decades of spread in t and the lead rates; the trade between blockade contrast and gate fidelity; devices that do not form |
 
+## J. The consumer session (device) — Step 8
+| id | sweep | readout | must show |
+|---|---|---|---|
+| `session-charge-trace` | samples at a dot-lead degeneracy, dwell 0.02, 0.5 and 50 times 1/Γ_L, and 1 ms with noise | charge present, sensor current | runs of one charge state at the short dwell; independent draws at the long dwell; the noisy read at 1 ms |
+| `session-hold-relaxation` | time after a step from a held point to one an electron away | mean charge, exp(−Γ_L t), one trajectory | the mean on the exponential; one trajectory stepping once |
+
 ## Candidates not included, for the owner to decide
 - Multi-dot arrays (linear 3+ dots): per-pair stability maps and sensor coverage. Deferred until a layout step defines arrays.
 - Anything for germanium holes (ADR 0002 lists it as later): g-tensor anisotropy, spin–orbit field.

@@ -1,6 +1,6 @@
 # 0004 — Nine layers that import only downward; `compile` imports all, nothing imports `compile`
 
-**Status:** Accepted
+**Status:** Accepted (amended by 0023, 0024)
 **Date:** 2026-10-24
 **Step:** 0
 

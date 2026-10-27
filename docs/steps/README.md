@@ -12,4 +12,4 @@ One file per roadmap step, fixed headings. `STATUS.md` names the current one.
 | 5 | [Valley](05-valley.md) | IN PROGRESS |
 | 6 | [Spin](06-spin.md) | IN PROGRESS |
 | 7 | [Compile and optimum](07-compile-optimum.md) | IN PROGRESS |
-| 8 | [qdt cutover](08-qdt-cutover.md) | NOT STARTED |
+| 8 | [qdt cutover](08-qdt-cutover.md) | IN PROGRESS |
