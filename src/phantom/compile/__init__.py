@@ -1,4 +1,4 @@
-"""phantom.compile — The offline tier: layout + material + catalog draw + seed → a serialisable, versioned `Device`. May import every layer; nothing imports it.
+"""phantom.compile — The offline tier: layout + material + catalog draw + seed → a serialisable, versioned `Device`. May import every layer; only the consumer surface (`phantom.api`, `phantom.contract`) imports it (ADR 0024).
 
 Modules: `device` (`CompileParams`, `compile_device`; the record itself is `phantom.device.Device`),
 `backends` (closed-form electrostatics; the FEM hook behind the `[fem]` extra).
