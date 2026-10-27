@@ -1124,6 +1124,30 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td>sensor current, slope, the optimum's marker</td>
 <td>the Coulomb peak; the steepest flank chosen by the optimum</td>
 </tr>
+<tr>
+<td><code>optimum-coupling-target</code></td>
+<td>interdot barrier gate around the operating point</td>
+<td>t at the compile tier and from the runtime exponential; chosen voltages</td>
+<td>the exponential holding near the operating point and flattening where the dots merge; the optimum's choices on the compile-tier curve</td>
+</tr>
+<tr>
+<td><code>optimum-readout-point</code></td>
+<td>detuning; time after the read pulse</td>
+<td>blockade contrast, Elzerman empty probability, the chosen points</td>
+<td>the read point at the contrast maximum; the read time at the empty-probability peak</td>
+</tr>
+<tr>
+<td><code>optimum-sweet-spot</code></td>
+<td>detuning through the symmetric point</td>
+<td>SWAP infidelity, J</td>
+<td>the infidelity minimum at the chosen sweet spot</td>
+</tr>
+<tr>
+<td><code>compiled-device-draws</code></td>
+<td>seed (twelve devices from one layout)</td>
+<td>t, lead rates, valley splittings, contrast, infidelity</td>
+<td>a population with decades of spread in t and the lead rates; the trade between blockade contrast and gate fidelity; devices that do not form</td>
+</tr>
 </tbody>
 </table>
 <h2 id="candidates-not-included-for-the-owner-to-decide">Candidates not included, for the owner to decide</h2>

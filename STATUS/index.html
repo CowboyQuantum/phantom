@@ -615,12 +615,13 @@
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
 <p><strong>Current step:</strong> 1–4 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in
-dynamics on the master equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37, compile and optimum) in
-progress → <code>docs/steps/07-compile-optimum.md</code>. Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin",
-"Steps 7-8: compile, cutover".
-<strong>Branch:</strong> <code>step-7/compile-device</code> (first Step 7 PR, part of #37). PRs #19–#36 merged.
-<strong>Last session:</strong> 2026-10-26 — Steps 4, 5 and 6 closed (#31, #33, #35, #36); Step 7 opened: <code>compile</code>, the new
-<code>device</code> layer, <code>optimum</code>, ADR 0023, three protocols, ten P0 tests.</p>
+dynamics on the master equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37, compile and optimum) built
+except the solver decision → <code>docs/steps/07-compile-optimum.md</code>. Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6:
+valley, spin", "Steps 7-8: compile, cutover".
+<strong>Branch:</strong> <code>step-7/optimum-protocols</code> (second Step 7 PR, part of #37). PRs #19–#38 merged.
+<strong>Last session:</strong> 2026-10-27 — Step 7 first PR merged (#38: <code>compile</code>, <code>device</code>, <code>optimum</code>); second PR: the Step 4
+dynamics protocols on the WKB action, optimum protocols for coupling, read point and sweet spot, and a population of
+twelve compiled devices.</p>
 <h2 id="done">Done</h2>
 <ul>
 <li><code>compile</code> / <code>device</code> / <code>optimum</code> (Step 7): <code>compile_device(layout, CompileParams, seed)</code> runs the scenario draw,
@@ -641,27 +642,36 @@ progress → <code>docs/steps/07-compile-optimum.md</code>. Milestones: "Steps 1
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>First Step 7 PR (this branch): everything under "Done" for Step 7; <code>docs/MODELS.md</code> (device, compile and optimum
-  subgraphs; graph and ledger refreshed); roster section I; step file; indexes; <code>measured.json</code>. 114 P0 tests.</li>
+<li>Second Step 7 PR (this branch): <code>readout.wkb_rate_from_action_hz</code>; the gallery's Step 4 dynamics helper uses the
+  action integral (operating points of <code>stability-vs-sweep-rate</code> and <code>stability-direction</code> moved to B_L = B_R = −0.02 V
+  to keep a 16 kHz lead rate; <code>plunger-vs-barrier-map</code> sweeps B_L from −0.25 V); <code>compile.interdot_tunnel_coupling_ev</code>
+  public; render option <code>markers</code>; protocols <code>optimum-coupling-target</code>, <code>optimum-readout-point</code>, <code>optimum-sweet-spot</code>,
+  <code>compiled-device-draws</code>; <code>spin.exchange</code> MODEL_VERSION 2 (J from the singlet secular equation by bisection, full
+  relative precision at tiny coupling; the eigenvalue difference kept as <code>exchange_j_eigen_ev</code>), after the Windows
+  gallery differed on a 0.003 µeV device; three P0 tests; ADR 0017, 0021 and 0023 notes. 117 P0 tests.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
 <ul>
-<li>Second Step 7 PR: move the Step 2–6 protocols that build a device by hand onto <code>compile_device</code> (one compiled device
-  per protocol family, the Step 4 rectangular WKB replaced by the action), an <code>optimum</code> protocol per remaining layer
-  (coupling target, read point, sweet spot), and the three-dot layout question. Then Step 8 (<code>qdt</code> cutover): the
-  adapter in qdt pins a phantom release and maps its objects onto <code>Device</code> and <code>optimum</code>.</li>
-<li>Open decisions: plan §8 #1 (solver) stays open; the <code>fem</code> backend raises until it is made.</li>
+<li>Step 8 (<code>qdt</code> cutover), phantom side: a changelog and the consumer contract (plan §4) documented as the public API,
+  a contract test over that surface that qdt's adapter can also run, and a release candidate for the owner to tag.
+  The qdt side (the <code>qdt-sim</code> adapter over <code>phantom.device.Device</code>, its fixtures regenerated) lives in the qdt
+  repository and is coordinated there. File the Step 8 issue under "Steps 7-8: compile, cutover".</li>
+<li>Open decisions: plan §8 #1 (solver) stays open; the <code>fem</code> backend raises until it is made. Step 8: the cadence of
+  phantom releases against qdt pins.</li>
 </ul>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>Owner-dependent, never blocking: sign-offs for all 60 protocols; catalog entries #1–#14; confirmation (or
+<li>Owner-dependent, never blocking: sign-offs for all 64 protocols; catalog entries #1–#14; confirmation (or
   replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6.</li>
 <li>The clean textbook layout's interdot barrier is high: at B_M = 0.2 V the clean t is 0.03 µeV while draws with
   interface charges give 4–370 µeV (seeds 1–3); the gallery device is seed 2 (t = 52 µeV, lead rates 1e9–1e11 Hz).
   The barrier gate's exponential scale comes out 7–10 mV per factor e (steeper than the 10–100 mV the <code>Barrier</code>
   docstring quotes), a property of the closed-form potential without screening.</li>
-<li>Two WKB estimates coexist: the rectangular one in Step 4's protocols and <code>readout.rates</code>, the action in compiled
-  devices, until the Step 4 protocols move to compiled devices. No screening until the FEM backend exists.</li>
+<li>The rectangular WKB estimate remains only as the bound in <code>readout.rates</code>; every rate the gallery and the compiled
+  device use comes from the action integral. No screening until the FEM backend exists.</li>
+<li>Across seeds 0–11 at the gallery operating point the compiled interdot coupling spans 0.003–900 µeV and seed 6's
+  interface charges stop the sensor dot from forming: the placeholder charge density near a high clean barrier
+  dominates the spread until catalog entry #1 sets it.</li>
 <li>Spin, valley, noise and disorder placeholders (<code>calibration: none</code>) as listed in the step files; the quasi-static
   detuning noise takes the whole 1/f band; Step 4's lock-in dynamics on the master equation still owed; amplifier
   noise absent from the SNR picture; the two-dot CI model cannot represent a plunger–barrier short.</li>

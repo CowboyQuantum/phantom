@@ -575,6 +575,10 @@
 <li><code>compiled-device-roundtrip</code> — the coarse map from the compiled and from the reloaded device, and their (zero) difference</li>
 <li><code>virtual-gates-map</code> — the coarse map in raw and in virtual plunger coordinates</li>
 <li><code>optimum-sensor-flank</code> — the sensor peak and the flank the optimum chooses</li>
+<li><code>optimum-coupling-target</code> — t against the barrier gate at the compile tier and from the runtime exponential; the optimum's choice for three targets beside the compile-tier crossing</li>
+<li><code>optimum-readout-point</code> — the blockade contrast with the chosen read point; the Elzerman empty probability with the chosen read time</li>
+<li><code>optimum-sweet-spot</code> — SWAP infidelity through the chosen sweet spot, and J</li>
+<li><code>compiled-device-draws</code> — twelve devices from one layout: coupling, lead rates, valley draws, and what the optimum reaches; devices that do not form are recorded</li>
 <li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
@@ -590,7 +594,7 @@
 </li>
 </ul>
 <h2 id="status">Status</h2>
-<p>IN PROGRESS — <code>compile</code>, <code>device</code> and <code>optimum</code> built (ADR 0023), ten P0 tests, three protocols rendering. Open: the solver choice and its agreement test; moving the Step 2–6 protocols onto compiled devices.</p>
+<p>IN PROGRESS — <code>compile</code>, <code>device</code> and <code>optimum</code> built (ADR 0023), twelve P0 tests, seven protocols rendering; the Step 4 dynamics protocols use the compiled device's WKB action. Open: the solver choice and its agreement test (plan §8 #1), the owner's sign-offs.</p>
 
 
 
