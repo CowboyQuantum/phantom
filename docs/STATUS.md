@@ -33,7 +33,9 @@ twelve compiled devices.
   action integral (operating points of `stability-vs-sweep-rate` and `stability-direction` moved to B_L = B_R = −0.02 V
   to keep a 16 kHz lead rate; `plunger-vs-barrier-map` sweeps B_L from −0.25 V); `compile.interdot_tunnel_coupling_ev`
   public; render option `markers`; protocols `optimum-coupling-target`, `optimum-readout-point`, `optimum-sweet-spot`,
-  `compiled-device-draws`; two P0 tests; ADR 0017 status note and ADR 0023 consequence updated. 116 P0 tests.
+  `compiled-device-draws`; `spin.exchange` MODEL_VERSION 2 (J from the singlet secular equation by bisection, full
+  relative precision at tiny coupling; the eigenvalue difference kept as `exchange_j_eigen_ev`), after the Windows
+  gallery differed on a 0.003 µeV device; three P0 tests; ADR 0017, 0021 and 0023 notes. 117 P0 tests.
 
 ## Next action
 - Step 8 (`qdt` cutover), phantom side: a changelog and the consumer contract (plan §4) documented as the public API,

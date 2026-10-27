@@ -14,7 +14,11 @@ must stay cheap (rule 4) and bit-reproducible (rule 3).
 ## Decision
 - **Exchange** (`spin.exchange`): J(V) = E(|↑↑⟩) − E(lowest two-electron singlet) from the six-state
   two-electron block of the Hubbard Hamiltonian at each gate point; no perturbative formula at runtime
-  (the second-order 2t²/Δ_R + 2t²/Δ_L is a P0 limit and an overlay). The detuning axis is the on-site
+  (the second-order 2t²/Δ_R + 2t²/Δ_L is a P0 limit and an overlay). Amended in Step 7
+  (`spin.exchange` MODEL_VERSION 2): J is the root of the singlet sector's secular equation measured
+  from E(1,1), found by bisection, instead of a difference of two eigenvalues of size U; the two agree
+  to 1e-8, and the secular form keeps J's relative precision at couplings where J is 1e-12 of U, which
+  the eigenvalue difference lost and which differed between platforms beyond ADR 0014's tolerance. The detuning axis is the on-site
   energy difference realised through the two plungers' lever-arm block at fixed sum; the symmetric point
   is ε_i = −U_i/2 − V₁₂. dJ/dε by a centred difference; detuning noise σ_ε from the gate-referred rms
   through (α₁ⱼ − α₂ⱼ).
