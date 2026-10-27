@@ -1,6 +1,6 @@
 # 0024 — The consumer contract: one import surface above `compile`, a session with a forward clock, truth apart from what a user may see, a contract test consumers run, a checked surface snapshot, and 0.x releases
 
-**Status:** Accepted
+**Status:** Accepted (release tagging amended by 0025)
 **Date:** 2026-10-27
 **Step:** 8
 

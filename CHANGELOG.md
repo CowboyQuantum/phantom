@@ -3,9 +3,10 @@
 phantom follows semantic versioning in 0.x (ADR 0024): the minor version rises for any breaking change
 to the consumer surface (`phantom.api`, recorded in `docs/api/surface.json`) or to the device file
 format, the patch version otherwise. A change of output for the same parameters, seed and calls bumps
-the `MODEL_VERSION` of the module that changed and is listed here. The owner tags releases.
+the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
+`main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.2.0 — the consumer contract (Step 8; to be tagged `v0.2.0` by the owner)
+## 0.2.0 — the consumer contract (Step 8; `v0.2.0` at `f72daac`)
 
 First release a consumer can pin. Only the fix below changes the output of a 0.1.0 model.
 

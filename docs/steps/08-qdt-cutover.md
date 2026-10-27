@@ -6,7 +6,7 @@
 qdt's `qdt-sim` becomes an adapter that pins a phantom release and contains no physics; qdt's golden files are regenerated once; the seam is enforced on both sides.
 
 ## Deliverables
-- in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API — `phantom.api` (ADR 0024), `docs/CONTRACT.md`, `CHANGELOG.md`, version 0.2.0, the surface snapshot `docs/api/surface.json` checked in `check_all.sh`; the runtime surface `Device.at` → `State`, `Device.session` → `Session` (`sense` with bias and samples, `hold`, `wait`, `spin_readout`; a noise seed apart from the device seed; one sample's charge stated), `Device.truth` (charge lattice, sensor peak and wing) and `Device.knowable`; the tag is the owner's
+- in phantom: a release tag and changelog; the consumer contract (plan §4) documented as the public API — `phantom.api` (ADR 0024), `docs/CONTRACT.md`, `CHANGELOG.md`, version 0.2.0, the surface snapshot `docs/api/surface.json` checked in `check_all.sh`; the runtime surface `Device.at` → `State`, `Device.session` → `Session` (`sense` with bias and samples, `hold`, `wait`, `spin_readout`; a noise seed apart from the device seed; one sample's charge stated), `Device.truth` (charge lattice, sensor peak and wing) and `Device.knowable`; the release is `v0.2.0` at `f72daac` (who tags: ADR 0025)
 - in qdt (coordinated issue): `qdt-sim` maps `StandConfig`/`ChannelMap` onto `phantom.Device`, implements the protocols over it, pins the release; the physics modules deleted; `make_sim_fixtures.py` regenerated; the vocabulary and import checks updated
 
 ## P0 tests (CI: analytic limits and invariants)
@@ -29,4 +29,4 @@ qdt's `qdt-sim` becomes an adapter that pins a phantom release and contains no p
 - cadence of phantom releases vs. qdt pins
 
 ## Status
-IN PROGRESS — phantom side built (ADR 0024): the consumer surface, the contract test, the snapshot, the changelog and 0.2.0; two protocols unsigned. Open: the owner's tag `v0.2.0`, the release cadence, the qdt side.
+IN PROGRESS — phantom side built (ADR 0024): the consumer surface, the contract test, the snapshot, the changelog and 0.2.0; two protocols unsigned. Open: the tag `v0.2.0` on `f72daac` (the owner's: this session's environment refused the tag push), the release cadence, the qdt side.

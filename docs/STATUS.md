@@ -2,13 +2,14 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** 8 (qdt cutover, #40), phantom side merged (PR #42); the tag `v0.2.0` is the owner's. Steps 1–4
+**Current step:** 8 (qdt cutover, #40), phantom side merged (PRs #42, #44); `v0.2.0` goes on `f72daac`. Steps 1–4
 complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
 equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
 Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-**Branch:** `issue-43/sensor-asymmetry` (fix before the tag). `main` is at the merge of PR #42.
+**Branch:** `issue-45/release-tagging` (ADR 0025). `main` is at `f72daac`, the merge of PR #44, CI green.
 **Last session:** 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
-the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in.
+the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in; the
+sensor-asymmetry fix (#43, PR #44); who tags a release (ADR 0025).
 
 ## Done
 - Steps 1–7 as before: `layout`, `electrostatics`, `disorder`, `charge`, `readout`, `valley`, `spin`, `compile`,
@@ -32,15 +33,17 @@ the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Ana
   - `RateEquation.rate_matrix` vectorised, bit-identical (checked on 1,200 matrices and four sweeps): a session with
     dynamics costs about 0.6–0.9 ms per sample.
   - Protocols `session-charge-trace`, `session-hold-relaxation` (unsigned, within budget).
-- 66 protocols render within budget, all unsigned; 135 P0 tests; eight reference entries, all `proposed`.
+- #43 (PR #44): the compiled sensor carries the wiring draw's coupling asymmetry (`device.compiled_sensor`, used by
+  compile's set point and `Device.runtime_sensor`); `device` and `compile` MODEL_VERSION 2.
+- 66 protocols render within budget, all unsigned; 136 P0 tests; eight reference entries, all `proposed`.
 
 ## In flight
-- `issue-43/sensor-asymmetry` (#43): the compiled sensor applies the wiring draw's coupling asymmetry
-  (`device.compiled_sensor`, used by compile's set point and `Device.runtime_sensor`); `device` and `compile`
-  MODEL_VERSION 2; changelog under 0.2.0; gallery re-recorded.
+- `issue-45/release-tagging` (#45): ADR 0025 (a session tags a release when the owner says so, on a green `main`
+  with the changelog entry), the `CLAUDE.md` line, ADR 0024's status line, the documents that repeated the rule.
 
 ## Next action
-- Merge #43's pull request, then the owner tags `v0.2.0` on `main` (the tag is the owner's, never a session's).
+- The owner tags `v0.2.0` on `f72daac` (2026-10-27: this session's environment refused the tag push with HTTP 403;
+  its branch pushes work). Merge #45's pull request.
 - The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
   release), then #140 and #142 against the tag (the adapter over `phantom.api.Session`, committed device files with
   SHA-256, `python -m phantom.contract devices/*.json` in qdt's CI). Coordinate there when the owner says so.
