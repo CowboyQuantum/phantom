@@ -5,6 +5,7 @@ nav:
   - Status: STATUS.md
   - Steps: steps/README.md
   - Models: MODELS.md
+  - Consumer contract: CONTRACT.md
   - ADRs: adr/README.md
   - Catalog: catalog/README.md
   - References: references/README.md

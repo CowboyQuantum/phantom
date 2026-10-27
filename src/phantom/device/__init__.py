@@ -1,6 +1,9 @@
 """phantom.device — The compiled-device record: parameters only, serialisable, versioned, and the runtime objects every layer consumes, built from it without a solver (ADR 0001, 0023).
 
 Sits between `spin` and `optimum`: `compile` writes a `Device`, `optimum` and consumers read one.
+Modules: `session` (`State` at a gate point, `Session` with a clock: `sense`, `hold`, `wait`,
+`spin_readout`), `truth` (`Truth`, `SensorTruth`, and `Knowable`, what a consumer may show a user).
+The consumer surface over all of it is `phantom.api` (ADR 0024).
 The electrostatics basis is not stored; `Device.basis()` recomputes it from the layout and the draw
 (compile tier, deterministic), so a device file stays small and diffable.
 """
@@ -17,6 +20,8 @@ import numpy as np
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
+from phantom.device.session import ChargeMode, Measurement, Session, SpinOutcome, State, state_at
+from phantom.device.truth import Knowable, Truth, knowable, truth
 from phantom.disorder.scenario import ScenarioDraw, apply_scenario
 from phantom.electrostatics.closed_form import GateBasis
 from phantom.layout.geometry import Gate, Layer, Layout, Stack
@@ -195,6 +200,63 @@ class Device:
         draw = self.scenario_draw()
         return float(draw.noise.one_over_f_amplitude_v) if draw.noise is not None else 0.0
 
+    # --- the consumer surface (plan §4, ADR 0024) ----------------------------------------------------
+
+    def at(self, v_programmed: np.ndarray, v_sd: float | np.ndarray | None = None) -> State:
+        """The noise-free `State` at programmed voltages (..., gates); `v_sd` is the sensor bias (V)."""
+        return state_at(self, v_programmed, v_sd)
+
+    def session(
+        self,
+        noise: bool = True,
+        dynamics: bool = True,
+        charge: ChargeMode = "sampled",
+        noise_seed: int | None = None,
+    ) -> Session:
+        """A fresh run with its own clock (`device.session`): `noise_seed=None` replays the device's
+        noise realisation; an integer gives a new one with the same noise parameters."""
+        return Session(self, noise=noise, dynamics=dynamics, charge=charge, noise_seed=noise_seed)
+
+    def measure(
+        self,
+        v_programmed: np.ndarray,
+        dwell_s: float,
+        samples: int | None = None,
+        v_sd: float | np.ndarray | None = None,
+        noise: bool = True,
+        dynamics: bool = True,
+        charge: ChargeMode = "sampled",
+        noise_seed: int | None = None,
+    ) -> Measurement:
+        """`sense` on a fresh session."""
+        return self.session(noise, dynamics, charge, noise_seed).sense(v_programmed, dwell_s, samples, v_sd)
+
+    def truth(
+        self,
+        lattice_gates: tuple[str, str] = ("P1", "P2"),
+        near_v: float | None = None,
+        v_sd: float | None = None,
+        v_programmed: np.ndarray | None = None,
+    ) -> Truth:
+        """The hidden parameters under the quantities a tune-up recovers (`device.truth`)."""
+        return truth(self, lattice_gates, near_v, v_sd, v_programmed)
+
+    def knowable(self) -> Knowable:
+        """The fields a consumer may show a user; everything else on the device is truth."""
+        return knowable(self)
 
 
-__all__ = ["DEVICE_FORMAT_VERSION", "MODEL_VERSION", "CompiledBarrier", "CompiledDot", "Device"]
+
+__all__ = [
+    "DEVICE_FORMAT_VERSION",
+    "MODEL_VERSION",
+    "CompiledBarrier",
+    "CompiledDot",
+    "Device",
+    "Knowable",
+    "Measurement",
+    "Session",
+    "SpinOutcome",
+    "State",
+    "Truth",
+]

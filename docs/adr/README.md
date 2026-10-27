@@ -7,7 +7,7 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0001 | Two tiers: compile once per device instance, run cheap at every gate point | Accepted |
 | 0002 | Statistical realism, never prediction of a particular device | Accepted |
 | 0003 | Dependency-free library with a reproducibility contract; qdt's adapter lives in qdt | Accepted |
-| 0004 | Nine layers that import only downward; `compile` imports all | Accepted |
+| 0004 | Nine layers that import only downward; `compile` imports all | Accepted (amended by 0023, 0024) |
 | 0005 | Test ladder P0 / P1 / P2 | Superseded by 0007 |
 | 0006 | The defect and material catalog is data a human fills in | Proposed |
 | 0007 | Published results only; every claim names an entry in the reference library | Accepted |
@@ -25,6 +25,6 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0019 | Noise is drawn per device: a 1/f amplitude, a Poisson number of dominant switchers, a white floor | Accepted |
 | 0020 | Valley splitting is a Rice draw per dot from alloy disorder, with a deterministic part for MOS; three signatures | Accepted |
 | 0021 | Exchange from the Hubbard two-electron sector; Lindblad spins with quasi-static noise by quadrature; PSB window is the valley draw | Accepted |
-| 0023 | A compiled device is a parameter record in its own layer; the basis is recomputed, not stored; JSON serialisation; the FEM backend is a hook; optimum reads the record | Accepted |
 | 0022 | Blockade transport as sequential cycles; funnel as two-level mixing; Elzerman shots; noise spectroscopy by filter functions; gate fidelity as the Lindblad channel's entanglement fidelity | Accepted |
-| 0017 | Readout dynamics: WKB lead rates from the landscape, a master equation with detailed balance, latching as lag | Accepted |
+| 0023 | A compiled device is a parameter record in its own layer; the basis is recomputed, not stored; JSON serialisation; the FEM backend is a hook; optimum reads the record | Accepted |
+| 0024 | The consumer contract: `phantom.api` above `compile`, a session with a forward clock, knowable fields apart from truth, a contract test consumers run, a checked surface snapshot, 0.x releases | Accepted |

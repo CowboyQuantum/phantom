@@ -1,0 +1,24 @@
+id: session-hold-relaxation
+name: The charge relaxing after a hold
+step: 8
+description: A consumer session holds the gates at a point A until the charge settles (`Session.hold`), then reads at a point B one electron away along P1 (`sense`, noise off). In `mean` mode dot 1's charge relaxes from A's value to B's as exp(−Γ_L·t), drawn beside it; one `sampled` trajectory steps once, at a random time. This is what a pulse step means in the contract (ADR 0024).
+layers: [readout, device]
+runner: step8:session_hold_relaxation
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: none, from: 0, to: 6, points: 300, unit: 1/Γ_L, relative_to: the step from A to B}
+readout: {channel: charge_state, unit: e}
+render:
+  panels:
+    - {kind: line, x: t_s, y: [n1_mean, n1_analytic, n1_trajectory], xlabel: "time after the step (s)", ylabel: "dot 1 charge (e)", title: "mean, exp(−Γ_L t), one trajectory"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 2.0, points: 600, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

@@ -12,6 +12,8 @@ Every pull request publishes its own preview of the same site at `/pr-<n>/` (ADR
 
 - Humans: start at the documentation site, or at `docs/DEVELOPMENT_PLAN.md` (roadmap §7).
 - Agents: start at `CLAUDE.md`, then `docs/STATUS.md`.
+- Consumers: import from `phantom.api` only; the promises are in `docs/CONTRACT.md`, the changes in `CHANGELOG.md`,
+  and `python -m phantom.contract` checks them on a release and on your device files.
 
 ```
 uv sync --all-extras && uv run pytest && bash scripts/check_all.sh

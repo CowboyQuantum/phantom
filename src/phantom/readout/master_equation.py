@@ -82,16 +82,19 @@ class RateEquation:
         index = {tuple(s): i for i, s in enumerate(states.tolist())}
         kt = self.kt_ev
         moves = (((1, 0), self.gamma_left_hz), ((0, 1), self.gamma_right_hz), ((1, -1), self.gamma_interdot_hz))
-        for i, (n1, n2) in enumerate(states.tolist()):
-            for (dn1, dn2), gamma in moves:
-                if gamma <= 0:
-                    continue
-                j = index.get((n1 + dn1, n2 + dn2))
-                if j is None:
-                    continue
-                du = u[j] - u[i]
-                w[j, i] += gamma * fermi(du / kt)  # i → j
-                w[i, j] += gamma * fermi(-du / kt)  # j → i
+        listed = states.tolist()
+        for (dn1, dn2), gamma in moves:
+            if gamma <= 0:
+                continue
+            pairs = [(i, index[(n1 + dn1, n2 + dn2)]) for i, (n1, n2) in enumerate(listed) if (n1 + dn1, n2 + dn2) in index]
+            if not pairs:
+                continue
+            src, dst = np.array(pairs, dtype=int).T
+            du = u[dst] - u[src]
+            # each entry is written once (no move is the reverse of another), so this equals the
+            # element-by-element loop bit for bit
+            w[dst, src] += gamma * fermi(du / kt)  # i → j
+            w[src, dst] += gamma * fermi(-du / kt)  # j → i
         w[np.diag_indices(k)] = -w.sum(axis=0)
         return u, w
 
