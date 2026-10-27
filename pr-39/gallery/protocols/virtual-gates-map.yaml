@@ -1,0 +1,26 @@
+id: virtual-gates-map
+name: Coarse stability map in raw and in virtual plunger coordinates
+step: 7
+description: The compiled device's coarse map against the raw plungers, where the honeycomb lines tilt because each plunger also shifts the other dot, and against the virtual plungers of the optimum's virtual-gate matrix, the inverse of the plunger block of the lever-arm matrix scaled to the raw plungers' lever arms, with the other gates' cross-talk compensated and the sensor gate moved to hold the sensor potential fixed, where each virtual plunger shifts one dot alone, the lines of that dot come out perpendicular to its axis, and the sensor background is flat apart from the charge steps (ADR 0023).
+layers: [charge, readout, device, optimum, compile]
+runner: step7:virtual_gates_map
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: P1, half_span_v: 0.06, points: 121, unit: V, relative_to: operating_point}
+  - {gate: P2, half_span_v: 0.06, points: 121, unit: V, relative_to: operating_point}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: current_raw_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "raw plungers"}
+    - {kind: map, x: u_p1_v, y: u_p2_v, z: current_virtual_a, xlabel: "virtual P1 (V)", ylabel: "virtual P2 (V)", zlabel: "sensor current (A)", title: "virtual plungers"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 29282, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
