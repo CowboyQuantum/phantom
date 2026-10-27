@@ -11,7 +11,8 @@ issue, stop and say so.
 **During** — one branch per issue: `step-N/<short-name>` for a roadmap-step issue, `issue-<n>/<short-name>` otherwise; conventional commits scoped by layer
 (`feat(charge): …`, `test(disorder): …`, `docs(adr): …`); PR body says `Closes #<n>`. Whoever opens a PR sets up a
 watcher on it in the same turn (subscribe to its activity), so the session answers review and CI and continues
-once the owner merges.
+once the owner merges. A release tag (`vX.Y.Z`, annotated) is pushed only when the owner says so, on a `main`
+commit with green CI and its `CHANGELOG.md` entry; the owner can always tag. (ADR 0025)
 **End** — `uv run pytest` and `bash scripts/check_all.sh` green; rewrite `docs/STATUS.md` (never append);
 `docs/MODELS.md` updated if a model was added or rewired, and `scripts/gallery.py --record` re-run if a model or
 protocol changed (ADR 0011); an ADR for any decision a future session

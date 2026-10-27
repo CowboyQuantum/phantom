@@ -103,7 +103,8 @@ voltages and the sensor set point compilation chose. A consumer that hides truth
   the surface shows in `docs/api/surface.json` and is listed in `CHANGELOG.md`.
 - A change of output for the same parameters, seed and calls bumps the `MODEL_VERSION` of the module
   that changed. `Device.provenance` records the compile-time versions; `model_versions()` gives them all.
-- The owner tags releases; a consumer pins a tag. How often phantom releases and consumers move their
+- A release is an annotated tag `vX.Y.Z` on a green `main` commit, made by the owner or by a session the owner
+  tells to (ADR 0025); a consumer pins a tag. How often phantom releases and consumers move their
   pins is an open decision (Step 8).
 
 ## Running the contract test
