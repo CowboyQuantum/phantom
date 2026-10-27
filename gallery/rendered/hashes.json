@@ -1,6 +1,7 @@
 {
  "charge-noise-spectroscopy-cpmg": "f193a58b076fc661eda13e64cfed16f09f6a91a710bdb68d4bf7a74909713e2e",
  "charge-noise-spectroscopy-j-vs-ramsey": "8dfbecfe6103daed3b0a942a6e79dbf723492b01741c57452b37ab7776afe4e2",
+ "compiled-device-roundtrip": "a4b6024df751ec91638fce5e408a251517ed5ef75ef3469626b76714bea378ab",
  "coulomb-oscillations-single-dot": "bc52e74a2a09dde262906a4e2c39fbfe13b7c0d4c4e5358c0618d0559759dd9e",
  "crosstalk-lines": "02959f47d5ca5ceff29d1f1dadc5e93a7721745f83c28c9c659a2c96a47a21e1",
  "diamonds-single-dot": "03b5146bc2f7e67714d940ac406166c1aec608b525fe4061ea0041102614a612",
@@ -22,6 +23,7 @@
  "noise-psd": "e27e6c1296dccc8104e202c984eb36d3f563bd1b467513cbbdeceeee2165766d",
  "noise-time-trace": "84d46b4e41efdf0a77596e7fec892718a530b1e67b9ac1057508b987399af0ea",
  "ohmic-iv": "81042b7d67ece5d2c4f97f7567f01605428e1fe06f6ac74c5406993f1aad1dd7",
+ "optimum-sensor-flank": "1d8c69bb812f2decc6f440c42330096a374adf198565a9b7e21601b5ed0c1f32",
  "pinch-off-barrier": "a5b596c4574ccc0c11fb6d3e15d9d5b940c5ec8dfb321bd350f303782442a95c",
  "pinch-off-crosstalk": "f0ee0bf1bd50f32d15c2b2feb781af74d62f289a85fdbfc44b58c68d9f2dbee0",
  "plunger-vs-barrier-map": "96eead6d0033429c36db2611e519138a4d2d55d468a10612269c6c0819583865",
@@ -55,5 +57,6 @@
  "turn-on-single-gate": "b9e5a1e942929bf0c37a06edeeb9411bd9bf74d1fbfd723e6b57b57606871a50",
  "turn-on-single-gate-layout": "f546ed4aa702b03d6a419be22548e87735c6acbaf63523c972937357a2c6aa49",
  "unintentional-dots": "a8c8b1ad08da7f684975fda9f279f83ab4737307b78c4aee0f0b20d9f7b1890d",
- "valley-splitting-draws": "fa71b9dee7394d70f3358a7efa8f77f74d61e8ccd4cadfa54647dc14124fc639"
+ "valley-splitting-draws": "fa71b9dee7394d70f3358a7efa8f77f74d61e8ccd4cadfa54647dc14124fc639",
+ "virtual-gates-map": "ce54c99b439ef1e9ba8b55c104c9c040e7445dc4b7999ca15629eced7a003161"
 }

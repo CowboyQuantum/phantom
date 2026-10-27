@@ -531,17 +531,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Status
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -567,14 +556,15 @@
 <p>The offline tier: FEM electrostatics for real stacks and overlapping gates through a wrapped external solver, Thomas–Fermi screening, and a <code>compile()</code> that produces a serialisable device; <code>optimum()</code> for every layer.</p>
 <h2 id="deliverables">Deliverables</h2>
 <ul>
-<li><code>compile</code>: layout + material + catalog draw + seed → <code>Device</code> (versioned, serialised); closed-form or FEM electrostatics selectable</li>
-<li><code>optimum</code>: best operating point for sensor sensitivity, best lattice (virtual-gate matrix), target interdot coupling; with <code>spin</code>, achievable readout fidelity and coherence</li>
+<li><code>compile</code>: layout + material + catalog draw + seed → <code>Device</code> (versioned, serialised); closed-form or FEM electrostatics selectable — <code>compile.compile_device</code> → <code>phantom.device.Device</code> (its own layer between <code>spin</code> and <code>optimum</code>, ADR 0023); closed form built, FEM a hook behind <code>[fem]</code> until plan §8 #1 is decided</li>
+<li><code>optimum</code>: best operating point for sensor sensitivity, best lattice (virtual-gate matrix), target interdot coupling; with <code>spin</code>, achievable readout fidelity and coherence — <code>optimum.optimum(device)</code>: sensor flank, virtual-gate matrix, barrier voltage for a target t, PSB read point and Elzerman peak time, exchange sweet spot with T₂* and SWAP fidelity</li>
 <li>a solver wrapper behind the <code>[fem]</code> extra; never a solver written here</li>
 </ul>
 <h2 id="p0-tests-ci-analytic-limits-and-invariants">P0 tests (CI: analytic limits and invariants)</h2>
 <ul>
-<li>closed-form and FEM agree for a shallow single-layer layout within tolerance</li>
-<li><code>optimum</code> is attained by a brute-force search on a small device</li>
+<li>closed-form and FEM agree for a shallow single-layer layout within tolerance — waits for the solver (plan §8 #1); the FEM hook's refusal is tested</li>
+<li>a compiled device round-trips text-identically and its reloaded runtime objects reproduce the stability map bit for bit; compile is deterministic in the seed; the clean device equals the Step 2 derivation; wiring faults map the programmed point — <code>tests/test_compile_optimum.py</code></li>
+<li><code>optimum</code> is attained by a brute-force search on a small device — sensor flank against a dense scan, virtual gates decouple the dots exactly, the coupling target inverts the compiled barrier, the read point against a dense detuning scan, the sweet spot against a detuning scan of the SWAP fidelity (<code>tests/test_compile_optimum.py</code>)</li>
 </ul>
 <h2 id="p1-tests-ci-literature-reproduce-an-item-of-a-confirmed-reference-entry-adr-0007">P1 tests (CI, <code>literature</code>: reproduce an item of a <code>confirmed</code> reference entry; ADR 0007)</h2>
 <ul>
@@ -582,19 +572,25 @@
 </ul>
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
-<li>to be listed before the step starts; each carries a <code>budget</code> (ADR 0009)</li>
+<li><code>compiled-device-roundtrip</code> — the coarse map from the compiled and from the reloaded device, and their (zero) difference</li>
+<li><code>virtual-gates-map</code> — the coarse map in raw and in virtual plunger coordinates</li>
+<li><code>optimum-sensor-flank</code> — the sensor peak and the flank the optimum chooses</li>
+<li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>
-<li>a compiled device round-trips through serialisation and reproduces its diagrams</li>
-<li><code>optimum</code> exists for every layer present</li>
+<li>a compiled device round-trips through serialisation and reproduces its diagrams — met (P0 and <code>compiled-device-roundtrip</code>)</li>
+<li><code>optimum</code> exists for every layer present — met for sensor, lattice, coupling, readout and coherence; the layers' protocols are not yet all re-rendered from a compiled device</li>
 </ul>
 <h2 id="open-decisions">Open decisions</h2>
 <ul>
-<li>plan §8 #1 solver choice; #3 serialisation format</li>
+<li>plan §8 #1 solver choice — still open; the <code>fem</code> backend is a hook</li>
+<li>
+<h1 id="3-serialisation-format-decided-adr-0023-canonical-json-basis-recomputed-format-and-model-versions-recorded">3 serialisation format — decided (ADR 0023): canonical JSON, basis recomputed, format and model versions recorded</h1>
+</li>
 </ul>
 <h2 id="status">Status</h2>
-<p>NOT STARTED</p>
+<p>IN PROGRESS — <code>compile</code>, <code>device</code> and <code>optimum</code> built (ADR 0023), ten P0 tests, three protocols rendering. Open: the solver choice and its agreement test; moving the Step 2–6 protocols onto compiled devices.</p>
 
 
 

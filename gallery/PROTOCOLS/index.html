@@ -543,6 +543,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#i-compiled-device-and-optimum-device-compile-optimum-step-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I. Compiled device and optimum (device, compile, optimum) — Step 7
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#candidates-not-included-for-the-owner-to-decide" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1081,6 +1092,37 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td>one gate up then down with trapping</td>
 <td>current, trapped fraction</td>
 <td>a loop: the downward trace turns off at a shifted voltage; the trapped fraction charges above capture and releases below release</td>
+</tr>
+</tbody>
+</table>
+<h2 id="i-compiled-device-and-optimum-device-compile-optimum-step-7">I. Compiled device and optimum (device, compile, optimum) — Step 7</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compiled-device-roundtrip</code></td>
+<td>(P1, P2) coarse map from a compiled device and from its JSON reload</td>
+<td>sensor_conductance, difference</td>
+<td>the honeycomb of the compiled device; a difference that is identically zero; a device file of a few kilobytes</td>
+</tr>
+<tr>
+<td><code>virtual-gates-map</code></td>
+<td>(P1, P2) raw beside (virtual P1, virtual P2) from the optimum's virtual-gate matrix</td>
+<td>sensor_conductance</td>
+<td>tilted lines in raw plungers; each dot's lines perpendicular to its own virtual axis</td>
+</tr>
+<tr>
+<td><code>optimum-sensor-flank</code></td>
+<td>SG over one peak period around the compiled set-point</td>
+<td>sensor current, slope, the optimum's marker</td>
+<td>the Coulomb peak; the steepest flank chosen by the optimum</td>
 </tr>
 </tbody>
 </table>
