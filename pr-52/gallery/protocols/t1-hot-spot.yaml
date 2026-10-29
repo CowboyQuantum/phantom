@@ -1,0 +1,17 @@
+id: t1-hot-spot
+name: Spin relaxation time against field with the spin-valley hot spot, three valley draws
+step: 5
+description: The spin relaxation time T1 against magnetic field for three dots drawn from the Si/SiGe valley distribution. Where the Zeeman energy equals a dot's valley splitting the spin and valley states mix and relaxation speeds up by orders of magnitude, a Lorentzian dip whose position moves with the draw. The background rate is a constant placeholder until the spin layer supplies its field dependence (ADR 0020).
+layers: [valley]
+runner: step5:t1_hot_spot
+instance: {material: SiGe, radius_nm: 10.0, seeds: [1, 2, 3], hot_spot: {background_hz: 1.0, peak_hz: 1.0e+5, width_uev: 5.0}}
+sweep:
+  - {axis: B_ext, from: 0.0, to: 3.0, points: 601, unit: T}
+readout: {channel: spin_outcome, unit: s}
+render:
+  panels:
+    - {kind: line, x: b_t, y: [t1_draw0_s, t1_draw1_s, t1_draw2_s], log_y: true, xlabel: "in-plane field (T)", ylabel: "T1 (s)", title: "hot spot where E_Z = E_V"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.01, points: 1803, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

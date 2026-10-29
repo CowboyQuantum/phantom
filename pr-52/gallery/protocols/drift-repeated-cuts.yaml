@@ -1,0 +1,24 @@
+id: drift-repeated-cuts
+name: One plunger cut repeated every minute for two hours
+step: 4
+description: A 200-point P1 cut across a dot-1 charge transition, 1 ms per point, repeated every 60 s for 120 repeats on a device with drawn noise; the noise clock runs between cuts. The map of current against (P1, elapsed time) shows the transition drifting with the slowest fluctuators of the 1/f ensemble (band down to 0.1 mHz) and jumping when a switcher flips; the second panel is the extracted transition position against time.
+layers: [disorder, readout]
+runner: step4_noise:drift_repeated_cuts
+instance:
+  material: SiGe
+  seed: 7
+  severity: 1.0
+  repeats: 120
+  interval_s: 60.0
+sweep:
+  - {gate: P1, points: 200, unit: V, span: "0.6 period around the first transition"}
+  - {axis: time, points: 120, unit: min}
+readout: {channel: sensor_conductance, unit: A, dt_s: 1.0e-3}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: elapsed_min, z: current_a, xlabel: "P1 (V)", ylabel: "elapsed (min)", zlabel: "sensor current (A)", title: "repeated cuts"}
+    - {kind: line, x: elapsed_min, y: transition_shift_uv, xlabel: "elapsed (min)", ylabel: "transition shift (uV)", title: "transition position"}
+budget:
+  compile: {wall_s: 1.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 24000, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
