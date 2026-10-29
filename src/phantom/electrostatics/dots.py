@@ -178,6 +178,14 @@ def line_cut(basis: GateBasis, voltages_v: np.ndarray, x0: float, y0: float, x1:
     return np.hypot(xs - x0, ys - y0), u[iy, ix]
 
 
+def tunnelling_level_ev(a: DerivedDot, u_far_ev: float, effective_mass_me: float, lead_fermi_ev: float = 2e-3) -> float:
+    """The level an electron tunnels at between dot `a` and a far point whose electron energy is
+    `u_far_ev`: the higher of the dot's ground level (minimum plus ħω) and the far side's Fermi level
+    (its energy plus `lead_fermi_ev`)."""
+    hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(a.curvature_ev_per_nm2, 1e-12) / effective_mass_me)
+    return max(a.energy_ev + hbar_omega, float(u_far_ev) + lead_fermi_ev)
+
+
 def barrier_action(
     basis: GateBasis,
     voltages_v: np.ndarray,
@@ -189,14 +197,14 @@ def barrier_action(
     lead_fermi_ev: float = 2e-3,
 ) -> tuple[float, float, float]:
     """(height, width, action) of the barrier between dot `a` and `b_point_nm` for an electron at the
-    tunnelling level (chosen as in `barrier_width_nm`): the WKB action S = ∫ κ ds over the first
-    forbidden stretch seen from the dot, with κ = √(2m*(U − E))/ħ, so that the transmission is
-    exp(−2S). Unlike the rectangular estimate (height × width), the action follows the barrier's
-    actual shape and varies smoothly as a gate lowers a rounded barrier top through the level."""
+    tunnelling level (`tunnelling_level_ev`, as in `barrier_width_nm`, unless `level_ev` fixes it): the
+    WKB action S = ∫ κ ds over the first forbidden stretch seen from the dot, with κ = √(2m*(U − E))/ħ,
+    so that the transmission is exp(−2S). Unlike the rectangular estimate (height × width), the action
+    follows the barrier's actual shape and varies smoothly as a gate lowers a rounded barrier top
+    through the level."""
     s, u = line_cut(basis, voltages_v, a.x_nm, a.y_nm, b_point_nm[0], b_point_nm[1], samples)
     if level_ev is None:
-        hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(a.curvature_ev_per_nm2, 1e-12) / effective_mass_me)
-        level_ev = max(a.energy_ev + hbar_omega, float(u[-1]) + lead_fermi_ev)
+        level_ev = tunnelling_level_ev(a, float(u[-1]), effective_mass_me, lead_fermi_ev)
     above = u > level_ev
     height = float(u.max() - level_ev)
     if not above.any():

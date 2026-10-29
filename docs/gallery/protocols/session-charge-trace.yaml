@@ -1,14 +1,14 @@
 id: session-charge-trace
 name: The charge a session sample sees at a dot-lead degeneracy
 step: 8
-description: A consumer session (`Device.session`, `sense` in `sampled` mode) parked at the point where dot 1 is half-way through a transition to its lead. With the noise off, the dwell is 0.02, 0.5 and 50 times 1/Γ_L; the charge is a Markov trajectory of the rate equation, so at the short dwell it switches rarely and in runs (a telegraph trace), and at the long dwell every sample is an independent Boltzmann draw. The last panel is the same point with the device's noise at a 1 ms dwell, the regime of a real sensor read. The traces of dot 1's charge are offset by 1.5 electrons for clarity (ADR 0024).
+description: A consumer session (`Device.session`, `sense` in `sampled` mode) parked at the point where dot 1 is half-way through a transition to its lead, with the sensor gate first tuned onto the optimum's flank (the sensor dot's peaks are a few hundred microvolts wide, so the programmed sensor gate alone usually sits between them; ADR 0026). With the noise off, the dwell is 0.02, 0.5 and 50 times 1/Γ_L; the charge is a Markov trajectory of the rate equation, so at the short dwell it switches rarely and in runs (a telegraph trace), and at the long dwell every sample is an independent Boltzmann draw. The last panel is the same point with the device's noise at a 1 ms dwell, the regime of a real sensor read. The traces of dot 1's charge are offset by 1.5 electrons for clarity (ADR 0024).
 layers: [readout, device]
 runner: step8:session_charge_trace
 instance:
   layout: two-dot-textbook
   material: SiGe
   pitch_nm: 80.0
-  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
   temperature_k: 0.15
   severity: 1.0
   seed: 2

@@ -34,7 +34,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 |---|---|---|---|
 | `coulomb-oscillations-single-dot` | P with barriers set | current | periodic peaks; spacing from the addition energy; peak width from temperature and lead coupling |
 | `diamonds-single-dot` | (P, V_sd) | current or dI/dV | Coulomb diamonds; slopes equal the lever arms; height equals the addition energy |
-| `barrier-barrier-map` | (B1, B2) at fixed P | current | the region where a dot forms; diagonal Coulomb lines; pinch-off corners |
+| `barrier-barrier-map` | (B1, B2) at fixed P | current | the region where a dot forms; diagonal Coulomb lines; pinch-off corners (built for the sensor dot as `sensor-barrier-barrier-map`, section I) |
 | `plunger-vs-barrier-map` | (P1 fast, lead barrier B_L slow) on the layout; dot 1's lead swept | sensor_conductance, charge present and at equilibrium, lead rate per row | the dot-1 lines tilt with the lever arm; as the barrier closes the WKB rate drops below the inverse dwell and the lines fade, latch along the row and carry across rows (master equation, Step 4) |
 | `sensor-coulomb-peak` | S | sensor_conductance | one peak; the steep flank where the sensor is operated |
 | `sensor-compensation-map` | (S, P of a dot) | sensor_conductance | tilted peak lines broken at the dot's charge transitions; slope gives the compensation |
@@ -118,11 +118,15 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 |---|---|---|---|
 | `compiled-device-roundtrip` | (P1, P2) coarse map from a compiled device and from its JSON reload | sensor_conductance, difference | the honeycomb of the compiled device; a difference that is identically zero; a device file of a few kilobytes |
 | `virtual-gates-map` | (P1, P2) raw beside (virtual P1, virtual P2) from the optimum's virtual-gate matrix | sensor_conductance | tilted lines in raw plungers; each dot's lines perpendicular to its own virtual axis |
-| `optimum-sensor-flank` | SG over one peak period around the compiled set-point | sensor current, slope, the optimum's marker | the Coulomb peak; the steepest flank chosen by the optimum |
+| `optimum-sensor-flank` | SG ±30 mV around the compiled set-point (about two periods of the sensor dot) | sensor current, slope, the optimum's marker | the Coulomb peak; the steepest flank chosen by the optimum; peaks growing along SG as it opens the sensor's barriers |
 | `optimum-coupling-target` | interdot barrier gate around the operating point | t at the compile tier and from the runtime exponential; chosen voltages | the exponential holding near the operating point and flattening where the dots merge; the optimum's choices on the compile-tier curve |
 | `optimum-readout-point` | detuning; time after the read pulse | blockade contrast, Elzerman empty probability, the chosen points | the read point at the contrast maximum; the read time at the empty-probability peak |
 | `optimum-sweet-spot` | detuning through the symmetric point | SWAP infidelity, J | the infidelity minimum at the chosen sweet spot |
-| `compiled-device-draws` | seed (twelve devices from one layout) | t, lead rates, valley splittings, contrast, infidelity | a population with decades of spread in t and the lead rates; the trade between blockade contrast and gate fidelity; devices that do not form |
+| `compiled-device-draws` | seed (twelve devices from one layout) | t, lead rates, sensor rates, valley splittings, contrast, infidelity | a population with decades of spread in t, the lead rates and the sensor rates; the trade between blockade contrast and gate fidelity; devices that do not form |
+| `sensor-bath-turn-on` | each sensor bath gate SR_L, SR_R from 0 to 0.8 V | bath occupation, sensor current (log, 1 fA floor) | each bath filling at its threshold; no current while a bath is empty; the bath gate's cross-talk on the adjacent sensor barrier (ADR 0026) |
+| `sensor-barrier-barrier-map` | (SB_L, SB_R) ±60 mV at the compiled sensor plunger | sensor current, effective tunnel rate | the roster's `barrier-barrier-map` for the sensor dot: the pinch-off corner, a diagonal Coulomb line, the open corner |
+| `sensor-barrier-rates` | SB_L ±40 mV from the leads' anchor | both sensor rates at the compile tier and from the runtime exponential | agreement at the anchor; the source rate steep, the drain rate through cross-talk; the attempt-rate ceiling |
+| `sensor-peak-broadening` | SG across one peak at five symmetric sensor-barrier offsets | sensor current; peak conductance in e²/h; lifetime over thermal width | peaks rising while thermally broadened, then broadening with their height bounded by e²/h |
 
 ## J. The consumer session (device) — Step 8
 | id | sweep | readout | must show |

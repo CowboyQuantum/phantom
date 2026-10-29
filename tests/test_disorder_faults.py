@@ -53,7 +53,10 @@ def test_leakage_pair_currents_are_equal_and_opposite_and_linear():
 def test_wiring_draw_is_clean_at_zero_severity_and_seeded_otherwise():
     lay = two_dot_layout()
     pairs = adjacent_gate_pairs(lay)
-    assert pairs == (("B_L", "P1"), ("B_L", "R_L"), ("P1", "B_M"), ("B_M", "P2"), ("P2", "B_R"), ("B_R", "R_R"))
+    assert pairs == (
+        ("B_L", "P1"), ("B_L", "R_L"), ("P1", "B_M"), ("B_M", "P2"), ("P2", "B_R"), ("B_R", "R_R"),
+        ("SG", "SB_L"), ("SG", "SB_R"), ("SB_L", "SR_L"), ("SB_R", "SR_R"),
+    )
     assert draw_wiring_faults(WiringFaultParams(), lay.gate_names, pairs, np.random.default_rng(0), severity=0.0).is_clean
     a = draw_wiring_faults(WiringFaultParams(), lay.gate_names, pairs, np.random.default_rng(4), severity=3.0)
     b = draw_wiring_faults(WiringFaultParams(), lay.gate_names, pairs, np.random.default_rng(4), severity=3.0)
@@ -62,7 +65,7 @@ def test_wiring_draw_is_clean_at_zero_severity_and_seeded_otherwise():
         assert kept not in a.open_gates and follower not in a.open_gates
     # over many draws the open-gate rate is the declared probability
     n_open = sum(len(draw_wiring_faults(WiringFaultParams(p_open_per_gate=0.1), lay.gate_names, pairs, np.random.default_rng(s)).open_gates) for s in range(500))
-    assert n_open / (500 * 8) == pytest.approx(0.1, abs=0.02)
+    assert n_open / (500 * len(lay.gate_names)) == pytest.approx(0.1, abs=0.02)
 
 
 def test_scenario_includes_wiring_and_round_trips():

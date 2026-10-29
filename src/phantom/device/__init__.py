@@ -20,6 +20,7 @@ import numpy as np
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
+from phantom.constants import K_B_EV_PER_K
 from phantom.device.session import ChargeMode, Measurement, Session, SpinOutcome, State, state_at
 from phantom.device.truth import Knowable, Truth, knowable, truth
 from phantom.disorder.scenario import ScenarioDraw, apply_scenario
@@ -27,21 +28,56 @@ from phantom.electrostatics.closed_form import GateBasis
 from phantom.layout.geometry import Gate, Layer, Layout, Stack
 from phantom.readout.master_equation import RateEquation
 from phantom.readout.measure import SensedDoubleDot
-from phantom.readout.sensor import SensorSETParams
+from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 2
-"""2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43)."""
-DEVICE_FORMAT_VERSION = 1
-"""Bumped when the serialised layout of a `Device` changes incompatibly."""
+MODEL_VERSION = 3
+"""2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
+3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026)."""
+DEVICE_FORMAT_VERSION = 2
+"""Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
+energy, per-electron coupling and leads (ADR 0026)."""
 
 
-def compiled_sensor(alpha_v_per_v: np.ndarray, beta_factors: tuple[float, float] = (1.0, 1.0)) -> SensorSETParams:
-    """The SET sensor of a compiled device: its lever arms on the gates from the basis, and the nominal
+def compiled_sensor(
+    alpha_v_per_v: np.ndarray,
+    beta_factors: tuple[float, float] = (1.0, 1.0),
+    charging_energy_ev: float | None = None,
+    beta_v_per_e: tuple[float, float] | None = None,
+    temperature_k: float | None = None,
+    leads: SensorLeads | None = None,
+) -> SensorSETParams:
+    """The SET sensor of a compiled device: its lever arms on the gates from the basis, and its
     per-electron coupling to each dot scaled by the wiring draw's sensor-coupling asymmetry (ADR 0016,
-    catalog #11). Compile places the set point with it and every runtime object reads through it."""
-    beta = SensorSETParams().beta_v_per_e * np.asarray(beta_factors, dtype=float)
-    return SensorSETParams(alpha_v_per_v=np.asarray(alpha_v_per_v, dtype=float), beta_v_per_e=beta)
+    catalog #11). Compile places the set point with it and every runtime object reads through it.
+
+    With `leads` (a layout that gives the sensor barriers and baths) the sensor is a dot like the qubit
+    dots (ADR 0026): φ_s is the potential at the dot in volts (lever arm 1 eV/V), its peaks are its
+    charging energy apart, its thermal width is the device's 2kT, its coupling β the layout's, and its
+    current comes through the leads. Without leads it is the typed Step 1 SET with the typed β."""
+    alpha = np.asarray(alpha_v_per_v, dtype=float)
+    factors = np.asarray(beta_factors, dtype=float)
+    if leads is None or charging_energy_ev is None or beta_v_per_e is None or temperature_k is None:
+        return SensorSETParams(alpha_v_per_v=alpha, beta_v_per_e=SensorSETParams().beta_v_per_e * factors)
+    e_c = float(charging_energy_ev)
+    return SensorSETParams(
+        alpha_v_per_v=alpha,
+        beta_v_per_e=np.asarray(beta_v_per_e, dtype=float) * factors,
+        period_v=e_c,
+        width_v=2 * K_B_EV_PER_K * float(temperature_k),
+        charging_energy_ev=e_c,
+        leads=leads,
+    )
+
+
+def switcher_scale(beta_v_per_e: tuple[float, float] | None) -> float:
+    """Factor from the noise draw's switcher amplitudes, stated in the typed sensor's V-equivalent
+    units, to a sensor dot's potential in volts: the ratio of the two sensors' mean per-electron
+    coupling, so that a switcher keeps its size against a dot electron's signal (ADR 0026). 1 for the
+    typed sensor."""
+    if beta_v_per_e is None:
+        return 1.0
+    return float(np.mean(np.abs(beta_v_per_e)) / np.mean(np.abs(SensorSETParams().beta_v_per_e)))
 
 
 @dataclass(frozen=True)
@@ -96,6 +132,14 @@ class Device:
     """The `CompileParams` used, as data."""
     provenance: dict[str, Any]
     """phantom version, format version and the model versions of every layer that produced this device."""
+    sensor_charging_energy_ev: float | None = None
+    """The sensor dot's charging energy e²(C⁻¹)_ss, eV (ADR 0026); None without a sensor dot."""
+    sensor_beta_v_per_e: tuple[float, float] | None = None
+    """Shift of the sensor potential per electron on (dot 1, dot 2) from the layout, V, before the
+    wiring draw's asymmetry; None without a sensor dot."""
+    sensor_leads: SensorLeads | None = None
+    """The sensor's barriers and baths compiled at the operating point; None when the layout gives the
+    sensor no reservoirs (the typed sensor then reads it)."""
 
     # --- files -----------------------------------------------------------------------------------
 
@@ -131,6 +175,9 @@ class Device:
             g_factors=tuple(d["g_factors"]),
             params=d["params"],
             provenance=d["provenance"],
+            sensor_charging_energy_ev=None if d["sensor_charging_energy_ev"] is None else float(d["sensor_charging_energy_ev"]),
+            sensor_beta_v_per_e=None if d["sensor_beta_v_per_e"] is None else tuple(float(x) for x in d["sensor_beta_v_per_e"]),
+            sensor_leads=None if d["sensor_leads"] is None else SensorLeads.from_dict(d["sensor_leads"]),
         )
 
     def to_json(self, path: str | pathlib.Path) -> None:
@@ -185,7 +232,18 @@ class Device:
         return tuple(wiring.sensor_beta_factors) if wiring is not None else (1.0, 1.0)
 
     def runtime_sensor(self) -> SensorSETParams:
-        return compiled_sensor(np.array(self.sensor_alpha_v_per_v), self.sensor_beta_factors())
+        return compiled_sensor(
+            np.array(self.sensor_alpha_v_per_v),
+            self.sensor_beta_factors(),
+            self.sensor_charging_energy_ev,
+            self.sensor_beta_v_per_e,
+            self.temperature_k,
+            self.sensor_leads,
+        )
+
+    def switcher_scale(self) -> float:
+        """The noise draw's switcher amplitudes in this device's sensor units (`switcher_scale`)."""
+        return switcher_scale(self.sensor_beta_v_per_e if self.sensor_leads is not None else None)
 
     def runtime_barrier(self) -> Barrier:
         j = self.gate_names.index(self.barrier_gate)
@@ -201,7 +259,7 @@ class Device:
     def runtime_sensed(self, sample_dt_s: float = 1e-3, noise: bool = True) -> SensedDoubleDot:
         draw = self.scenario_draw()
         if noise and draw.noise is not None:
-            return SensedDoubleDot.from_noise_draw(draw.noise, sample_dt_s, charge=self.runtime_ci(), sensor=self.runtime_sensor())
+            return SensedDoubleDot.from_noise_draw(draw.noise, sample_dt_s, self.switcher_scale(), charge=self.runtime_ci(), sensor=self.runtime_sensor())
         return SensedDoubleDot(charge=self.runtime_ci(), sensor=self.runtime_sensor())
 
     def runtime_spin(self) -> SpinDraw:

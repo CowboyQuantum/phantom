@@ -29,7 +29,7 @@ def test_lead_rate_falls_by_decades_as_the_barrier_closes():
     m = MaterialClass.sige().effective_mass_me
     rates = []
     for vb in (0.2, 0.1, 0.0):
-        v = np.array([vb, 0.6, 0.2, 0.6, vb, 0.6, 0.7, 0.7])
+        v = np.array([vb, 0.6, 0.2, 0.6, vb, 0.6, 0.7, 0.7, 0.4, 0.3, 0.7, 0.7])
         d = derive_double_dot(lay, v, basis=basis)
         h, w = barrier_width_nm(basis, v, d.dots[0], lay.reservoir_points_nm()["R_L"])
         rates.append(wkb_tunnel_rate_hz(h, w, d.dots[0].curvature_ev_per_nm2, m))

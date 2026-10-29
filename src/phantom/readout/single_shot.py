@@ -83,7 +83,7 @@ def single_shots(
     r = dev.readout_noise.trace(times)
     v_eff = v[None, :] + g[:, None]
     n = np.asarray(states, dtype=float)[np.repeat(true_state, n_per)]
-    i = dev.sensor.current_a(dev.sensor.potential(v_eff, n, s)) + r
+    i = dev.sensor.current_a(dev.sensor.potential(v_eff, n, s), None, v_eff) + r
     signals = i.reshape(n_shots, n_per).mean(axis=1)
     means = tuple(float(signals[true_state == k].mean()) if np.any(true_state == k) else float("nan") for k in (0, 1))
     stds = tuple(float(signals[true_state == k].std()) if np.sum(true_state == k) > 1 else float("nan") for k in (0, 1))

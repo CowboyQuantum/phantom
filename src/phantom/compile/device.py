@@ -8,7 +8,10 @@ The compile tier runs every draw and every derivation once per device instance:
    FEM hook of `compile.backends`);
 3. the programmed operating point mapped through the wiring faults to the voltages the gates carry;
 4. the two dots, the sensor dot and the constant-interaction model from the basis
-   (`charge.derive_double_dot`), with the sensor gate moved onto the flank of its Coulomb peak;
+   (`charge.derive_double_dot`, with the sensor's charging energy and coupling to the dots), with the
+   sensor gate moved onto the flank of its Coulomb peak;
+4a. the sensor's leads (ADR 0026): the rate through each sensor barrier to its bath from the WKB action,
+   its slope against every gate at the compiled tunnelling level, and each bath's lever arms;
 5. the barriers to the leads and between the dots at the tunnelling level, their WKB transmissions
    from the action integral along the cut (`electrostatics.barrier_action`), the rates f_attempt·T,
    the interdot tunnel coupling estimate t ≈ ħω₀ √T / π, and the barrier gate's exponential scale
@@ -49,17 +52,24 @@ from phantom.disorder import scenario as disorder_scenario
 from phantom.disorder.scenario import ScenarioParams, draw_scenario
 from phantom.electrostatics import closed_form as electrostatics_closed_form
 from phantom.electrostatics.closed_form import GateBasis
-from phantom.electrostatics.dots import barrier_action
+from phantom.electrostatics.dots import barrier_action, line_cut, tunnelling_level_ev
 from phantom.layout.geometry import Layout, MaterialClass
 from phantom.readout import rates as readout_rates
 from phantom.readout.rates import attempt_rate_hz
+from phantom.readout.sensor import WING_WIDTHS, SensorLeads, SensorSETParams
 from phantom.spin import dynamics as spin_dynamics
 from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 2
-"""2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43)."""
+MODEL_VERSION = 3
+"""2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
+3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026)."""
+
+SENSOR_SLOPE_STEP_V = 0.01
+"""Half-step of the central differences that give the sensor rates' slopes against each gate, V."""
+SET_POINT_WIDTH_PASSES = 3
+"""Passes of the last set-point step, each taking the peak width at the previous pass's target."""
 
 
 @dataclass(frozen=True)
@@ -80,6 +90,14 @@ class CompileParams:
     barrier_gate: str = "B_M"
     reservoir_gates: tuple[str, str] = ("R_L", "R_R")
     lead_fermi_ev: float = 2e-3
+    sensor_barrier_gates: tuple[str, str] = ("SB_L", "SB_R")
+    """The sensor's barrier gates, source side first (ADR 0026)."""
+    sensor_reservoir_gates: tuple[str, str] = ("SR_L", "SR_R")
+    """The sensor's bath gates, source side first; a layout without them gives the typed sensor."""
+    bath_threshold_ev: float = -0.05
+    """Electron energy below which a bath is accumulated, eV (the turn-on protocols' placeholder)."""
+    bath_width_ev: float = 0.004
+    """Width of a bath's accumulation step, eV."""
     valley: ValleyParams | None = None
     """Defaults to `ValleyParams.for_material(layout.material)`."""
     spin: SpinParams = field(default_factory=SpinParams)
@@ -95,22 +113,124 @@ def _programmed_vector(layout: Layout, op: dict[str, float]) -> np.ndarray:
     return np.array([float(op[g]) for g in layout.gate_names])
 
 
-def _sensor_set_point(layout: Layout, derived, v: np.ndarray, p: CompileParams, basis: GateBasis, beta_factors: tuple[float, float] = (1.0, 1.0)):
+def sensor_tunnelling_levels_ev(basis: GateBasis, layout: Layout, v: np.ndarray, s, p: CompileParams, mass: float) -> tuple[float, float] | None:
+    """The level each sensor lead's electrons tunnel at, from `tunnelling_level_ev` on the cut from
+    the sensor dot to the centroid of that lead's reservoir gate at carried voltages `v`."""
+    names = tuple(p.sensor_reservoir_gates)
+    if s is None or any(n not in layout.gate_names for n in names):
+        return None
+    levels = []
+    for n in names:
+        point = layout.gate(n).centroid_nm
+        _, u = line_cut(basis, v, s.x_nm, s.y_nm, point[0], point[1], 401)
+        levels.append(float(tunnelling_level_ev(s, float(u[-1]), mass, p.lead_fermi_ev)))
+    return levels[0], levels[1]
+
+
+def _sensor_leads(
+    basis: GateBasis, layout: Layout, v: np.ndarray, s, p: CompileParams, mass: float, levels: tuple[float, float] | None, slopes: bool = True
+) -> SensorLeads | None:
+    """The sensor dot's barriers and baths at carried voltages `v` (ADR 0026); None without a sensor
+    dot or without the sensor's reservoir gates in the layout.
+
+    Each lead's rate is f_a·exp(−2S), the WKB action S through the barrier from the sensor dot to the
+    centroid of its reservoir gate, at the fixed tunnelling level `levels` (compile takes them at the
+    wired programmed point, before the sensor set point). On a Coulomb peak the electrons tunnel at
+    the leads' electrochemical potential, which no gate moves; the closed-form potential has no
+    absolute Fermi level, so the level is placed once by `tunnelling_level_ev` and held there, and a
+    gate changes a rate through the barrier's profile alone, at the compile tier and at runtime alike.
+    The slopes d ln Γ/dV = −2 dS/dV are central differences of ±`SENSOR_SLOPE_STEP_V` on each gate.
+    Each bath's lever arms and offset are the basis and the draw's energy at that centroid."""
+    names = tuple(p.sensor_reservoir_gates)
+    if s is None or levels is None or any(n not in layout.gate_names for n in names):
+        return None
+    points = [layout.gate(n).centroid_nm for n in names]
+    f_a = attempt_rate_hz(s.curvature_ev_per_nm2, mass)
+    heights, widths, rates, rows = [], [], [], []
+    for point, level in zip(points, levels, strict=True):
+        h, w, action = barrier_action(basis, v, s, point, mass, level_ev=level)
+        heights.append(float(h))
+        widths.append(float(w))
+        rates.append(float(f_a * np.exp(-2.0 * action)))
+        row = np.zeros(len(v))
+        if slopes:
+            for g in range(len(v)):
+                vp, vm = v.copy(), v.copy()
+                vp[g] += SENSOR_SLOPE_STEP_V
+                vm[g] -= SENSOR_SLOPE_STEP_V
+                s_p = barrier_action(basis, vp, s, point, mass, level_ev=level)[2]
+                s_m = barrier_action(basis, vm, s, point, mass, level_ev=level)[2]
+                row[g] = -(s_p - s_m) / SENSOR_SLOPE_STEP_V
+        rows.append(tuple(float(x) for x in row))
+    return SensorLeads(
+        barrier_gates=tuple(p.sensor_barrier_gates),
+        reservoir_gates=names,
+        v_ref_v=tuple(float(x) for x in v),
+        gamma_ref_hz=(rates[0], rates[1]),
+        attempt_rate_hz=float(f_a),
+        log_rate_slopes_per_v=(rows[0], rows[1]),
+        bath_lever_arms=tuple(tuple(float(x) for x in basis.at(*pt)) for pt in points),
+        bath_offset_ev=tuple(basis.offset_at(*pt) for pt in points),
+        bath_threshold_ev=float(p.bath_threshold_ev),
+        bath_width_ev=float(p.bath_width_ev),
+        tunnelling_level_ev=(float(levels[0]), float(levels[1])),
+        barrier_height_ev=(heights[0], heights[1]),
+        barrier_width_nm=(widths[0], widths[1]),
+    )
+
+
+def _derived_sensor(derived, beta_factors: tuple[float, float], p: CompileParams, leads: SensorLeads | None) -> SensorSETParams:
+    beta = None if derived.sensor_beta_v_per_e is None else tuple(float(x) for x in derived.sensor_beta_v_per_e)
+    return compiled_sensor(derived.sensor_alpha_v_per_v, beta_factors, derived.sensor_charging_energy_ev, beta, p.temperature_k, leads)
+
+
+def _sensor_set_point(
+    layout: Layout,
+    derived,
+    v: np.ndarray,
+    p: CompileParams,
+    basis: GateBasis,
+    beta_factors: tuple[float, float] = (1.0, 1.0),
+    mass: float = 0.19,
+    levels: tuple[float, float] | None = None,
+):
     """Move the sensor gate so the sensor sits `sensor_flank_widths` from a peak centre, then re-derive.
-    The sensor is the one the runtime reads (`device.compiled_sensor`, with the draw's asymmetry)."""
-    sensor = compiled_sensor(derived.sensor_alpha_v_per_v, beta_factors)
+    The sensor is the one the runtime reads (`device.compiled_sensor`, with the draw's asymmetry).
+    Returns the derivation, the voltages and the sensor's leads (None for the typed sensor).
+
+    A sensor with leads then takes one more step with the re-derived sensor and its leads compiled
+    there, without deriving again: its peak (a fraction of a millivolt of φ_s) is narrow against the
+    jump of its potential α·V when a re-derivation moves the dot minimum by a grid step, so only a step
+    with the lever arms the runtime keeps lands on the target. Its peak width is that of the sech² with
+    the same wing as its broadened peak (`width_v` when ħΓ ≪ kT), at the rates the leads give at the
+    step's own target (`SET_POINT_WIDTH_PASSES` fixed passes, the same on every platform). The
+    derivation returned is the sensor's, a fraction of a period of the sensor gate from the final
+    point, and the leads are anchored there; `compile_device` derives the double dot again at the end."""
+    sensor = _derived_sensor(derived, beta_factors, p, _sensor_leads(basis, layout, v, derived.sensor_dot, p, mass, levels, slopes=False))
     if p.sensor_gate not in layout.gate_names:
-        return derived, v
+        return derived, v, None
     j = layout.gate_names.index(p.sensor_gate)
     if sensor.alpha_v_per_v[j] <= 0:
-        return derived, v
-    n0 = derived.ci.mean_occupation(v)
-    phi0 = float(sensor.potential(v, n0))
-    k = np.rint((phi0 - sensor.phase_v) / sensor.period_v)
-    target = sensor.phase_v + k * sensor.period_v + p.sensor_flank_widths * sensor.width_v
-    v = v.copy()
-    v[j] += (target - phi0) / sensor.alpha_v_per_v[j]
-    return derive_double_dot(layout, v, temperature_k=p.temperature_k, basis=basis), v
+        return derived, v, None
+
+    def step(sensor: SensorSETParams, derived, v: np.ndarray, passes: int) -> np.ndarray:
+        phi0 = float(sensor.potential(v, derived.ci.mean_occupation(v)))
+        k = np.rint((phi0 - sensor.phase_v) / sensor.period_v)
+        out = v
+        for _ in range(passes):
+            width = sensor.width_v if sensor.leads is None else sensor.wing_offset_v(out) / WING_WIDTHS
+            target = sensor.phase_v + k * sensor.period_v + p.sensor_flank_widths * width
+            out = v.copy()
+            out[j] += (target - phi0) / sensor.alpha_v_per_v[j]
+        return out
+
+    v = step(sensor, derived, v, 1)
+    derived = derive_double_dot(layout, v, temperature_k=p.temperature_k, basis=basis)
+    if sensor.leads is None:
+        return derived, v, None
+    leads = _sensor_leads(basis, layout, v, derived.sensor_dot, p, mass, levels)
+    v = step(_derived_sensor(derived, beta_factors, p, leads), derived, v, SET_POINT_WIDTH_PASSES)
+    return derived, v, leads
 
 
 def _barrier(basis: GateBasis, v: np.ndarray, d, point_nm: tuple[float, float], mass: float, lead_fermi_ev: float) -> tuple[float, float, float, float]:
@@ -137,7 +257,11 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     v = draw.wiring.apply(v_prog) if draw.wiring is not None else v_prog.copy()
     derived = derive_double_dot(perturbed, v, temperature_k=params.temperature_k, basis=basis)
     beta_factors = tuple(draw.wiring.sensor_beta_factors) if draw.wiring is not None else (1.0, 1.0)
-    derived, v = _sensor_set_point(perturbed, derived, v, params, basis, beta_factors)
+    levels = sensor_tunnelling_levels_ev(basis, perturbed, v, derived.sensor_dot, params, mat.effective_mass_me)
+    derived, v, sensor_leads = _sensor_set_point(perturbed, derived, v, params, basis, beta_factors, mat.effective_mass_me, levels)
+    sensor = derived  # the sensor's linearisation: the one its set point was placed with
+    if sensor_leads is not None:
+        derived = derive_double_dot(perturbed, v, temperature_k=params.temperature_k, basis=basis)
     d1, d2 = derived.dots
     res = perturbed.reservoir_points_nm()
     r_l, r_r = params.reservoir_gates
@@ -155,7 +279,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     t_m = interdot_tunnel_coupling_ev(basis, vm, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
     v_scale = float(2 * dv / np.log(max(t_p, 1e-300) / max(t_m, 1e-300))) if t_p > t_m > 0 else 0.05
     valley_params = params.valley or ValleyParams.for_material(material)
-    radii = np.array([d1.radius_nm, d2.radius_nm] + ([derived.sensor_dot.radius_nm] if derived.sensor_dot else []))
+    radii = np.array([d1.radius_nm, d2.radius_nm] + ([sensor.sensor_dot.radius_nm] if sensor.sensor_dot else []))
     valleys = draw_valley_splitting_uev(valley_params, radii, np.random.default_rng(seed + 1))
     spin = draw_spin(params.spin, np.random.default_rng(seed + 2), seed)
 
@@ -187,11 +311,11 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         operating_point_v=tuple(float(x) for x in v),
         gate_names=layout.gate_names,
         dots=(cdot(d1, valleys[0]), cdot(d2, valleys[1])),
-        sensor_dot=cdot(derived.sensor_dot, valleys[2]) if derived.sensor_dot else None,
+        sensor_dot=cdot(sensor.sensor_dot, valleys[2]) if sensor.sensor_dot else None,
         c_dot_af=tuple(tuple(float(x) for x in row) for row in derived.ci.c_dot_af),
         c_gate_af=tuple(tuple(float(x) for x in row) for row in derived.ci.c_gate_af),
         temperature_k=params.temperature_k,
-        sensor_alpha_v_per_v=tuple(float(x) for x in derived.sensor_alpha_v_per_v),
+        sensor_alpha_v_per_v=tuple(float(x) for x in sensor.sensor_alpha_v_per_v),
         barriers=(
             CompiledBarrier(("dot1", "lead_left"), float(h_l), float(w_l), g_l),
             CompiledBarrier(("dot2", "lead_right"), float(h_r), float(w_r), g_r),
@@ -203,6 +327,9 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         g_factors=spin.g_factors,
         params=params_dict,
         provenance=provenance,
+        sensor_charging_energy_ev=sensor.sensor_charging_energy_ev,
+        sensor_beta_v_per_e=None if sensor.sensor_beta_v_per_e is None else (float(sensor.sensor_beta_v_per_e[0]), float(sensor.sensor_beta_v_per_e[1])),
+        sensor_leads=sensor_leads,
     )
 
 

@@ -6,6 +6,61 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
+## 0.3.0 — the sensor dot's barriers and bath (#47; untagged)
+
+The charge sensor becomes a dot like the qubit dots, with its own tunnel barriers and a bath behind each
+that can be tuned (ADR 0026). Every compiled device's sensor changes.
+
+### Breaking
+- `two_dot_layout` gains four gates after the first eight: sensor barriers `SB_L`, `SB_R` beside `SG` and
+  sensor bath (reservoir) gates `SR_L`, `SR_R` beyond them; gate vectors are 12 long and every operating
+  point needs the four. The sensor's search region spans its barriers. The gallery's and the contract's
+  programmed point adds `SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7`, set for seed 2; at that point seeds
+  0, 3, 6 and 9 of 0–11 form no device (6 as before).
+- `DEVICE_FORMAT_VERSION` 2: `Device` gains `sensor_charging_energy_ev`, `sensor_beta_v_per_e` and
+  `sensor_leads`. Device files from 0.2.0 do not load; recompile them from their seed.
+- A compiled sensor with leads reads φ_s as the potential at its dot in volts (lever arm 1 eV/V): its
+  peaks are its charging energy apart (about 35 mV on SG for the gallery device, against about 1 V
+  before), its thermal width is the device's 2kT, and its per-electron coupling comes from the layout
+  (about −0.35 mV, against the typed −4 and −3 mV). Its current comes through its leads: no typed
+  `peak_a` or `background_a`. The programmed sensor gate alone usually sits between peaks; tune it (the
+  compiled set point and `optimum(...).sensor` do).
+- The noise draw's switcher amplitudes are converted to the sensor dot's units (times its mean coupling
+  over the typed sensor's), so a switcher keeps its size against a dot electron's signal; the gate 1/f
+  noise now moves the sharper sensor visibly.
+- `SensorTruth.wing_v` and `sensitivity_a_per_v` describe the lifetime-broadened peak (its steepest
+  point and the slope there) and equal the sech² statements only when the lifetime width is negligible.
+
+### Added
+- `readout.broadening`: the Fermi function convolved with a Lorentzian level through the complex
+  digamma function, the linear-response lineshape, its wing by bisection, the peak conductance, and
+  `polygamma` for complex arguments.
+- `readout.sensor.SensorLeads`: the sensor's rates compiled from the WKB action through its barriers at a
+  fixed tunnelling level, their slopes against every gate, the attempt-rate ceiling, and each bath's
+  occupation at the accumulation threshold; `SensorSETParams.leads`, `rates_hz`, `lifetime_width_v`,
+  `linear_response_peak_a`, `wing_offset_v`, `wing_slope_a_per_v`; `current_a(phi, v_sd, v)` takes the
+  carried gate voltages. `phantom.api.SensorLeads`.
+- `charge.derived.sensor_coupling`: the sensor's charging energy and coupling from the three-dot
+  capacitance matrix; `DerivedDoubleDot.sensor_charging_energy_ev`, `sensor_beta_v_per_e`.
+- `CompileParams.sensor_barrier_gates`, `sensor_reservoir_gates`, `bath_threshold_ev`, `bath_width_ev`.
+- `State.sensor_gamma_hz`; `Knowable.sensor_barrier_gates`, `sensor_reservoir_gates`;
+  `SensorTruth.lifetime_width_v`, `gamma_source_hz`, `gamma_drain_hz`; `Device.switcher_scale`.
+- `electrostatics.tunnelling_level_ev` (the level rule `barrier_action` already used, now shared) and
+  `GateBasis.offset_at`.
+- Gallery protocols `sensor-bath-turn-on`, `sensor-barrier-barrier-map`, `sensor-barrier-rates`,
+  `sensor-peak-broadening` (unsigned); `compiled-device-draws` records the sensor rates; the session
+  protocols tune the sensor gate first; `optimum-sensor-flank` sweeps ±30 mV.
+- Reference entries `beenakker1991-coulomb-blockade`, `foxman1993-quantum-levels-coulomb-island`
+  (`proposed`).
+
+### Changed
+- Compile's sensor set point: one step and a re-derivation as before, then a last step with the
+  re-derived sensor and its leads; the double dot is derived again at the final point.
+- Model versions: `layout.geometry` 2, `charge.derived` 2, `compile.device` 3, `device` 3,
+  `device.session` 2, `device.truth` 2, `readout.broadening` 1 (new); layer versions `layout` 2,
+  `charge` 4. The typed sensor (no leads) gives the same output as in 0.2.0.
+- `gate-leakage-iv` evaluates twelve gates: its budget rises from 2,408 to 3,612 points.
+
 ## 0.2.0 — the consumer contract (Step 8; `v0.2.0` at `f72daac`)
 
 First release a consumer can pin. Only the fix below changes the output of a 0.1.0 model.

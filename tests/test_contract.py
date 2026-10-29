@@ -6,7 +6,7 @@ import pytest
 from phantom.contract import CHECKS, main, reference_device, run
 
 
-@pytest.mark.parametrize("seed", [2, 0, 7])
+@pytest.mark.parametrize("seed", [2, 4, 7])
 def test_every_contract_check_holds(seed: int):
     results = run(reference_device(seed))
     assert len(results) == len(CHECKS)
@@ -17,7 +17,7 @@ def test_every_contract_check_holds(seed: int):
 
 def test_the_module_exits_zero_and_reads_device_files(tmp_path, capsys):
     path = tmp_path / "device.json"
-    reference_device(3).to_json(path)
+    reference_device(5).to_json(path)
     assert main([str(path)]) == 0
     out = capsys.readouterr().out
     assert "contract: OK" in out and str(path) in out

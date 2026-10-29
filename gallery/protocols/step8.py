@@ -7,11 +7,22 @@ import numpy as np
 from gallery.protocols.step7 import _compiled
 from gallery.runner import Context, Protocol
 from phantom.device import Device
+from phantom.optimum import sensor_optimum
+
+
+def _tuned_point(dev: Device) -> np.ndarray:
+    """The programmed point with the sensor gate on the optimum's flank, as a consumer tunes the sensor
+    before measuring: the sensor dot's peaks are a few hundred µV wide, so the programmed sensor gate
+    alone usually sits between them (ADR 0026). The gallery device's sensor gate is not faulted, so its
+    programmed and carried voltages agree."""
+    v = np.array(dev.programmed_point_v)
+    v[dev.gate_names.index("SG")] = sensor_optimum(dev).v_sensor_gate_v
+    return v
 
 
 def _dot1_degeneracy(dev: Device, half_v: float = 0.03, n: int = 4001) -> np.ndarray:
-    """The programmed point nearest the programmed point where dot 1 is half-way through a transition to its lead."""
-    v0 = np.array(dev.programmed_point_v)
+    """The programmed point nearest the tuned point where dot 1 is half-way through a transition to its lead."""
+    v0 = _tuned_point(dev)
     j = dev.gate_names.index("P1")
     grid = v0 + np.linspace(-half_v, half_v, n)[:, None] * np.eye(len(v0))[j]
     occ = dev.at(grid).n_mean
@@ -55,7 +66,7 @@ def session_hold_relaxation(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     samples = int(p.sweep[0]["points"])
     with ctx.compile():
         dev = _compiled(p)
-        v0 = np.array(dev.programmed_point_v)
+        v0 = _tuned_point(dev)
         j = dev.gate_names.index("P1")
         per_e = dev.truth().charge_lattice_e_per_v[0][0]
         a = _dot1_degeneracy(dev) + 0.5 / per_e * np.eye(len(v0))[j]

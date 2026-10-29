@@ -1,6 +1,6 @@
 [project]
 name = "phantom"
-version = "0.2.0"
+version = "0.3.0"
 description = "A stand-in spin-qubit device: gate-defined quantum dot physics with disorder and fabrication defects"
 requires-python = ">=3.11,<3.14"
 dependencies = ["numpy>=1.26,<3", "scipy>=1.11,<2"]

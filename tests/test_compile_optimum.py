@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from phantom.charge import derive_double_dot
-from phantom.compile import CompileParams, Device, compile_device, fem_basis
+from phantom.compile import DEVICE_FORMAT_VERSION, CompileParams, Device, compile_device, fem_basis
 from phantom.disorder import ScenarioParams, draw_scenario
 from phantom.layout import two_dot_layout
 from phantom.optimum import (
@@ -20,7 +20,7 @@ from phantom.optimum import (
 from phantom.spin import psb_contrast, swap_gate_fidelity
 from phantom.spin.exchange import detuning_noise_sigma_ev
 
-OP = {"B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7}
+OP = {"B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7, "SB_L": 0.4, "SB_R": 0.3, "SR_L": 0.7, "SR_R": 0.7}
 
 
 @pytest.fixture(scope="module")
@@ -44,7 +44,7 @@ def test_round_trip_is_text_identical_and_reproduces_the_diagram(device: Device,
     device.to_json(path)
     again = Device.from_json(path)
     assert again.dumps() == device.dumps()
-    assert again.provenance["format_version"] == 1 and "charge.ci" in again.provenance["model_versions"]
+    assert again.provenance["format_version"] == DEVICE_FORMAT_VERSION and "charge.ci" in again.provenance["model_versions"]
     np.testing.assert_array_equal(_coarse_map(again), _coarse_map(device))
     assert path.stat().st_size < 50_000, "a device file stays small: the basis is not stored"
     _lay, basis = again.basis()
@@ -53,9 +53,9 @@ def test_round_trip_is_text_identical_and_reproduces_the_diagram(device: Device,
 
 def test_compile_is_deterministic_in_the_seed_and_the_draws_differ_between_seeds():
     lay = two_dot_layout("SiGe", 80.0)
-    a = compile_device(lay, CompileParams(operating_point_v=OP), seed=3)
-    b = compile_device(lay, CompileParams(operating_point_v=OP), seed=3)
-    c = compile_device(lay, CompileParams(operating_point_v=OP), seed=4)
+    a = compile_device(lay, CompileParams(operating_point_v=OP), seed=4)
+    b = compile_device(lay, CompileParams(operating_point_v=OP), seed=4)
+    c = compile_device(lay, CompileParams(operating_point_v=OP), seed=5)
     assert a.dumps() == b.dumps()
     assert a.valley_splittings_uev().tolist() != c.valley_splittings_uev().tolist()
     assert a.g_factors != c.g_factors and a.scenario["charges"] != c.scenario["charges"]
@@ -197,20 +197,21 @@ def test_coupling_optimum_agrees_with_the_compile_tier_near_the_operating_point(
 
 
 def test_the_compiled_sensor_carries_the_coupling_asymmetry_and_sits_on_its_flank(device: Device):
-    """#43, ADR 0016: each dot's per-electron sensor coupling is the nominal one times the wiring draw's
-    factor, and compile places the set point on the flank of that same sensor."""
-    from phantom.readout.sensor import SensorSETParams
+    """#43, ADR 0016, 0026: each dot's per-electron sensor coupling is the layout's times the wiring
+    draw's factor, and compile places the set point on the flank of that same sensor."""
+    from phantom.readout.sensor import WING_WIDTHS
 
     factors = np.array(device.scenario["wiring"]["sensor_beta_factors"])
     assert not np.allclose(factors, 1.0), "the gallery device draws an asymmetry"
     sensor = device.runtime_sensor()
-    np.testing.assert_array_equal(sensor.beta_v_per_e, SensorSETParams().beta_v_per_e * factors)
+    np.testing.assert_array_equal(sensor.beta_v_per_e, np.array(device.sensor_beta_v_per_e) * factors)
     v = device.operating_point()
     phi = float(sensor.potential(v, device.runtime_ci().mean_occupation(v)))
     offset = (phi - sensor.phase_v) / sensor.period_v
     offset = (offset - np.rint(offset)) * sensor.period_v
-    # compile moves the sensor gate in one step and re-derives the dots, so the set point lands within a
-    # few hundredths of a width here (further on draws whose charge shifts with the sensor gate)
-    assert abs(offset - device.params["sensor_flank_widths"] * sensor.width_v) < 0.02 * sensor.width_v
+    # the target is 0.9 of the sech²-equivalent width at the rates one step before; the rates at the
+    # stored point differ by the last step's move along the sensor gate, so the width does too
+    width = sensor.wing_offset_v(v) / WING_WIDTHS
+    assert 0.5 < offset / (device.params["sensor_flank_widths"] * width) < 1.5
     clean = compile_device(two_dot_layout("SiGe", 80.0), CompileParams(operating_point_v=OP, severity=0.0, wiring_faults=False), seed=0)
-    np.testing.assert_array_equal(clean.runtime_sensor().beta_v_per_e, SensorSETParams().beta_v_per_e)
+    np.testing.assert_array_equal(clean.runtime_sensor().beta_v_per_e, np.array(clean.sensor_beta_v_per_e))

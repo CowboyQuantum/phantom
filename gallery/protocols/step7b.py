@@ -130,7 +130,8 @@ def optimum_sweet_spot(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
 
 def compiled_device_draws(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     """Twelve devices compiled from the same layout and operating point with seeds 0–11: the interdot
-    coupling and the lead rates, the valley splittings, and what the optimum reaches for each (sensor
+    coupling and the lead rates, the sensor's two rates at its set point, the valley splittings, and
+    what the optimum reaches for each (sensor
     slope, blockade contrast, SWAP infidelity at the sweet spot of the compiled operating point). A
     device whose disorder stops a dot or the sensor from forming is recorded as not formed (NaN) — a
     yield, not an error."""
@@ -147,13 +148,15 @@ def compiled_device_draws(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
                 devices.append(None)
     n = len(seeds)
     nan = np.full(n, np.nan)
-    t_uev, g_l, g_r, ev1, ev2, dg, slope, contrast, infid = (nan.copy() for _ in range(9))
+    t_uev, g_l, g_r, ev1, ev2, dg, slope, contrast, infid, s_s, s_d = (nan.copy() for _ in range(11))
     with ctx.run(n):
         for k, dev in enumerate(devices):
             if dev is None:
                 continue
             t_uev[k] = dev.tunnel_coupling_ev * 1e6
             g_l[k], g_r[k] = dev.barriers[0].rate_hz, dev.barriers[1].rate_hz
+            if dev.sensor_leads is not None:
+                s_s[k], s_d[k] = dev.runtime_sensor().rates_hz(dev.operating_point())
             ev1[k], ev2[k] = dev.valley_splittings_uev()[:2]
             dg[k] = abs(dev.g_factors[0] - dev.g_factors[1])
             slope[k] = sensor_optimum(dev).slope_a_per_v
@@ -166,6 +169,8 @@ def compiled_device_draws(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
         "log10_t_uev": np.log10(t_uev),
         "log10_gamma_left_hz": np.log10(g_l),
         "log10_gamma_right_hz": np.log10(g_r),
+        "log10_sensor_gamma_source_hz": np.log10(s_s),
+        "log10_sensor_gamma_drain_hz": np.log10(s_d),
         "valley_dot1_uev": ev1,
         "valley_dot2_uev": ev2,
         "g_difference": dg,

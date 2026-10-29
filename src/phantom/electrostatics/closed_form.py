@@ -121,5 +121,18 @@ class GateBasis:
             + b[:, iy + 1, ix + 1] * fx * fy
         )
 
+    def offset_at(self, x_nm: float, y_nm: float) -> float:
+        """The gate-independent energy offset (eV) at one point by bilinear interpolation; 0 when clean."""
+        if self.offset_ev is None:
+            return 0.0
+        ix = np.clip(np.searchsorted(self.x_nm, x_nm) - 1, 0, len(self.x_nm) - 2)
+        iy = np.clip(np.searchsorted(self.y_nm, y_nm) - 1, 0, len(self.y_nm) - 2)
+        fx = (x_nm - self.x_nm[ix]) / (self.x_nm[ix + 1] - self.x_nm[ix])
+        fy = (y_nm - self.y_nm[iy]) / (self.y_nm[iy + 1] - self.y_nm[iy])
+        o = self.offset_ev
+        return float(
+            o[iy, ix] * (1 - fx) * (1 - fy) + o[iy, ix + 1] * fx * (1 - fy) + o[iy + 1, ix] * (1 - fx) * fy + o[iy + 1, ix + 1] * fx * fy
+        )
+
     def index_of(self, name: str) -> int:
         return self.gate_names.index(name)

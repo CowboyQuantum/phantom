@@ -1,0 +1,25 @@
+id: sensor-bath-turn-on
+name: The sensor's baths turning on
+step: 7
+description: On the seed-2 compiled device, each of the sensor's two bath gates (SR_L, the source side, and SR_R, the drain side) swept from 0 to 0.8 V with every other gate at the compiled operating point. Per sweep, the bath's occupation, the soft step where the electron energy under the bath gate crosses the accumulation threshold (the turn-on protocols' placeholder, -50 meV, calibration none), and the sensor current. Below the turn-on the bath is depleted and the sensor carries nothing. Above it the current is set by the bath gate's reach under the adjacent sensor barrier; in the closed-form potential without screening a wide bath gate moves that barrier about as strongly as the barrier gate itself (d ln Gamma / dV near 200 per volt for both), so the sensor stays pinched until the bath gate is within a few tens of mV of the operating point, where it sits on the flank of a Coulomb peak; on the logarithmic axis (floored at 1 fA, below any measurement) the current rises exponentially towards it. The computed turn-on voltage of each bath is recorded (ADR 0026; screening is a known gap).
+layers: [electrostatics, readout, device, compile]
+runner: step7c:sensor_bath_turn_on
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: "SR_L, then SR_R", from: 0.0, to: 0.8, points: 801, unit: V}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_bath_v, y: [occupation_left_bath_swept, occupation_right_bath_swept], xlabel: "bath gate (V)", ylabel: "bath occupation", title: "turn-on of each bath"}
+    - {kind: line, x: v_bath_v, y: [log10_current_left_bath_swept_a, log10_current_right_bath_swept_a], xlabel: "bath gate (V)", ylabel: "log10 sensor current (A), floor 1 fA", title: "sensor current"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 1602, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

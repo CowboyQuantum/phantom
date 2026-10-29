@@ -8,7 +8,7 @@ instance:
   layout: two-dot-textbook
   material: SiGe
   pitch_nm: 80.0
-  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
   seeds: [1, 2, 3]
   severity: 1.0
 sweep:
