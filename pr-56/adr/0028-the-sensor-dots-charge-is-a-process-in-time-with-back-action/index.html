@@ -587,6 +587,8 @@ at the present voltages and dot charge. Specifically:</p>
     exponential. Its variance is the long-time variance of full counting statistics
     (1ᵀJ₂p − 2·1ᵀJ₁W^D J₁p), and the end state is drawn from e^{WT}.</li>
 <li>In <code>mean</code> mode the distribution is propagated and the expected count is read.</li>
+<li>Once the dwell spans more than 50 of the chain's relaxation times, the end state is the stationary
+    p and the integral of e^{Ws}q is T·p + W^D(p − q), in closed form.</li>
 <li><strong>Order within a sample.</strong> The dots step first, with the back-action of the sensor's charge at the
   start of the dwell. The sensor then steps at the dots' new charge and the sample's switcher shift.
   A <code>hold</code> evolves both, at the last bias given.</li>
@@ -619,8 +621,9 @@ at the present voltages and dot charge. Specifically:</p>
     stationary mean and in the thermal limit, but its noise is the sequential one.</li>
 <li>The chain has no joint energy with the dots: detailed balance holds per step, not over the joint
     process.</li>
-<li>At ΓT ≈ 10⁸ the augmented exponential keeps about eight digits, so the contract's long-dwell
-    equality holds to 1e-6.</li>
+<li>At ΓT ≈ 10⁸ the augmented exponential keeps only about eight digits, and they differ between
+    platforms. The first Windows comparison differed by 1.5·10⁻⁹. Beyond 50 relaxation times,
+    <code>propagate</code> therefore uses the relaxed closed form T·p + W^D(p − q) (ADR 0014).</li>
 <li>A session with a sensor with leads costs about 0.3–0.7 ms per sample, against 0.2.</li>
 <li>Must now: a consumer that reads <code>n_present</code> alone still gets the dots. <code>sensor_charge</code> counts on the
   level numbering of φ_s, so only its changes are physical.</li>

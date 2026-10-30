@@ -511,9 +511,9 @@
 <p><strong>Current step:</strong> none in flight. Step 8's phantom side was released as <code>v0.2.0</code> (on <code>f72daac</code>). Steps 1–7
 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28,</p>
 <h1 id="32-34-and-37-030-is-untagged-and-now-carries-47-53-and-54-changelogmd">32, #34 and #37. 0.3.0 is untagged and now carries #47, #53 and #54 (<code>CHANGELOG.md</code>).</h1>
-<p><strong>Branches:</strong> <code>issue-53/gate-dependent-dot-rates</code> (PR #55, CI green) and <code>issue-54/sensor-charge-dynamics</code>,
-stacked on it (PR targets the #53 branch). <code>main</code> is at <code>310381f</code>, the merge of #52.
-<strong>Last session:</strong> 2026-10-30. The owner asked for better charge dynamics for the sensor and for the
+<p><strong>Branch:</strong> <code>issue-54/sensor-charge-dynamics</code> (PR #56, against <code>main</code>). <code>main</code> is at <code>45e27a0</code>, the merge of</p>
+<h1 id="55-53">55 (#53).</h1>
+<p><strong>Last session:</strong> 2026-10-30. The owner asked for better charge dynamics for the sensor and for the
 gates to modulate them. Two decisions were taken that day:
 - <strong>Back-action:</strong> on, always with dynamics.
 - <strong>Release:</strong> both changes fold into the untagged 0.3.0.</p>
@@ -540,18 +540,17 @@ gates to modulate them. Two decisions were taken that day:
 <li>Back-action is −β_i·(M − M̄), against the sensor's stationary mean.</li>
 <li>New code: <code>readout.sensor_dynamics</code> and <code>Measurement.sensor_charge</code>.</li>
 <li>New protocol <code>session-slow-sensor</code>.</li>
-<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 9 P0.</li>
-<li><strong>Totals:</strong> 173 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
+<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 10 P0.</li>
+<li><strong>Totals:</strong> 174 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>PR #55 (#53): CI green, including the Windows comparison. It waits for the owner's review of its
-  preview at <code>/pr-55/</code>.</li>
-<li>The #54 pull request, stacked on #55, waits for CI and the preview. Once #55 merges, retarget it to
-  <code>main</code> if GitHub has not.</li>
+<li>PR #56 (#54) waits for the owner's review of its preview at <code>/pr-56/</code>. Its first Windows gallery
+  comparison failed by 1.5·10⁻⁹, from an exponential at ΓT ≈ 10⁸. The fix in <code>9a58df2</code> replaces it with
+  the relaxed closed form beyond 50 relaxation times (ADR 0028).</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>The owner reviews and merges #55, then the #54 pull request. They also decide whether to tag <code>v0.3.0</code>
+<p>The owner reviews and merges #56. They also decide whether to tag <code>v0.3.0</code>
 (ADR 0025) and when qdt moves its pin (CowboyQuantum/qdt #140, #142, and #169 for the run option).</p>
 <h2 id="open-issues">Open issues</h2>
 <h1 id="48-rates-unscreened-sensitivity-now-also-the-dots-p1-moves-_l-more-than-b_l-49-per-device">48 rates' unscreened sensitivity (now also the dots': P1 moves Γ_L more than B_L); #49 per-device</h1>
