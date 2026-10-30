@@ -87,6 +87,26 @@
     },
     {
      "default": true,
+     "name": "sensor_barrier_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": true,
+     "name": "sensor_reservoir_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": true,
+     "name": "bath_threshold_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "bath_width_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
      "name": "valley",
      "type": "ValleyParams | None"
     },
@@ -194,7 +214,7 @@
   "DEVICE_FORMAT_VERSION": {
    "kind": "value",
    "type": "int",
-   "value": 1
+   "value": 2
   },
   "Device": {
    "fields": [
@@ -297,6 +317,21 @@
      "default": false,
      "name": "provenance",
      "type": "dict[str, Any]"
+    },
+    {
+     "default": true,
+     "name": "sensor_charging_energy_ev",
+     "type": "float | None"
+    },
+    {
+     "default": true,
+     "name": "sensor_beta_v_per_e",
+     "type": "tuple[float, float] | None"
+    },
+    {
+     "default": true,
+     "name": "sensor_leads",
+     "type": "SensorLeads | None"
     }
    ],
    "frozen": true,
@@ -389,6 +424,10 @@
     "session": {
      "kind": "method",
      "signature": "(self, noise: 'bool' = True, dynamics: 'bool' = True, charge: 'ChargeMode' = 'sampled', noise_seed: 'int | None' = None) -> 'Session'"
+    },
+    "switcher_scale": {
+     "kind": "method",
+     "signature": "(self) -> 'float'"
     },
     "to_dict": {
      "kind": "method",
@@ -484,6 +523,16 @@
     {
      "default": false,
      "name": "reservoir_gates",
+     "type": "tuple[str, ...]"
+    },
+    {
+     "default": true,
+     "name": "sensor_barrier_gates",
+     "type": "tuple[str, ...]"
+    },
+    {
+     "default": true,
+     "name": "sensor_reservoir_gates",
      "type": "tuple[str, ...]"
     }
    ],
@@ -682,6 +731,99 @@
    "kind": "dataclass",
    "members": {}
   },
+  "SensorLeads": {
+   "fields": [
+    {
+     "default": false,
+     "name": "barrier_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": false,
+     "name": "reservoir_gates",
+     "type": "tuple[str, str]"
+    },
+    {
+     "default": false,
+     "name": "v_ref_v",
+     "type": "tuple[float, ...]"
+    },
+    {
+     "default": false,
+     "name": "gamma_ref_hz",
+     "type": "tuple[float, float]"
+    },
+    {
+     "default": false,
+     "name": "attempt_rate_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "log_rate_slopes_per_v",
+     "type": "tuple[tuple[float, ...], tuple[float, ...]]"
+    },
+    {
+     "default": false,
+     "name": "bath_lever_arms",
+     "type": "tuple[tuple[float, ...], tuple[float, ...]]"
+    },
+    {
+     "default": false,
+     "name": "bath_offset_ev",
+     "type": "tuple[float, float]"
+    },
+    {
+     "default": true,
+     "name": "bath_threshold_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "bath_width_ev",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "tunnelling_level_ev",
+     "type": "tuple[float, float]"
+    },
+    {
+     "default": true,
+     "name": "barrier_height_ev",
+     "type": "tuple[float, float]"
+    },
+    {
+     "default": true,
+     "name": "barrier_width_nm",
+     "type": "tuple[float, float]"
+    }
+   ],
+   "frozen": true,
+   "kind": "dataclass",
+   "members": {
+    "barrier_rates_hz": {
+     "kind": "method",
+     "signature": "(self, v: 'np.ndarray | None' = None) -> 'np.ndarray'"
+    },
+    "bath_energy_ev": {
+     "kind": "method",
+     "signature": "(self, v: 'np.ndarray | None' = None) -> 'np.ndarray'"
+    },
+    "bath_occupation": {
+     "kind": "method",
+     "signature": "(self, v: 'np.ndarray | None' = None) -> 'np.ndarray'"
+    },
+    "from_dict": {
+     "kind": "classmethod",
+     "signature": "(cls, d: 'dict') -> 'SensorLeads'"
+    },
+    "rates_hz": {
+     "kind": "method",
+     "signature": "(self, v: 'np.ndarray | None' = None) -> 'np.ndarray'"
+    }
+   }
+  },
   "SensorOptimum": {
    "fields": [
     {
@@ -745,6 +887,21 @@
      "default": false,
      "name": "v_sd_v",
      "type": "float"
+    },
+    {
+     "default": true,
+     "name": "lifetime_width_v",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "gamma_source_hz",
+     "type": "float | None"
+    },
+    {
+     "default": true,
+     "name": "gamma_drain_hz",
+     "type": "float | None"
     }
    ],
    "frozen": true,
@@ -918,6 +1075,11 @@
      "default": false,
      "name": "gamma_interdot_hz",
      "type": "float"
+    },
+    {
+     "default": true,
+     "name": "sensor_gamma_hz",
+     "type": "np.ndarray | None"
     }
    ],
    "frozen": true,
@@ -1103,7 +1265,7 @@
   "__version__": {
    "kind": "value",
    "type": "str",
-   "value": "0.2.0"
+   "value": "0.3.0"
   },
   "compile_device": {
    "kind": "function",

@@ -129,7 +129,7 @@ def lockin_sweep_dynamic_a_per_v(
     kt = rates.broadened_kt_ev(v_eff, device.charge.temperature_k)
     n_eq = device.charge.mean_occupation(v_eff, kt)
     n_present = latched_occupation(n_eq, gamma, half_s, rng, per_dot=True)
-    i = device.sensor.current_a(device.sensor.potential(v_eff, n_present, s), v_sd) + r
+    i = device.sensor.current_a(device.sensor.potential(v_eff, n_present, s), v_sd, v_eff) + r
     i = i.reshape(n_pts, lockin.cycles, 2)
     signal = (i[..., 0] - i[..., 1]).mean(axis=1) / lockin.amplitude_v
     log_rate = np.log10(gamma.max(axis=-1).reshape(n_pts, -1).mean(axis=1))

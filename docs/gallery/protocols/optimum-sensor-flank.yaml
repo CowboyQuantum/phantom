@@ -1,19 +1,19 @@
 id: optimum-sensor-flank
 name: Sensor peak of the compiled device and the optimum's flank
 step: 7
-description: The compiled device's sensor current and the magnitude of its slope against the sensor gate over about one Coulomb-peak period around the compiled set-point, with the point the optimum chooses, the steepest flank found by a coarse scan and a fine scan, marked by a spike in the marker trace. The compiled set-point itself sits 0.9 peak widths from the peak centre (ADR 0023).
+description: The compiled device's sensor current and the magnitude of its slope against the sensor gate 30 mV either way of the compiled set-point, a little under two Coulomb-peak periods of the sensor dot (its charging energy over its plunger lever arm, about 35 mV), with the point the optimum chooses, the steepest flank found by a coarse scan and a fine scan, marked by a spike in the marker trace. The compiled set-point itself sits 0.9 peak widths from the peak centre, a width being that of the sech-squared with the same wing as the lifetime-broadened peak (ADR 0023, 0026). The peaks grow along the sensor gate because it also lowers the sensor's barriers (its tunnel rates rise by a factor e every few mV, then stop at the attempt rate).
 layers: [readout, device, optimum, compile]
 runner: step7:optimum_sensor_flank
 instance:
   layout: two-dot-textbook
   material: SiGe
   pitch_nm: 80.0
-  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
   temperature_k: 0.15
   severity: 1.0
   seed: 2
 sweep:
-  - {gate: SG, from: -0.4, to: 0.4, points: 1601, unit: V, relative_to: operating_point}
+  - {gate: SG, from: -0.03, to: 0.03, points: 1601, unit: V, relative_to: operating_point}
 readout: {channel: sensor_conductance, unit: A}
 render:
   panels:

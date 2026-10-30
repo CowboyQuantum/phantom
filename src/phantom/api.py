@@ -38,6 +38,7 @@ from phantom.optimum import (
     SensorOptimum,
     optimum,
 )
+from phantom.readout.sensor import SensorLeads
 from phantom.spin import SpinParams
 from phantom.valley import ValleyParams
 
@@ -72,6 +73,7 @@ __all__ = [
     "Measurement",
     "Optimum",
     "ReadoutOptimum",
+    "SensorLeads",
     "SensorOptimum",
     "SensorTruth",
     "Session",

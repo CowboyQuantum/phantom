@@ -1,8 +1,9 @@
 """P0 for Step 8: the runtime session and the truth record against closed forms. A sampled charge is a
 Boltzmann draw without dynamics and a Markov trajectory with them, whose switching matches the
 two-state propagator; white readout noise keeps its density as the dwell changes; a noise seed keeps the
-noise parameters; the sensor truth is the peak, width, wing and slope of the sensor's own current; the
-charge lattice follows the wiring draw; the spin readout reproduces the PSB occupations."""
+noise parameters; the sensor truth is the peak, width, wing and slope of the sensor's own current, thermal
+and lifetime-broadened; the charge lattice follows the wiring draw; the spin readout reproduces the PSB
+occupations."""
 
 import dataclasses
 import math
@@ -78,34 +79,48 @@ def test_a_noise_seed_changes_the_realisation_not_the_parameters(device: Device)
     assert not np.array_equal(a.sense(v, 1e-3, samples=50).current_a, b.sense(v, 1e-3, samples=50).current_a)
 
 
-def test_sensor_truth_is_the_peak_wing_and_slope_of_the_sensor_current(device: Device):
+@pytest.mark.parametrize("at_set_point", [False, True], ids=["programmed-thermal", "set-point-broadened"])
+def test_sensor_truth_is_the_peak_wing_and_slope_of_the_sensor_current(device: Device, at_set_point: bool):
+    """The peak nearest the programmed sensor gate is nearly thermal on the reference device; the one at
+    the compiled set point is lifetime-broadened (ħΓ about four thermal widths). The truth states each
+    peak's lineshape with the leads' rates at its peak, so the current is read with the rates held there."""
     bias = 1e-7  # linear response
-    s = device.truth(v_sd=bias).sensor
+    near = device.operating_point_v[device.gate_names.index("SG")] if at_set_point else None
+    s = device.truth(near_v=near, v_sd=bias).sensor
+    assert (s.lifetime_width_v > 2 * s.width_v) is at_set_point
     j = device.gate_names.index(s.gate)
     sensor = device.runtime_sensor()
     v_ref = np.array(device.programmed_point_v)
     n_ref = device.runtime_ci().mean_occupation(device.effective_voltages(v_ref))
-    sg = s.peak_v + np.linspace(-0.5, 0.5, 200001) * s.period_v
+    v_peak = v_ref.copy()
+    v_peak[j] = s.peak_v
+    sg = s.peak_v + np.linspace(-0.05, 0.05, 200001) * s.period_v
     v = np.broadcast_to(v_ref, sg.shape + v_ref.shape).copy()
     v[:, j] = sg
-    i = sensor.current_a(sensor.potential(device.effective_voltages(v), n_ref), bias)
+    i = sensor.current_a(sensor.potential(device.effective_voltages(v), n_ref), bias, device.effective_voltages(v_peak))
     step = sg[1] - sg[0]
     assert abs(sg[np.argmax(i)] - s.peak_v) <= step
     slope = -np.gradient(i, step)
     k = int(np.argmax(np.where(sg > s.peak_v, slope, -np.inf)))
-    assert abs(sg[k] - s.wing_v) < 2e-4 * s.period_v
+    assert abs(sg[k] - s.wing_v) < 2 * step
     assert slope[k] == pytest.approx(s.sensitivity_a_per_v, rel=2e-3)
-    assert (i.max() - i.min()) == pytest.approx(sensor.peak_a * bias / sensor.bias_v, rel=2e-3)
+    assert i.max() == pytest.approx(sensor.linear_response_peak_a(bias, device.effective_voltages(v_peak)), rel=2e-3)
     assert s.width_v == pytest.approx(sensor.width_v / sensor.alpha_v_per_v[j], rel=1e-12)
+    rates = sensor.rates_hz(device.effective_voltages(v_peak))
+    assert (s.gamma_source_hz, s.gamma_drain_hz) == (float(rates[0]), float(rates[1]))
 
 
 def test_sensor_truth_agrees_with_the_optimum_flank(device: Device):
+    """The optimum searches the actual current at the default bias, whose rates change along the sensor
+    gate (a factor e per few mV, ADR 0026); the truth states the linear-response lineshape with the rates
+    at the peak. Across the 0.2 mV from the peak to its wing that is a few per cent of slope and a tenth
+    of the wing's offset."""
     from phantom.api import optimum
 
-    s = device.truth().sensor
     o = optimum(device).sensor
-    assert o.slope_a_per_v == pytest.approx(s.sensitivity_a_per_v, rel=0.03), "finite bias and the background shift it slightly"
-    assert abs(abs(o.v_sensor_gate_v - s.peak_v) - (s.wing_v - s.peak_v)) < 0.05 * s.width_v
+    s = device.truth(near_v=o.v_sensor_gate_v).sensor
+    assert o.slope_a_per_v == pytest.approx(s.sensitivity_a_per_v, rel=0.08)
+    assert abs(abs(o.v_sensor_gate_v - s.peak_v) - (s.wing_v - s.peak_v)) < 0.2 * (s.wing_v - s.peak_v)
 
 
 def test_charge_lattice_and_sensor_truth_follow_the_wiring_draw(device: Device):

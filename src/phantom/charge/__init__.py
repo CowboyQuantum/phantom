@@ -11,7 +11,7 @@ from phantom.charge.dot import Barrier, Dot
 from phantom.charge.hubbard import HubbardParams
 from phantom.constants import E_CHARGE_C, E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
 
 __all__ = [

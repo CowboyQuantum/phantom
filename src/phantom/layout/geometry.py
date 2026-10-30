@@ -13,8 +13,9 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 
-MODEL_VERSION = 1
-"""Bumped whenever any output derived from these records changes for the same inputs (ADR 0003)."""
+MODEL_VERSION = 2
+"""Bumped whenever any output derived from these records changes for the same inputs (ADR 0003).
+2: `two_dot_layout` gains the sensor's barriers and bath (SB_L, SB_R, SR_L, SR_R; ADR 0026)."""
 
 
 @dataclass(frozen=True)
@@ -183,20 +184,30 @@ class Layout:
 
 def two_dot_layout(material: str = "SiGe", pitch_nm: float = 80.0) -> Layout:
     """A textbook single-layer double-dot layout with a charge sensor: two plungers P1, P2 over a channel
-    along x, three barriers B_L, B_M, B_R across it, a sensor plunger SG over a sensor channel at positive y,
-    and two reservoir accumulation gates R_L, R_R beyond the outer barriers that hold the leads populated,
-    so the lead barriers are the outer barrier gates and not the ungated region."""
+    along x, three barriers B_L, B_M, B_R across it, and two reservoir accumulation gates R_L, R_R beyond
+    the outer barriers that hold the leads populated, so the lead barriers are the outer barrier gates and
+    not the ungated region. The sensor is a dot of the same kind in a parallel channel at positive y: a
+    sensor plunger SG between sensor barriers SB_L and SB_R, and the sensor's bath, two reservoir gates
+    SR_L and SR_R beyond them that accumulate its source and drain (ADR 0026). The sensor gates follow the
+    qubit channel's pattern (plunger and barrier widths, gaps) and are listed last, so the first eight
+    gates keep their order."""
     half = pitch_nm / 2
     pw, bw, gl = 0.55 * pitch_nm, 0.3 * pitch_nm, 120.0  # plunger width, barrier width, gate length (y)
+    gap = (pitch_nm - pw - bw) / 2  # between a plunger and the next barrier
+    ys = 150.0  # the sensor gates' lower edge
     gates = (
         Gate.rectangle("B_L", -half - pitch_nm / 2 - bw / 2, -half - pitch_nm / 2 + bw / 2, -gl / 2, gl / 2, "barrier"),
         Gate.rectangle("P1", -half - pw / 2, -half + pw / 2, -gl / 2, gl / 2, "plunger"),
         Gate.rectangle("B_M", -bw / 2, bw / 2, -gl / 2, gl / 2, "barrier"),
         Gate.rectangle("P2", half - pw / 2, half + pw / 2, -gl / 2, gl / 2, "plunger"),
         Gate.rectangle("B_R", half + pitch_nm / 2 - bw / 2, half + pitch_nm / 2 + bw / 2, -gl / 2, gl / 2, "barrier"),
-        Gate.rectangle("SG", -pw / 2, pw / 2, 150.0, 150.0 + gl, "sensor"),
+        Gate.rectangle("SG", -pw / 2, pw / 2, ys, ys + gl, "sensor"),
         Gate.rectangle("R_L", -4 * pitch_nm, -half - pitch_nm / 2 - bw / 2 - 10.0, -gl / 2, gl / 2, "reservoir"),
         Gate.rectangle("R_R", half + pitch_nm / 2 + bw / 2 + 10.0, 4 * pitch_nm, -gl / 2, gl / 2, "reservoir"),
+        Gate.rectangle("SB_L", -pw / 2 - gap - bw, -pw / 2 - gap, ys, ys + gl, "barrier"),
+        Gate.rectangle("SB_R", pw / 2 + gap, pw / 2 + gap + bw, ys, ys + gl, "barrier"),
+        Gate.rectangle("SR_L", -4 * pitch_nm, -pw / 2 - gap - bw - 10.0, ys, ys + gl, "reservoir"),
+        Gate.rectangle("SR_R", pw / 2 + gap + bw + 10.0, 4 * pitch_nm, ys, ys + gl, "reservoir"),
     )
     mat = MaterialClass.by_name(material)
     return Layout(
@@ -204,5 +215,5 @@ def two_dot_layout(material: str = "SiGe", pitch_nm: float = 80.0) -> Layout:
         mat.default_stack,
         material,
         channel_nm=(-2 * pitch_nm, 2 * pitch_nm, -0.3 * gl, 0.3 * gl),
-        sensor_nm=(-pitch_nm, pitch_nm, 150.0 + 0.2 * gl, 150.0 + 0.8 * gl),
+        sensor_nm=(-pw / 2 - gap - bw, pw / 2 + gap + bw, ys + 0.2 * gl, ys + 0.8 * gl),
     )

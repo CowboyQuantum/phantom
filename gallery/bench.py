@@ -7,6 +7,7 @@ commit, platform and date, and `docs/MODELS.md` renders them next to the protoco
 
 from __future__ import annotations
 
+import dataclasses
 import time
 from collections.abc import Callable
 
@@ -18,6 +19,7 @@ from phantom.readout import (
     LockinParams,
     OneOverFNoise,
     SensedDoubleDot,
+    SensorLeads,
     TelegraphNoise,
     latched_occupation,
     lockin_sweep_a_per_v,
@@ -47,10 +49,17 @@ def workloads() -> list[tuple[str, str, int, Callable[[], object]]]:
     rates = LeadRateLandscape(ci.gate_names)
     phi = np.linspace(-0.6, 0.6, 100_000)
     n_eq = np.stack([np.repeat(np.arange(100.0), 1000), np.zeros(100_000)], axis=1)
+    # a sensor dot with leads on the three-gate model (ADR 0026): 9 meV peaks, 13 µeV thermal energy,
+    # rates near 1e11 Hz moving with the gates, both baths full
+    leads = SensorLeads(("B1", "B2"), ("R1", "R2"), (0.0, 0.0, 0.0), (1e11, 1e11), 1e12, ((10.0, 0.0, 20.0), (0.0, 10.0, 20.0)), ((0.0, 0.0, 0.5), (0.0, 0.0, 0.5)), (-0.4, -0.4))
+    dot = dataclasses.replace(d.sensor, period_v=9e-3, width_v=2.6e-5, charging_energy_ev=9e-3, leads=leads)
+    phi_dot = np.linspace(-0.03, 0.03, 100_000)
+    v_dot = np.zeros((100_000, 3))
     return [
         ("charge.ci.ConstantInteractionParams.mean_occupation", "thermal occupation per gate point", 10_000, lambda: ci.mean_occupation(v3)),
         ("charge.hubbard.HubbardParams.mean_occupation", "16x16 diagonalisation per gate point", 10_000, lambda: hb.mean_occupation(v4)),
         ("readout.sensor.SensorSETParams.current_a", "sensor current per point", 100_000, lambda: d.sensor.current_a(phi)),
+        ("readout.sensor.SensorSETParams.current_a (with leads)", "rates, bath occupations and 10 complex digammas per point", 100_000, lambda: dot.current_a(phi_dot, None, v_dot)),
         ("readout.noise.TelegraphNoise.trace", "one fluctuator per sample", 100_000, lambda: TelegraphNoise(1.0, 10.0, 10.0, seed=0).trace(np.arange(100_000) * 1e-3)),
         ("readout.noise.OneOverFNoise.trace", "24 fluctuators per sample", 10_000, lambda: OneOverFNoise(1.0, seed=0).trace(np.arange(10_000) * 1e-3)),
         ("readout.measure.SensedDoubleDot.sweep_a (noisy)", "occupation + sensor + three noise traces per point", 10_000, lambda: d.sweep_a(v3, times)),

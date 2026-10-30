@@ -1,6 +1,7 @@
 """phantom.readout — Lead tunnel rates, master equation, latching, charge-sensor (SET) and RF response, noise processes (white, telegraph, 1/f, fluctuator ensembles) with explicit time steps. Seeded from qdt-sim's noise models (Step 1).
 
-Modules: `sensor` (SET sensor and single-dot transport current), `noise` (seeded processes with a time
+Modules: `sensor` (SET sensor and single-dot transport current; a sensor dot's barriers and baths, `SensorLeads`),
+`broadening` (lifetime-broadened tunnelling through one level: occupation, lineshape, wing), `noise` (seeded processes with a time
 axis), `measure` (a CI double dot read by the sensor with noise), `lockin` (the `sensor_lockin`
 hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only), `loading` (Step 1 placeholder for
 rate-limited loading; superseded for dynamics by `master_equation`), `rates` (WKB tunnel rates from barrier height
@@ -28,7 +29,7 @@ from phantom.readout.rates import (
     wkb_tunnel_rate_hz,
 )
 from phantom.readout.rf import TankCircuit, sensor_resistance_ohm
-from phantom.readout.sensor import SensorSETParams
+from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.readout.single_shot import ShotResult, noisy_device_for_sampling, single_shots
 from phantom.readout.transport import (
     ChannelTurnOn,
@@ -52,6 +53,7 @@ __all__ = [
     "OneOverFNoise",
     "RateEquation",
     "SensedDoubleDot",
+    "SensorLeads",
     "SensorSETParams",
     "ShotResult",
     "TankCircuit",

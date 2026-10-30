@@ -39,13 +39,20 @@ from phantom.api import (
 )
 
 REFERENCE_SEED = 2
-REFERENCE_OPERATING_POINT_V = {"B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7}
-"""The gallery's device: two_dot_layout("SiGe", 80 nm) at this programmed point, seed 2."""
+REFERENCE_OPERATING_POINT_V = {
+    "B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7,
+    "SB_L": 0.4, "SB_R": 0.3, "SR_L": 0.7, "SR_R": 0.7,
+}
+"""The gallery's device: two_dot_layout("SiGe", 80 nm) at this programmed point, seed 2. The sensor
+barriers are set for that draw: its interface charges raise the left one (ADR 0026)."""
 
 BATCH_RTOL = 1e-12
 """A point evaluated alone and inside a batch agree within this, relative; identical calls agree bit for bit."""
 
-KNOWABLE_FIELDS = ("material", "gate_names", "layout", "temperature_k", "programmed_point_v", "sensor_gate", "barrier_gate", "reservoir_gates")
+KNOWABLE_FIELDS = (
+    "material", "gate_names", "layout", "temperature_k", "programmed_point_v", "sensor_gate", "barrier_gate", "reservoir_gates",
+    "sensor_barrier_gates", "sensor_reservoir_gates",
+)
 
 
 @dataclass(frozen=True)
@@ -130,6 +137,9 @@ def check_at_shapes(device: Device) -> str:
             _require(bool(np.all(np.isfinite(x))), f"{name} not finite")
         for name in ("gamma_left_hz", "gamma_right_hz", "gamma_interdot_hz"):
             _require(math.isfinite(getattr(s, name)) and getattr(s, name) >= 0, f"{name}")
+        if s.sensor_gamma_hz is not None:
+            _require(s.sensor_gamma_hz.shape == lead + (2,), f"sensor_gamma_hz has shape {s.sensor_gamma_hz.shape}")
+            _require(bool(np.all(np.isfinite(s.sensor_gamma_hz)) and np.all(s.sensor_gamma_hz >= 0)), "sensor_gamma_hz")
     _require(bool(np.all(device.at(v0).n_ground == np.rint(device.at(v0).n_ground))), "n_ground is not integer")
     bias = np.array([0.0, 50e-6, 200e-6])
     i = device.at(np.broadcast_to(v0, (3, g)), v_sd=bias).sensor_current_a
@@ -284,7 +294,12 @@ def check_truth(device: Device) -> str:
     if s is None:
         return "the sensor gate does not move the sensor: no sensor truth"
     _require(all(math.isfinite(getattr(s, f.name)) for f in fields(s) if f.name != "gate"), "sensor truth not finite")
-    _require(math.isclose(s.wing_v - s.peak_v, math.atanh(1 / math.sqrt(3)) * s.width_v, rel_tol=1e-9), "the wing is not the inflection")
+    thermal_wing = math.atanh(1 / math.sqrt(3)) * s.width_v
+    if s.lifetime_width_v == 0:
+        _require(math.isclose(s.wing_v - s.peak_v, thermal_wing, rel_tol=1e-9), "the wing is not the inflection")
+    else:
+        _require(s.wing_v - s.peak_v >= thermal_wing * (1 - 1e-9), "lifetime broadening moved the wing inwards")
+        _require(s.gamma_source_hz is not None and s.gamma_drain_hz is not None, "the sensor's rates")
     _require(math.isclose(s.lever_arm_ev_per_v, s.charging_energy_ev / s.period_v, rel_tol=1e-12), "lever arm")
     s2 = device.truth(v_sd=2 * s.v_sd_v).sensor
     _require(s2 is not None and math.isclose(s2.sensitivity_a_per_v, 2 * s.sensitivity_a_per_v, rel_tol=1e-12), "sensitivity is not linear in bias")

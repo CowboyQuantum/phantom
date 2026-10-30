@@ -6,6 +6,6 @@ Module `geometry`: `Gate`, `Layer`, `Stack`, `MaterialClass`, `Layout` (JSON in 
 
 from phantom.layout.geometry import Gate, Layer, Layout, MaterialClass, Stack, two_dot_layout
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
 
 __all__ = ["MODEL_VERSION", "Gate", "Layer", "Layout", "MaterialClass", "Stack", "two_dot_layout"]

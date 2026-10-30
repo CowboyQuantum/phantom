@@ -61,13 +61,14 @@ class SensedDoubleDot:
         )
 
     @classmethod
-    def from_noise_draw(cls, draw: NoiseDraw, sample_dt_s: float = 1e-3, **kwargs) -> SensedDoubleDot:
+    def from_noise_draw(cls, draw: NoiseDraw, sample_dt_s: float = 1e-3, switcher_scale: float = 1.0, **kwargs) -> SensedDoubleDot:
         """The processes a per-device noise draw (disorder.noise_draw) describes: a 1/f ensemble on the
-        gates, the drawn switchers summed at the sensor, and the white floor rescaled to `sample_dt_s`
-        (constant spectral density). Seeds derive from the draw's seed."""
+        gates, the drawn switchers summed at the sensor with their amplitudes times `switcher_scale`
+        (the draw states them in the typed sensor's units; a sensor dot converts them, ADR 0026), and the
+        white floor rescaled to `sample_dt_s` (constant spectral density). Seeds derive from the draw's seed."""
         gate = OneOverFNoise(draw.one_over_f_amplitude_v, draw.f_min_hz, draw.f_max_hz, draw.n_fluctuators, seed=draw.seed) if draw.one_over_f_amplitude_v > 0 else NoNoise()
         switchers = tuple(
-            TelegraphNoise(a, up, down, seed=draw.seed + 10 + k)
+            TelegraphNoise(a * switcher_scale, up, down, seed=draw.seed + 10 + k)
             for k, (a, up, down) in enumerate(zip(draw.switcher_amplitudes_v, draw.switcher_rates_up_hz, draw.switcher_rates_down_hz, strict=True))
         )
         sensor = Composite(switchers) if switchers else NoNoise()
@@ -84,7 +85,7 @@ class SensedDoubleDot:
     ) -> np.ndarray:
         """Sensor current (A) at gate voltages `v` (..., gates) with the thermal-average occupation."""
         n = self.charge.mean_occupation(v)
-        return self.sensor.current_a(self.sensor.potential(v, n, delta_phi_v), v_sd)
+        return self.sensor.current_a(self.sensor.potential(v, n, delta_phi_v), v_sd, v)
 
     # --- with time and noise -----------------------------------------------------------------
 

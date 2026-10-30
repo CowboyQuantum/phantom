@@ -25,7 +25,8 @@ The offline tier: FEM electrostatics for real stacks and overlapping gates throu
 - `optimum-coupling-target` — t against the barrier gate at the compile tier and from the runtime exponential; the optimum's choice for three targets beside the compile-tier crossing
 - `optimum-readout-point` — the blockade contrast with the chosen read point; the Elzerman empty probability with the chosen read time
 - `optimum-sweet-spot` — SWAP infidelity through the chosen sweet spot, and J
-- `compiled-device-draws` — twelve devices from one layout: coupling, lead rates, valley draws, and what the optimum reaches; devices that do not form are recorded
+- `compiled-device-draws` — twelve devices from one layout: coupling, lead rates, sensor rates, valley draws, and what the optimum reaches; devices that do not form are recorded
+- added with the sensor dot's barriers and bath (#47, ADR 0026): `sensor-bath-turn-on`, `sensor-barrier-barrier-map`, `sensor-barrier-rates`, `sensor-peak-broadening`
 - each carries a `budget` (ADR 0009); all unsigned
 
 ## Exit criteria

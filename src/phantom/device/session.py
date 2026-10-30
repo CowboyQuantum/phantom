@@ -3,7 +3,8 @@
 `state_at(device, v)` is a pure function of the programmed gate voltages (..., gates): the voltages
 the gates carry after the wiring draw, the thermal and ground-state charge, the sensor potential and
 its noise-free current at a source–drain bias, the interdot coupling and the exchange energy there,
-and the compiled rates. Nothing in it has a time or a random number.
+the compiled rates of the dots, and the sensor's rates through its barriers and baths there. Nothing
+in it has a time or a random number.
 
 A `Session` is one run on the device. It owns a clock that only moves forward, the device's noise
 processes, and the charge on the dots. Its three verbs are all a consumer needs to drive the device:
@@ -62,8 +63,10 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 1
-"""Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds."""
+MODEL_VERSION = 2
+"""Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
+2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
+sensor dot's units (ADR 0026)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -103,6 +106,9 @@ class State:
     """Dot 2 to the right lead, Hz (compiled at the operating point; constant at runtime)."""
     gamma_interdot_hz: float
     """Electron transfer between the dots, Hz (compiled at the operating point; constant at runtime)."""
+    sensor_gamma_hz: np.ndarray | None = None
+    """(..., 2) the sensor's source and drain rates at the carried voltages, Hz, through its barriers
+    and baths (ADR 0026); None for a typed sensor without leads."""
 
 
 @dataclass(frozen=True)
@@ -157,6 +163,7 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
         gamma_left_hz=rates.gamma_left_hz,
         gamma_right_hz=rates.gamma_right_hz,
         gamma_interdot_hz=rates.gamma_interdot_hz,
+        sensor_gamma_hz=sensor.rates_hz(vc),
     )
 
 
@@ -190,7 +197,7 @@ class Session:
         if self.noise and draw is not None:
             if self.noise_seed is not None:
                 draw = replace(draw, seed=noise_realisation_seed(device.seed, self.noise_seed))
-            self._sensed = SensedDoubleDot.from_noise_draw(draw, WHITE_REFERENCE_DWELL_S, charge=ci, sensor=sensor)
+            self._sensed = SensedDoubleDot.from_noise_draw(draw, WHITE_REFERENCE_DWELL_S, device.switcher_scale(), charge=ci, sensor=sensor)
         else:
             self._sensed = SensedDoubleDot(charge=ci, sensor=sensor)
         self._rates: RateEquation = device.runtime_rates()
@@ -302,7 +309,7 @@ class Session:
         else:
             n_present = self._equilibrium(v_eff)
         sensor = self._sensed.sensor
-        current = sensor.current_a(sensor.potential(v_eff, n_present, s), bias) + r
+        current = sensor.current_a(sensor.potential(v_eff, n_present, s), bias, v_eff) + r
         self._t = float(times[-1])
         self._v_last = pts[-1].copy()
         return Measurement(times.reshape(out_shape), current.reshape(out_shape), n_present.reshape(out_shape + (2,)))

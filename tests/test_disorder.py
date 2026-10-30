@@ -22,7 +22,7 @@ from phantom.disorder import (
 from phantom.electrostatics import GateBasis
 from phantom.layout import two_dot_layout
 
-OP = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.6, 0.7, 0.7])
+OP = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.7, 0.7, 0.7, 0.4, 0.35, 0.7, 0.7])  # a sensor dot forms on every draw used here
 
 
 def test_zero_severity_reproduces_the_clean_device_bit_for_bit():

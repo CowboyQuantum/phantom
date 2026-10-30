@@ -18,6 +18,7 @@ from phantom.electrostatics.dots import (
     barrier_width_nm,
     find_dots,
     line_cut,
+    tunnelling_level_ev,
 )
 
 MODEL_VERSION = 1
@@ -34,4 +35,5 @@ __all__ = [
     "line_cut",
     "polygon_solid_angle",
     "rectangle_potential_dls",
+    "tunnelling_level_ev",
 ]

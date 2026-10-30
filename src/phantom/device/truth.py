@@ -13,16 +13,18 @@ measurements, and nothing else.
 - `charge_lattice_e_per_v`: electrons per volt on (dot 1, dot 2) from two programmed gates, the rows
   of C_gate·M / e with M the wiring matrix (`charge.ci.charge_lattice` when the wiring is clean);
 - `sensor` (`SensorTruth`): the sensor's Coulomb peak in programmed sensor-gate volts, with the
-  other gates at a reference point and the dot charge held at its thermal occupation there. The
-  sensor current is the sequential-tunnelling sum of `readout.sensor`; in linear response a peak is
-  I(V) = h · sech²((V − V_peak)/w) above the background, h = peak_a · V_sd / bias_v. The wing is its
-  inflection, w · atanh(1/√3) above the peak, where |dI/dV| = 4h / (3√3 w). These are qdt's
-  `sensor-operating-point` and `sensor-wing` quantities (qdt ADR 0062), stated by phantom.
+  other gates at a reference point and the dot charge held at its thermal occupation there. For the
+  typed sensor a peak in linear response is I(V) = h · sech²((V − V_peak)/w) above the background,
+  h = peak_a · V_sd / bias_v, and the wing is its inflection, w · atanh(1/√3) above the peak, where
+  |dI/dV| = 4h / (3√3 w). A sensor dot with leads (ADR 0026) has the lifetime-broadened lineshape of
+  `readout.broadening`: h, the wing (the steepest point) and the slope there are those of the thermal
+  peak convolved with a Lorentzian of full width ħ(Γ_S + Γ_D) (`lifetime_width_v`), and reduce to the
+  sech² statements when that width is small against w. These are qdt's `sensor-operating-point` and
+  `sensor-wing` quantities (qdt ADR 0062), stated by phantom.
 """
 
 from __future__ import annotations
 
-import math
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -33,12 +35,8 @@ from phantom.constants import E_UNIT_V_PER_E_AF
 if TYPE_CHECKING:
     from phantom.device import CompiledDot, Device
 
-MODEL_VERSION = 1
-
-WING_WIDTHS = math.atanh(1.0 / math.sqrt(3.0))
-"""Distance of the wing (the inflection of sech²) from the peak, in peak widths."""
-WING_SLOPE_FACTOR = 4.0 / (3.0 * math.sqrt(3.0))
-"""|d sech²(x)/dx| at the wing."""
+MODEL_VERSION = 2
+"""2: the sensor's leads in `SensorTruth` and `Knowable`; the wing and slope of a broadened peak (ADR 0026)."""
 
 
 @dataclass(frozen=True)
@@ -56,6 +54,10 @@ class Knowable:
     sensor_gate: str
     barrier_gate: str
     reservoir_gates: tuple[str, ...]
+    sensor_barrier_gates: tuple[str, ...] = ()
+    """The sensor's barrier gates, source side first (empty when the layout has none)."""
+    sensor_reservoir_gates: tuple[str, ...] = ()
+    """The sensor's bath gates, source side first (empty when the layout has none)."""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -75,13 +77,20 @@ class SensorTruth:
     lever_arm_ev_per_v: float
     """Sensor level shift per programmed sensor-gate volt, eV/V (charging energy / period)."""
     width_v: float
-    """Thermal width w of a peak in sensor-gate volts, V (I ∝ sech²((V − V_peak)/w))."""
+    """Thermal width w of a peak in sensor-gate volts, V (I ∝ sech²((V − V_peak)/w) without lifetime broadening)."""
     wing_v: float
-    """The wing: the inflection above the peak, V_peak + w·atanh(1/√3), V."""
+    """The wing, where the linear-response slope is steepest above the peak, V: V_peak + w·atanh(1/√3)
+    without lifetime broadening, further out with it."""
     sensitivity_a_per_v: float
     """|dI/dV| at the wing at bias `v_sd_v`, A/V (linear response)."""
     v_sd_v: float
     """Source–drain bias the sensitivity is stated at, V."""
+    lifetime_width_v: float = 0.0
+    """ħ(Γ_S + Γ_D) in sensor-gate volts: the Lorentzian full width of a level, V; 0 for the typed sensor."""
+    gamma_source_hz: float | None = None
+    """Tunnel rate through the sensor's source barrier into a full bath, Hz; None for the typed sensor."""
+    gamma_drain_hz: float | None = None
+    """Tunnel rate through the sensor's drain barrier into a full bath, Hz; None for the typed sensor."""
 
 
 @dataclass(frozen=True)
@@ -122,6 +131,7 @@ class Truth:
 
 def knowable(device: Device) -> Knowable:
     p = device.params
+    leads = device.sensor_leads
     return Knowable(
         material=device.material,
         gate_names=tuple(device.gate_names),
@@ -131,6 +141,8 @@ def knowable(device: Device) -> Knowable:
         sensor_gate=str(p.get("sensor_gate", "SG")),
         barrier_gate=device.barrier_gate,
         reservoir_gates=tuple(p.get("reservoir_gates", ())),
+        sensor_barrier_gates=tuple(leads.barrier_gates) if leads is not None else (),
+        sensor_reservoir_gates=tuple(leads.reservoir_gates) if leads is not None else (),
     )
 
 
@@ -160,7 +172,11 @@ def sensor_truth(device: Device, near_v: float | None = None, v_sd: float | None
     peak = float(v_ref[j] + (sensor.phase_v + k * sensor.period_v - phi0) / a)
     period, width = sensor.period_v / a, sensor.width_v / a
     bias = sensor.bias_v if v_sd is None else float(v_sd)
-    height = sensor.peak_a * bias / sensor.bias_v
+    # the leads' rates at the peak: the reference point with the sensor gate moved there
+    vp = v_ref.copy()
+    vp[j] = peak
+    v_peak = device.effective_voltages(vp)
+    rates = sensor.rates_hz(v_peak)
     return SensorTruth(
         gate=gate,
         peak_v=peak,
@@ -168,9 +184,12 @@ def sensor_truth(device: Device, near_v: float | None = None, v_sd: float | None
         charging_energy_ev=float(sensor.charging_energy_ev),
         lever_arm_ev_per_v=float(sensor.charging_energy_ev / period),
         width_v=float(width),
-        wing_v=float(peak + WING_WIDTHS * width),
-        sensitivity_a_per_v=float(WING_SLOPE_FACTOR * height / width),
+        wing_v=float(peak + sensor.wing_offset_v(v_peak) / a),
+        sensitivity_a_per_v=float(sensor.wing_slope_a_per_v(bias, v_peak) * a),
         v_sd_v=float(bias),
+        lifetime_width_v=float(sensor.lifetime_width_v(v_peak) / a),
+        gamma_source_hz=None if rates is None else float(rates[0]),
+        gamma_drain_hz=None if rates is None else float(rates[1]),
     )
 
 

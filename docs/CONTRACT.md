@@ -7,9 +7,10 @@ which a consumer runs against the release it pins and against its own device fil
 ```python
 from phantom.api import CompileParams, Device, compile_device, optimum, two_dot_layout
 
-op = {"B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7}
+op = {"B_L": 0.15, "P1": 0.6, "B_M": 0.2, "P2": 0.6, "B_R": 0.15, "SG": 0.6, "R_L": 0.7, "R_R": 0.7,
+      "SB_L": 0.4, "SB_R": 0.3, "SR_L": 0.7, "SR_R": 0.7}
 device = compile_device(two_dot_layout("SiGe", 80.0), CompileParams(operating_point_v=op), seed=2)
-device.to_json("device.json")             # canonical JSON, about 8 KB; Device.from_json reloads it
+device.to_json("device.json")             # canonical JSON, about 13 KB; Device.from_json reloads it
 
 run = device.session(noise_seed=7)        # one run: a clock, the device's noise, the dot charge
 run.hold(v_pulse, 1e-6)                   # sit at v_pulse for 1 µs; the charge evolves there
@@ -79,8 +80,9 @@ one matrix exponential, about 1 ms; without, about 0.05 ms.
 ## Knowable and truth
 
 `Device.knowable()` holds what a person running the device knows before measuring: the material, the
-gate names, the layout, the electron temperature, the programmed point, and the sensor, barrier and
-reservoir gates. **Everything else on a `Device` is truth**, including the seed (recompiling from it
+gate names, the layout, the electron temperature, the programmed point, the sensor, barrier and
+reservoir gates, and the sensor's own barrier and bath gates (`sensor_barrier_gates`,
+`sensor_reservoir_gates`, empty for a layout without them). **Everything else on a `Device` is truth**, including the seed (recompiling from it
 reproduces every draw), `params`, the scenario draw and `operating_point_v`, which holds the carried
 voltages and the sensor set point compilation chose. A consumer that hides truth from a user forwards
 `knowable()` and measurements, never the `Device`, `truth()` or `optimum()`. phantom has no hidden mode.
@@ -92,9 +94,21 @@ voltages and the sensor set point compilation chose. A consumer that hides truth
 - `sensor` (`SensorTruth`, None when the sensor gate does not move the sensor): with the other gates at
   `v_programmed` (the programmed point by default) and the dots' charge held at its thermal value there,
   the peak in programmed sensor-gate volts nearest `near_v`, the period, the sensor's charging energy,
-  its lever arm (charging energy / period), the width w of I ∝ sech²((V − V_peak)/w), the wing
-  V_peak + w·atanh(1/√3) (the inflection) and the sensitivity |dI/dV| = 4h/(3√3 w) there at bias
-  `v_sd`, h the linear-response peak height.
+  its lever arm (charging energy / period), the thermal width w of I ∝ sech²((V − V_peak)/w), the
+  sensor's two tunnel rates at that peak and their lifetime width ħ(Γ_S + Γ_D) in sensor-gate volts,
+  the wing (the steepest point of the linear-response peak above it) and the sensitivity |dI/dV| there
+  at bias `v_sd`. The peak is the thermal sech² convolved with a Lorentzian of the lifetime width
+  (ADR 0026); with a negligible lifetime width the wing is V_peak + w·atanh(1/√3) and the sensitivity
+  4h/(3√3 w), h the linear-response peak height. The rates are those at the peak: along the sensor gate
+  they change by a factor e every few mV, so the truth states each peak with its own rates.
+
+The sensor of a compiled device is a dot with two barriers and a bath behind each (ADR 0026). Its peaks
+are a few hundred microvolts wide and tens of millivolts apart on the sensor gate, so the programmed
+sensor gate alone usually sits between peaks: tune it first, as on a device (the compiled set point in
+`operating_point_v`, the truth's peak and wing, and `optimum(device).sensor` are where a tune-up lands).
+`State.sensor_gamma_hz` gives its source and drain rates at any point: they follow the sensor's barrier,
+bath and plunger gates and every other gate's cross-talk, and a bath gate below its turn-on empties that
+side.
 
 ## Versions and releases
 
@@ -123,6 +137,8 @@ parts; `spin_readout` shapes and clock.
 
 ## Not yet in the contract
 
-- Rates are compiled at the operating point and are constant over voltage at runtime.
+- The dots' lead and interdot rates are compiled at the operating point and are constant over voltage
+  at runtime; the sensor's rates follow the gate voltages through a compiled exponential that holds
+  within about 20 % of the compile tier over ±10 mV and drifts beyond.
 - `spin_readout` takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.

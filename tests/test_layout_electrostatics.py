@@ -9,7 +9,7 @@ from phantom.electrostatics.dots import harmonic_radius_nm
 from phantom.electrostatics.schrodinger import dot_levels_ev
 from phantom.layout import Gate, Layout, MaterialClass, two_dot_layout
 
-OPERATING_POINT = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.6, 0.7, 0.7])  # B_L P1 B_M P2 B_R SG R_L R_R
+OPERATING_POINT = np.array([0.2, 0.6, 0.2, 0.6, 0.2, 0.6, 0.7, 0.7, 0.35, 0.35, 0.7, 0.7])  # B_L P1 B_M P2 B_R SG R_L R_R SB_L SB_R SR_L SR_R
 
 
 def test_polygon_solid_angle_matches_the_rectangle_closed_form():
@@ -72,7 +72,8 @@ def test_lever_arms_are_the_derivative_of_the_dot_energy():
 def test_derived_double_dot_is_symmetric_and_plausible():
     d = derive_double_dot(two_dot_layout(), OPERATING_POINT)
     d1, d2 = d.dots
-    assert d1.x_nm == pytest.approx(-d2.x_nm) and d1.y_nm == d2.y_nm == 0.0
+    assert d1.x_nm == pytest.approx(-d2.x_nm) and d1.y_nm == d2.y_nm
+    assert 0.0 <= d1.y_nm <= 6.0, "the sensor's baths pull the dots a few nm towards the sensor channel"
     assert d1.lever_arms[1] == pytest.approx(d2.lever_arms[3])  # P1 on dot 1 equals P2 on dot 2
     assert d1.lever_arms[1] > d1.lever_arms[2] > d1.lever_arms[3], "own plunger > middle barrier > other plunger"
     assert 1e-3 < d.ci.addition_energies_ev()[0] < 30e-3, "meV-scale charging energy"
