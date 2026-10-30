@@ -132,23 +132,39 @@ def counting_cumulants(c: SensorChain, p: np.ndarray | None = None) -> tuple[flo
     electrons²/s: 1ᵀJ₁p and 1ᵀJ₂p − 2·1ᵀJ₁x with W x = J₁p − (1ᵀJ₁p) p, 1ᵀx = 0."""
     p = stationary(c) if p is None else p
     mean = float(c.j1.sum(axis=0) @ p)
-    rhs = c.j1 @ p - mean * p
-    k = len(p)
-    a = np.vstack([c.w, np.ones((1, k))])
-    x = np.linalg.lstsq(a, np.concatenate([rhs, [0.0]]), rcond=None)[0]
+    x = _drazin_solve(c, c.j1 @ p - mean * p)
     return mean, float(c.j2.sum(axis=0) @ p - 2.0 * c.j1.sum(axis=0) @ x)
+
+
+RELAXED_GAPS = 50.0
+"""Above this many relaxation times in a dwell the chain has forgotten its start (e⁻⁵⁰ ≈ 2·10⁻²²)."""
+
+
+def _drazin_solve(c: SensorChain, rhs: np.ndarray) -> np.ndarray:
+    """x with W x = `rhs` and 1ᵀx = 0, for a right-hand side that sums to zero: W^D rhs."""
+    k = len(rhs)
+    a = np.vstack([c.w, np.ones((1, k))])
+    return np.linalg.lstsq(a, np.concatenate([rhs, [0.0]]), rcond=None)[0]
 
 
 def propagate(c: SensorChain, q: np.ndarray, dwell_s: float) -> tuple[np.ndarray, float]:
     """(distribution after the dwell, expected counted charge in electrons) from distribution `q` (k,):
-    e^{WT}q and 1ᵀJ₁∫₀ᵀe^{Ws}q ds from one matrix exponential of the generator augmented by q."""
+    e^{WT}q and 1ᵀJ₁∫₀ᵀe^{Ws}q ds. Within `RELAXED_GAPS` relaxation times, from one matrix exponential of
+    the generator augmented by q; beyond them, e^{WT}q = p and the integral is T·p + W^D(p − q) in closed
+    form, since an exponential of W·T with a norm of 10⁸ keeps only about eight digits, differently on
+    different platforms (ADR 0014)."""
     k = len(q)
+    gap = float(np.sort(np.abs(np.linalg.eigvals(c.w)))[1]) if k > 1 else np.inf  # the slowest relaxation rate
+    counted_rates = c.j1.sum(axis=0)
+    if gap * dwell_s > RELAXED_GAPS:
+        p = stationary(c)
+        return p, float(counted_rates @ p) * dwell_s + float(counted_rates @ _drazin_solve(c, p - q))
     a = np.zeros((k + 1, k + 1))
     a[:k, :k] = c.w * dwell_s
     a[:k, k] = q * dwell_s
     e = expm(a)
     after = np.maximum(e[:k, :k] @ q, 0.0)
-    return after / after.sum(), float(c.j1.sum(axis=0) @ e[:k, k])
+    return after / after.sum(), float(counted_rates @ e[:k, k])
 
 
 def expected_jumps(c: SensorChain, dwell_s: float) -> float:
@@ -179,6 +195,7 @@ def trajectory(sensor: SensorSETParams, phi: float, v: np.ndarray, v_sd: float, 
 __all__ = [
     "EXACT_JUMPS",
     "MODEL_VERSION",
+    "RELAXED_GAPS",
     "SensorChain",
     "chain",
     "counting_cumulants",

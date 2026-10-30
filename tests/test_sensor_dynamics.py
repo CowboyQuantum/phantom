@@ -90,8 +90,7 @@ def test_with_fast_rates_the_long_dwell_mean_is_the_stationary_current_and_the_n
     v = _on_peak(device, _point(device), 1.0)
     expected = float(device.at(v).sensor_current_a)
     run = device.session(noise=False, charge="mean").sense(v, 1e-3, samples=3)
-    # the integral of e^{Ws} by one matrix exponential at ΓT ≈ 10⁸ keeps about eight digits
-    np.testing.assert_allclose(run.current_a, expected, rtol=1e-6)
+    np.testing.assert_allclose(run.current_a, expected, rtol=1e-9)
     c, _, _ = _chain_at(device, v)
     _, var = sd.counting_cumulants(c)
     spreads = []
@@ -178,3 +177,21 @@ def test_a_typed_sensor_has_no_charge_process():
     lay = Layout(tuple(g for g in full.gates if g.name not in ("SB_L", "SB_R", "SR_L", "SR_R")), full.stack, full.material, full.channel_nm, (-80.0, 80.0, 174.0, 246.0))
     dev = compile_device(lay, CompileParams(operating_point_v={g: REFERENCE_OPERATING_POINT_V[g] for g in lay.gate_names}), seed=2)
     assert dev.session().sense(np.array(dev.programmed_point_v), 1e-3, samples=3).sensor_charge is None
+
+
+def test_the_relaxed_closed_form_is_the_matrix_exponential(device: Device):
+    """Beyond `RELAXED_GAPS` relaxation times `propagate` uses e^{WT}q = p and ∫e^{Ws}q ds = T·p +
+    W^D(p − q) instead of the exponential, which loses digits at ΓT ≈ 10⁸ (ADR 0014). At 60 relaxation
+    times, where the exponential is still exact, the two agree."""
+    from scipy.linalg import expm
+
+    c, _, _ = _chain_at(device, _on_peak(device, _point(device, **SLOW), 0.5))
+    gap = float(np.sort(np.abs(np.linalg.eigvals(c.w)))[1])
+    dwell = 60.0 / gap
+    q = np.array([1.0, 0.0])
+    after, counted = sd.propagate(c, q, dwell)
+    a = np.zeros((3, 3))
+    a[:2, :2], a[:2, 2] = c.w * dwell, q * dwell
+    e = expm(a)
+    np.testing.assert_allclose(after, e[:2, :2] @ q, atol=1e-15)
+    assert counted == pytest.approx(float(c.j1.sum(axis=0) @ e[:2, 2]), rel=1e-12)
