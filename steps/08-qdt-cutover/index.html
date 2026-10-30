@@ -609,8 +609,9 @@
 <h2 id="gallery-protocols-rendered-by-ci-signed-off-per-protocol-by-a-human-adr-0008">Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)</h2>
 <ul>
 <li><code>session-charge-trace</code> — the charge a sample sees at a dot-lead degeneracy at three dwells, and the noisy read at 1 ms</li>
-<li><code>session-hold-relaxation</code> — the mean charge after a hold relaxing on exp(−Γ_L t), and one trajectory</li>
-<li>each carries a <code>budget</code> (ADR 0009); both unsigned</li>
+<li><code>session-hold-relaxation</code> — the mean charge after a hold relaxing on exp(−Γ_out t) (every rate out of the held state at the read point), and one trajectory</li>
+<li><code>session-closing-barrier</code> — the dots' rates along B_L, a P1 sweep that latches into a loop with B_L closed, and a telegraph trace at the closed transition (#53, ADR 0027)</li>
+<li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
 <ul>

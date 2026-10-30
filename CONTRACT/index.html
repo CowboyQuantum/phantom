@@ -903,6 +903,11 @@ sensor gate alone usually sits between peaks: tune it first, as on a device (the
 <code>State.sensor_gamma_hz</code> gives its source and drain rates at any point: they follow the sensor's barrier,
 bath and plunger gates and every other gate's cross-talk, and a bath gate below its turn-on empties that
 side.</p>
+<p>The dots' own rates follow the gates too (ADR 0027): <code>State.gamma_left_hz</code>, <code>gamma_right_hz</code> and
+<code>gamma_interdot_hz</code> are arrays with the input's leading axes, the compiled rates moved by their slopes
+against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
+voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
+<code>Truth</code> states the rates at the operating point.</p>
 <h2 id="versions-and-releases">Versions and releases</h2>
 <ul>
 <li><code>phantom.__version__</code> follows semantic versioning in 0.x: the minor version rises for any breaking
@@ -926,9 +931,8 @@ equilibrium; bias in <code>sense</code>; sample semantics; a hold moves the char
 parts; <code>spin_readout</code> shapes and clock.</p>
 <h2 id="not-yet-in-the-contract">Not yet in the contract</h2>
 <ul>
-<li>The dots' lead and interdot rates are compiled at the operating point and are constant over voltage
-  at runtime; the sensor's rates follow the gate voltages through a compiled exponential that holds
-  within about 20 % of the compile tier over ±10 mV and drifts beyond.</li>
+<li>Every rate, the dots' and the sensor's, follows the gate voltages through a compiled exponential that
+  holds within about 20 % of the compile tier's change over ±10 mV and drifts beyond (ADR 0026, 0027).</li>
 <li><code>spin_readout</code> takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.</li>
 </ul>
