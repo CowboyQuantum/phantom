@@ -1,0 +1,34 @@
+id: session-closing-barrier
+name: A closing barrier slows a dot's lead until its charge latches and telegraphs
+step: 8
+description: The qubit dots' lead and interdot rates follow the gates at runtime (#53, ADR 0027). With the sensor gate tuned onto the optimum's flank, the first panel lowers B_L from the programmed point and shows the three rates of `Device.at` (log scale) — the left lead falls by about a decade every 20 mV, the others barely move. At dot 1's transition with B_L open (Γ_L about 10¹¹ Hz) and 0.1 V lower (about 10⁴ Hz), P1 is swept up and then down at 3 µs per point (`mean` mode, noise off) — open, the two directions lie on one step; closed, the charge lags the gate both ways and the step opens into a loop a few mV wide. The last panels park a `sampled` session at the closed transition with a 20 µs dwell, noise-free and with the device's noise — a telegraph trace from the dot's own lead. Placeholder potential without screening, so the rates' gate dependence is steeper than a real device's (#48).
+layers: [readout, device]
+runner: step8:session_closing_barrier
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+  dwell_s: 3.0e-6
+  closed_b_l_v: -0.1
+  trace_dwell_s: 2.0e-5
+sweep:
+  - {gate: B_L, from: 0.0, to: -0.15, points: 61, unit: V, relative_to: tuned point}
+  - {gate: P1, half_span_v: 0.01, points: 201, unit: V, relative_to: dot 1 transition, axis_role: up then down}
+  - {gate: none, from: 0, to: 399, points: 400, unit: sample, relative_to: closed transition}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_b_l_v, y: [gamma_left_hz, gamma_right_hz, gamma_interdot_hz], log_y: true, xlabel: "B_L (V)", ylabel: "rate (Hz)", title: "Γ_L, Γ_R, Γ_m along B_L"}
+    - {kind: line, x: dp1_v, y: [n1_up_open, n1_down_open], xlabel: "P1 from the transition (V)", ylabel: "dot 1 charge (e)", title: "B_L open: up and down, 3 µs per point"}
+    - {kind: line, x: dp1_v, y: [n1_up_closed, n1_down_closed], xlabel: "P1 from the transition (V)", ylabel: "dot 1 charge (e)", title: "B_L closed by 0.1 V: up and down"}
+    - {kind: line, x: dp1_v, y: [current_up_closed_a, current_down_closed_a], xlabel: "P1 from the transition (V)", ylabel: "sensor current (A)", title: "B_L closed: the sensor's view"}
+    - {kind: line, x: sample, y: current_trace_a, xlabel: "sample (20 µs)", ylabel: "sensor current (A)", title: "parked at the closed transition, noise-free"}
+    - {kind: line, x: sample, y: current_trace_noisy_a, xlabel: "sample (20 µs)", ylabel: "sensor current (A)", title: "the same with the device's noise"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 2.0, points: 1665, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

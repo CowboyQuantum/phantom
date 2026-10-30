@@ -47,6 +47,7 @@ from phantom.readout.broadening import (
     occupation,
     wing_ev,
 )
+from phantom.readout.rates import saturating_rates_hz
 
 MODEL_VERSION = 1
 """Bumped whenever any output of this module changes for the same parameters (ADR 0003); a sensor
@@ -134,10 +135,7 @@ class SensorLeads:
 
     def barrier_rates_hz(self, v: np.ndarray | None = None) -> np.ndarray:
         """Γ through each barrier (..., 2), Hz, with the baths full."""
-        g_ref = np.asarray(self.gamma_ref_hz, dtype=float)
-        f_a = self.attempt_rate_hz
-        anchor = np.log(g_ref) - np.log(np.maximum(f_a - g_ref, 1e-12 * f_a))
-        return f_a * expit(anchor + self._dv(v) @ np.asarray(self.log_rate_slopes_per_v).T)
+        return saturating_rates_hz(np.asarray(self.gamma_ref_hz, dtype=float), self.attempt_rate_hz, self._dv(v) @ np.asarray(self.log_rate_slopes_per_v).T)
 
     def rates_hz(self, v: np.ndarray | None = None) -> np.ndarray:
         """Γ_S, Γ_D (..., 2), Hz: the barriers' rates times the baths' occupations."""

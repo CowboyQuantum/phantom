@@ -131,12 +131,12 @@ def check_at_shapes(device: Device) -> str:
         s = device.at(v)
         _require(s.v_programmed_v.shape == lead + (g,) and s.v_carried_v.shape == lead + (g,), f"voltages for {lead}")
         _require(s.n_mean.shape == lead + (2,) and s.n_ground.shape == lead + (2,), f"charge for {lead}")
-        for name in ("sensor_potential_v", "sensor_current_a", "tunnel_coupling_ev", "exchange_ev"):
+        for name in ("sensor_potential_v", "sensor_current_a", "tunnel_coupling_ev", "exchange_ev", "gamma_left_hz", "gamma_right_hz", "gamma_interdot_hz"):
             x = np.asarray(getattr(s, name))
             _require(x.shape == lead, f"{name} has shape {x.shape} for leading axes {lead}")
             _require(bool(np.all(np.isfinite(x))), f"{name} not finite")
         for name in ("gamma_left_hz", "gamma_right_hz", "gamma_interdot_hz"):
-            _require(math.isfinite(getattr(s, name)) and getattr(s, name) >= 0, f"{name}")
+            _require(bool(np.all(np.asarray(getattr(s, name)) >= 0)), f"{name} negative")
         if s.sensor_gamma_hz is not None:
             _require(s.sensor_gamma_hz.shape == lead + (2,), f"sensor_gamma_hz has shape {s.sensor_gamma_hz.shape}")
             _require(bool(np.all(np.isfinite(s.sensor_gamma_hz)) and np.all(s.sensor_gamma_hz >= 0)), "sensor_gamma_hz")
@@ -256,9 +256,9 @@ def check_hold_moves_the_charge(device: Device) -> str:
     if pair is None:
         return "skipped: no clean pair of points one electron apart near the programmed point"
     a, b = pair
-    s = device.at(a)
-    slowest = min(r for r in (s.gamma_left_hz, s.gamma_right_hz) if r > 0)
-    fastest = max(s.gamma_left_hz, s.gamma_right_hz, s.gamma_interdot_hz)
+    states = (device.at(a), device.at(b))  # the rates follow the gates (#53): settle for the slower point
+    slowest = min(float(r) for s in states for r in (s.gamma_left_hz, s.gamma_right_hz) if r > 0)
+    fastest = max(float(r) for s in states for r in (s.gamma_left_hz, s.gamma_right_hz, s.gamma_interdot_hz))
     settle = 200.0 / slowest
     if settle > 1e6:
         return f"skipped: the slowest lead ({slowest:.3g} Hz) does not settle within 1e6 s"

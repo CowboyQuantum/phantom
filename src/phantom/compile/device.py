@@ -13,7 +13,8 @@ The compile tier runs every draw and every derivation once per device instance:
 4a. the sensor's leads (ADR 0026): the rate through each sensor barrier to its bath from the WKB action,
    its slope against every gate at the compiled tunnelling level, and each bath's lever arms;
 5. the barriers to the leads and between the dots at the tunnelling level, their WKB transmissions
-   from the action integral along the cut (`electrostatics.barrier_action`), the rates f_attempt·T,
+   from the action integral along the cut (`electrostatics.barrier_action`), the rates f_attempt·T
+   and their slopes against every gate at that level held fixed (#53, as the sensor's in 4a),
    the interdot tunnel coupling estimate t ≈ ħω₀ √T / π, and the barrier gate's exponential scale
    from two nearby evaluations;
 6. the valley splitting of each dot from its harmonic radius (`valley`), and the g-factors (`spin`).
@@ -62,12 +63,14 @@ from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
-3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026)."""
+3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026).
+4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027)."""
 
 SENSOR_SLOPE_STEP_V = 0.01
-"""Half-step of the central differences that give the sensor rates' slopes against each gate, V."""
+"""Half-step of the central differences that give the rates' slopes against each gate (the sensor's
+leads and the qubit dots' barriers), V."""
 SET_POINT_WIDTH_PASSES = 3
 """Passes of the last set-point step, each taking the peak width at the previous pass's target."""
 
@@ -127,6 +130,21 @@ def sensor_tunnelling_levels_ev(basis: GateBasis, layout: Layout, v: np.ndarray,
     return levels[0], levels[1]
 
 
+def _log_rate_slopes(basis: GateBasis, v: np.ndarray, d, point_nm: tuple[float, float], mass: float, level_ev: float) -> tuple[float, ...]:
+    """d ln Γ/dV = −2 dS/dV of the barrier from dot `d` to `point_nm` against every gate, at the fixed
+    tunnelling level `level_ev`: central differences of ±`SENSOR_SLOPE_STEP_V` with the dot held where
+    it is, 1/V."""
+    row = np.zeros(len(v))
+    for g in range(len(v)):
+        vp, vm = v.copy(), v.copy()
+        vp[g] += SENSOR_SLOPE_STEP_V
+        vm[g] -= SENSOR_SLOPE_STEP_V
+        s_p = barrier_action(basis, vp, d, point_nm, mass, level_ev=level_ev)[2]
+        s_m = barrier_action(basis, vm, d, point_nm, mass, level_ev=level_ev)[2]
+        row[g] = -(s_p - s_m) / SENSOR_SLOPE_STEP_V
+    return tuple(float(x) for x in row)
+
+
 def _sensor_leads(
     basis: GateBasis, layout: Layout, v: np.ndarray, s, p: CompileParams, mass: float, levels: tuple[float, float] | None, slopes: bool = True
 ) -> SensorLeads | None:
@@ -152,16 +170,7 @@ def _sensor_leads(
         heights.append(float(h))
         widths.append(float(w))
         rates.append(float(f_a * np.exp(-2.0 * action)))
-        row = np.zeros(len(v))
-        if slopes:
-            for g in range(len(v)):
-                vp, vm = v.copy(), v.copy()
-                vp[g] += SENSOR_SLOPE_STEP_V
-                vm[g] -= SENSOR_SLOPE_STEP_V
-                s_p = barrier_action(basis, vp, s, point, mass, level_ev=level)[2]
-                s_m = barrier_action(basis, vm, s, point, mass, level_ev=level)[2]
-                row[g] = -(s_p - s_m) / SENSOR_SLOPE_STEP_V
-        rows.append(tuple(float(x) for x in row))
+        rows.append(_log_rate_slopes(basis, v, s, point, mass, level) if slopes else (0.0,) * len(v))
     return SensorLeads(
         barrier_gates=tuple(p.sensor_barrier_gates),
         reservoir_gates=names,
@@ -240,6 +249,17 @@ def _barrier(basis: GateBasis, v: np.ndarray, d, point_nm: tuple[float, float], 
     return float(h), float(w), float(np.exp(-2.0 * action)), attempt_rate_hz(d.curvature_ev_per_nm2, mass)
 
 
+def _gated_barrier(basis: GateBasis, v: np.ndarray, d, point_nm: tuple[float, float], mass: float, lead_fermi_ev: float, between: tuple[str, str]) -> CompiledBarrier:
+    """The barrier from dot `d` to `point_nm` with what the runtime needs to follow the gates (#53): its
+    rate f_a·exp(−2S) at `v`, the attempt rate, the tunnelling level (`tunnelling_level_ev`, placed at
+    `v` and then held fixed, as for the sensor's leads, ADR 0026) and the slopes of ln Γ against every
+    gate at that level."""
+    _, u = line_cut(basis, v, d.x_nm, d.y_nm, point_nm[0], point_nm[1], 401)
+    level = float(tunnelling_level_ev(d, float(u[-1]), mass, lead_fermi_ev))
+    h, w, trans, f_a = _barrier(basis, v, d, point_nm, mass, lead_fermi_ev)
+    return CompiledBarrier(between, float(h), float(w), f_a * trans, float(f_a), level, _log_rate_slopes(basis, v, d, point_nm, mass, level))
+
+
 def interdot_tunnel_coupling_ev(basis: GateBasis, v: np.ndarray, d1, d2, mass: float, lead_fermi_ev: float = 2e-3) -> tuple[float, float, float, float]:
     """(t, height, width, rate) for the interdot barrier: t ≈ ħω₀ √T / π with T the WKB transmission."""
     h, w, trans, f_attempt = _barrier(basis, v, d1, (d2.x_nm, d2.y_nm), mass, lead_fermi_ev)
@@ -265,10 +285,13 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     d1, d2 = derived.dots
     res = perturbed.reservoir_points_nm()
     r_l, r_r = params.reservoir_gates
-    h_l, w_l, t_l, f_l = _barrier(basis, v, d1, res[r_l], mat.effective_mass_me, params.lead_fermi_ev)
-    h_r, w_r, t_r, f_r = _barrier(basis, v, d2, res[r_r], mat.effective_mass_me, params.lead_fermi_ev)
-    t, h_m, w_m, g_m = interdot_tunnel_coupling_ev(basis, v, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)
-    g_l, g_r = f_l * t_l, f_r * t_r
+    mass, fermi = mat.effective_mass_me, params.lead_fermi_ev
+    barriers = (
+        _gated_barrier(basis, v, d1, res[r_l], mass, fermi, ("dot1", "lead_left")),
+        _gated_barrier(basis, v, d2, res[r_r], mass, fermi, ("dot2", "lead_right")),
+        _gated_barrier(basis, v, d1, (d2.x_nm, d2.y_nm), mass, fermi, ("dot1", "dot2")),
+    )
+    t = interdot_tunnel_coupling_ev(basis, v, d1, d2, mass, fermi)[0]
     # the barrier gate's exponential scale: t at ±10 mV on the barrier gate, same dots
     jb = layout.gate_names.index(params.barrier_gate)
     dv = 0.01
@@ -316,11 +339,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         c_gate_af=tuple(tuple(float(x) for x in row) for row in derived.ci.c_gate_af),
         temperature_k=params.temperature_k,
         sensor_alpha_v_per_v=tuple(float(x) for x in sensor.sensor_alpha_v_per_v),
-        barriers=(
-            CompiledBarrier(("dot1", "lead_left"), float(h_l), float(w_l), g_l),
-            CompiledBarrier(("dot2", "lead_right"), float(h_r), float(w_r), g_r),
-            CompiledBarrier(("dot1", "dot2"), h_m, w_m, g_m),
-        ),
+        barriers=barriers,
         tunnel_coupling_ev=t,
         barrier_gate=params.barrier_gate,
         barrier_v_scale_v=v_scale,

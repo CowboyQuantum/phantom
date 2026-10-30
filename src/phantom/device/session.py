@@ -3,7 +3,7 @@
 `state_at(device, v)` is a pure function of the programmed gate voltages (..., gates): the voltages
 the gates carry after the wiring draw, the thermal and ground-state charge, the sensor potential and
 its noise-free current at a source–drain bias, the interdot coupling and the exchange energy there,
-the compiled rates of the dots, and the sensor's rates through its barriers and baths there. Nothing
+the dots' lead and interdot rates there (#53), and the sensor's rates through its barriers and baths. Nothing
 in it has a time or a random number.
 
 A `Session` is one run on the device. It owns a clock that only moves forward, the device's noise
@@ -25,7 +25,9 @@ noise is added to the current with its density fixed at the device's 1 ms value 
   a Markov jump trajectory of the rate equation (`readout.master_equation`): from the state present,
   the transition probabilities over the dwell are the column of exp(W·dwell), and the next state is
   drawn from them, so a sample is correlated with the last one when the rates are slow against the
-  dwell and is a fresh Boltzmann draw when they are fast. With `dynamics=False` every sample is an
+  dwell and is a fresh Boltzmann draw when they are fast. The rates are those at the sample's
+  voltages, gate noise included (#53): closing a barrier gate slows its lead until the charge
+  latches along a sweep and telegraphs at a parked point. With `dynamics=False` every sample is an
   independent Boltzmann draw at its voltages (qdt-sim's behaviour). `Measurement.n_present` holds
   the integer state.
 - `charge="mean"`: the ensemble average. With `dynamics=True` the distribution is propagated with
@@ -63,10 +65,10 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 2
+MODEL_VERSION = 3
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
-sensor dot's units (ADR 0026)."""
+sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -100,12 +102,13 @@ class State:
     """(...) interdot tunnel coupling t at the carried barrier-gate voltage, eV."""
     exchange_ev: np.ndarray
     """(...) J of the two-electron sector at the carried voltages, eV; meaningful in the (1,1) cell."""
-    gamma_left_hz: float
-    """Dot 1 to the left lead, Hz (compiled at the operating point; constant at runtime)."""
-    gamma_right_hz: float
-    """Dot 2 to the right lead, Hz (compiled at the operating point; constant at runtime)."""
-    gamma_interdot_hz: float
-    """Electron transfer between the dots, Hz (compiled at the operating point; constant at runtime)."""
+    gamma_left_hz: np.ndarray
+    """(...) dot 1 to the left lead at the carried voltages, Hz: the compiled rate moved by its gate
+    slopes, capped at the attempt rate (#53)."""
+    gamma_right_hz: np.ndarray
+    """(...) dot 2 to the right lead at the carried voltages, Hz."""
+    gamma_interdot_hz: np.ndarray
+    """(...) electron transfer between the dots at the carried voltages, Hz."""
     sensor_gamma_hz: np.ndarray | None = None
     """(..., 2) the sensor's source and drain rates at the carried voltages, Hz, through its barriers
     and baths (ADR 0026); None for a typed sensor without leads."""
@@ -149,7 +152,7 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
     n_mean = ci.mean_occupation(vc)
     bias = sensor.bias_v if v_sd is None else v_sd
     hub = device.runtime_hubbard()
-    rates = device.runtime_rates()
+    gammas = device.runtime_rates().rates_hz(vc)
     return State(
         v_programmed_v=v,
         v_carried_v=vc,
@@ -160,9 +163,9 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
         v_sd_v=bias,
         tunnel_coupling_ev=hub.barrier.tunnel_coupling_ev(vc[..., hub.gate_names.index(hub.barrier_gate)]),
         exchange_ev=exchange_j_ev(hub, vc),
-        gamma_left_hz=rates.gamma_left_hz,
-        gamma_right_hz=rates.gamma_right_hz,
-        gamma_interdot_hz=rates.gamma_interdot_hz,
+        gamma_left_hz=gammas[..., 0],
+        gamma_right_hz=gammas[..., 1],
+        gamma_interdot_hz=gammas[..., 2],
         sensor_gamma_hz=sensor.rates_hz(vc),
     )
 

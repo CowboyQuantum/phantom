@@ -118,8 +118,11 @@ class Truth:
     barrier_v_scale_v: float
     """Barrier-gate voltage that changes t by a factor e, V."""
     gamma_left_hz: float
+    """Dot 1 to the left lead at the operating point, Hz; `Device.at` gives it at any point (#53)."""
     gamma_right_hz: float
+    """Dot 2 to the right lead at the operating point, Hz."""
     gamma_interdot_hz: float
+    """Electron transfer between the dots at the operating point, Hz."""
     valley_splittings_uev: tuple[float, ...]
     g_factors: tuple[float, ...]
     sensor: SensorTruth | None
