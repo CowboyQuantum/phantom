@@ -5,8 +5,8 @@
 **Current step:** none in flight. Step 8's phantom side was released as `v0.2.0` (on `f72daac`). Steps 1–7
 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28,
 #32, #34 and #37. 0.3.0 is untagged and now carries #47, #53 and #54 (`CHANGELOG.md`).
-**Branches:** `issue-53/gate-dependent-dot-rates` (PR #55, CI green) and `issue-54/sensor-charge-dynamics`,
-stacked on it (PR targets the #53 branch). `main` is at `310381f`, the merge of #52.
+**Branch:** `issue-54/sensor-charge-dynamics` (PR #56, against `main`). `main` is at `45e27a0`, the merge of
+#55 (#53).
 **Last session:** 2026-10-30. The owner asked for better charge dynamics for the sensor and for the
 gates to modulate them. Two decisions were taken that day:
 - **Back-action:** on, always with dynamics.
@@ -34,17 +34,16 @@ gates to modulate them. Two decisions were taken that day:
   - Back-action is −β_i·(M − M̄), against the sensor's stationary mean.
   - New code: `readout.sensor_dynamics` and `Measurement.sensor_charge`.
   - New protocol `session-slow-sensor`.
-  - Tests: `tests/test_sensor_dynamics.py`, 9 P0.
-- **Totals:** 173 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.
+  - Tests: `tests/test_sensor_dynamics.py`, 10 P0.
+- **Totals:** 174 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.
 
 ## In flight
-- PR #55 (#53): CI green, including the Windows comparison. It waits for the owner's review of its
-  preview at `/pr-55/`.
-- The #54 pull request, stacked on #55, waits for CI and the preview. Once #55 merges, retarget it to
-  `main` if GitHub has not.
+- PR #56 (#54) waits for the owner's review of its preview at `/pr-56/`. Its first Windows gallery
+  comparison failed by 1.5·10⁻⁹, from an exponential at ΓT ≈ 10⁸. The fix in `9a58df2` replaces it with
+  the relaxed closed form beyond 50 relaxation times (ADR 0028).
 
 ## Next action
-The owner reviews and merges #55, then the #54 pull request. They also decide whether to tag `v0.3.0`
+The owner reviews and merges #56. They also decide whether to tag `v0.3.0`
 (ADR 0025) and when qdt moves its pin (CowboyQuantum/qdt #140, #142, and #169 for the run option).
 
 ## Open issues
