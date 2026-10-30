@@ -1,14 +1,14 @@
 id: session-hold-relaxation
 name: The charge relaxing after a hold
 step: 8
-description: A consumer session holds the gates at a point A until the charge settles (`Session.hold`), then reads at a point B one electron away along P1 (`sense`, noise off). In `mean` mode dot 1's charge relaxes from A's value to B's as exp(−Γ_L·t), drawn beside it; one `sampled` trajectory steps once, at a random time. This is what a pulse step means in the contract (ADR 0024).
+description: With the sensor gate tuned onto the optimum's flank (ADR 0026), a consumer session holds the gates at a point A until the charge settles (`Session.hold`), then reads at a point B one electron away along P1 (`sense`, noise off). In `mean` mode dot 1's charge relaxes from A's value to B's as exp(−Γ_L·t), drawn beside it; one `sampled` trajectory steps once, at a random time. This is what a pulse step means in the contract (ADR 0024).
 layers: [readout, device]
 runner: step8:session_hold_relaxation
 instance:
   layout: two-dot-textbook
   material: SiGe
   pitch_nm: 80.0
-  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7}
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
   temperature_k: 0.15
   severity: 1.0
   seed: 2

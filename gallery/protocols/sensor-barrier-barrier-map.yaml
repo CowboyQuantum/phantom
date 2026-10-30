@@ -1,0 +1,26 @@
+id: sensor-barrier-barrier-map
+name: The sensor's two barriers against each other
+step: 7
+description: On the seed-2 compiled device, the noise-free sensor current against its two barrier gates SB_L and SB_R, each moved 60 mV either way from the compiled operating point, with the sensor plunger at its compiled set point. Where either barrier is closed no current flows (the pinch-off corner); where both are open the Coulomb peaks run diagonally, because each barrier also moves the dot's level; where they are wide open the peaks broaden into one another. Beside it, the effective tunnel rate Gamma_S Gamma_D / (Gamma_S + Gamma_D) the current scales with. The rates follow the compiled exponential, close to the compile tier within about 10 mV of the operating point and drifting beyond (sensor-barrier-rates; ADR 0026). This is the roster's barrier-barrier-map, for the sensor dot.
+layers: [electrostatics, readout, device, compile]
+runner: step7c:sensor_barrier_barrier_map
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: SB_L, from: -0.06, to: 0.06, points: 121, unit: V, relative_to: operating_point}
+  - {gate: SB_R, from: -0.06, to: 0.06, points: 121, unit: V, relative_to: operating_point}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_sb_l_v, y: v_sb_r_v, z: current_a, xlabel: "SB_L (V)", ylabel: "SB_R (V)", zlabel: "sensor current (A)", title: "sensor current"}
+    - {kind: map, x: v_sb_l_v, y: v_sb_r_v, z: log10_gamma_eff_hz, xlabel: "SB_L (V)", ylabel: "SB_R (V)", zlabel: "log10 effective rate (Hz)", title: "effective tunnel rate"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 14641, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

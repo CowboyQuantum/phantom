@@ -310,10 +310,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#done" class="md-nav__link">
+  <a href="#done-this-session" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Done
+        Done this session
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In flight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-issues-from-this-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open issues from this session
       
     </span>
   </a>
@@ -544,10 +566,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#done" class="md-nav__link">
+  <a href="#done-this-session" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Done
+        Done this session
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In flight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-issues-from-this-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open issues from this session
       
     </span>
   </a>
@@ -575,82 +619,56 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> 8 (qdt cutover, #40), phantom side merged (PRs #42, #44); <code>v0.2.0</code> goes on <code>f72daac</code>. Steps 1–4
-complete except the owner's sign-offs, catalog entries and P1 rows (and Step 4's lock-in dynamics on the master
-equation); 5 (#32) and 6 (#34) built, their P1 rows open; 7 (#37) built except the solver decision (plan §8 #1).
-Milestones: "Steps 1-2", "Steps 3-4", "Steps 5-6: valley, spin", "Steps 7-8: compile, cutover".
-<strong>Branch:</strong> <code>issue-45/release-tagging</code> (ADR 0025). <code>main</code> is at <code>f72daac</code>, the merge of PR #44, CI green.
-<strong>Last session:</strong> 2026-10-27 — Step 8's phantom side: the consumer surface, the contract test, the API snapshot,
-the changelog and version 0.2.0 (ADR 0024), with qdt's six requests from its Analysis 0007 built in; the
-sensor-asymmetry fix (#43, PR #44); who tags a release (ADR 0025).</p>
-<h2 id="done">Done</h2>
+<p><strong>Current step:</strong> none in flight. Step 8's phantom side is released as <code>v0.2.0</code> (on <code>f72daac</code>); Steps 1–7 built
+(their open items are on #16, #17, #25, #28, #32, #34, #37: sign-offs, catalog entries, P1 rows, the solver).
+<strong>Branch:</strong> <code>issue-47/sensor-barriers-bath</code> (#47) from <code>main</code> at <code>84f9efa</code>; its pull request is open for review.
+<strong>Last session:</strong> 2026-10-29 — the owner asked for the charge sensor dot to have its own barriers and a bath that
+can be tuned: built as #47, <a href="../adr/0026-the-sensor-is-a-dot-with-its-own-barriers-and-bath/">ADR 0026</a>, 0.3.0
+(untagged, breaking: <code>CHANGELOG.md</code>).</p>
+<h2 id="done-this-session">Done this session</h2>
 <ul>
-<li>Steps 1–7 as before: <code>layout</code>, <code>electrostatics</code>, <code>disorder</code>, <code>charge</code>, <code>readout</code>, <code>valley</code>, <code>spin</code>, <code>compile</code>,
-  <code>device</code>, <code>optimum</code> (ADRs 0001–0023); tooling; CI with the ubuntu reference and the Windows comparison.</li>
-<li>Step 8, phantom side (ADR 0024, <code>docs/CONTRACT.md</code>, <code>CHANGELOG.md</code>):</li>
-<li><code>phantom.api</code>, the one consumer import, above <code>compile</code> with <code>phantom.contract</code>; rule 2 amended in <code>CLAUDE.md</code>
-    and enforced by <code>scripts/check_imports.py</code> (no layer or root module imports either); <code>model_versions()</code>.</li>
-<li><code>device.session</code>: <code>Device.at(v, v_sd)</code> → <code>State</code>; <code>Device.session(noise, dynamics, charge, noise_seed)</code> →
-    <code>Session</code> with a forward clock: <code>sense(v, dwell_s, samples, v_sd)</code> (sample k at t₀ + (k+1)·dwell), <code>hold(v,
-    duration_s)</code>, <code>wait(duration_s)</code>, <code>spin_readout(...)</code>; <code>Device.measure</code>. One sample's charge: a Markov jump
-    trajectory or an independent Boltzmann draw (<code>sampled</code>, default) or ⟨N⟩ (<code>mean</code>). <code>noise_seed</code> gives a new
-    realisation with the device's noise parameters; <code>None</code> replays the device's own.</li>
-<li><code>device.truth</code>: <code>Device.truth()</code> (charge lattice through the wiring, <code>SensorTruth</code>: peak, period, charging
-    energy, lever arm, width, wing, sensitivity at a bias, as qdt's tune-up nodes name them) and
-    <code>Device.knowable()</code> (material, gate names, layout, temperature, programmed point, sensor/barrier/reservoir gates).</li>
-<li><code>python -m phantom.contract [device.json ...]</code>: fifteen checks, exit 0 or 1; <code>tests/test_contract.py</code> (three
-    draws), <code>tests/test_device_session.py</code> (closed forms: Boltzmann draws, trajectory switching against the
-    two-state propagator, white floor under a dwell change, sensor truth against the sensor current, lattice
-    through the wiring, PSB occupations). The contract holds on every compilable seed 0–11 (6 does not compile).</li>
-<li><code>scripts/api_surface.py</code> → <code>docs/api/surface.json</code>, <code>--check</code> in <code>check_all.sh</code>.</li>
-<li><code>RateEquation.rate_matrix</code> vectorised, bit-identical (checked on 1,200 matrices and four sweeps): a session with
-    dynamics costs about 0.6–0.9 ms per sample.</li>
-<li>Protocols <code>session-charge-trace</code>, <code>session-hold-relaxation</code> (unsigned, within budget).</li>
-<li>
-<h1 id="43-pr-44-the-compiled-sensor-carries-the-wiring-draws-coupling-asymmetry-devicecompiled_sensor-used-by">43 (PR #44): the compiled sensor carries the wiring draw's coupling asymmetry (<code>device.compiled_sensor</code>, used by</h1>
-  compile's set point and <code>Device.runtime_sensor</code>); <code>device</code> and <code>compile</code> MODEL_VERSION 2.</li>
-<li>66 protocols render within budget, all unsigned; 136 P0 tests; eight reference entries, all <code>proposed</code>.</li>
+<li><code>two_dot_layout</code> gains <code>SB_L</code>, <code>SB_R</code>, <code>SR_L</code>, <code>SR_R</code> after the first eight gates (<code>src/phantom/layout/geometry.py</code>).</li>
+<li>A compiled sensor with leads is a dot like the qubit dots: E_c and β from the three-dot capacitance matrix
+  (<code>charge/derived.py</code>), rates through its barriers with gate slopes and an attempt-rate ceiling, baths with a
+  turn-on (<code>readout/sensor.py</code>), a lifetime-broadened current (<code>readout/broadening.py</code>), compiled in
+  <code>compile/device.py</code>; <code>Device</code> format 2; <code>State</code>, <code>Knowable</code>, <code>SensorTruth</code> extended; contract and API snapshot
+  updated. The typed sensor is unchanged for layouts without sensor reservoirs.</li>
+<li>Reference programmed point adds <code>SB_L 0.4, SB_R 0.3, SR_L 0.7, SR_R 0.7</code> (set for seed 2).</li>
+<li><code>tests/test_sensor_leads.py</code> (18 P0); 155 tests; four protocols (<code>gallery/protocols/step7c.py</code>), 70 rendering
+  within budget, all unsigned; two <code>proposed</code> reference entries; <code>docs/MODELS.md</code>, <code>measured.json</code> re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li><code>issue-45/release-tagging</code> (#45): ADR 0025 (a session tags a release when the owner says so, on a green <code>main</code>
-  with the changelog entry), the <code>CLAUDE.md</code> line, ADR 0024's status line, the documents that repeated the rule.</li>
+<li>The pull request for #47: CI's ubuntu reference run and the Windows comparison (first cross-platform check of
+  the sensor slopes' central differences and the wing bisection, ADR 0014), and the preview at <code>/pr-&lt;n&gt;/</code>.</li>
+</ul>
+<h2 id="open-issues-from-this-session">Open issues from this session</h2>
+<ul>
+<li>
+<h1 id="48-sensor-rates-sensitivity-and-the-bath-gates-cross-talk-no-screening-plan-8-1">48 sensor rates' sensitivity and the bath gate's cross-talk (no screening; plan §8 #1).</h1>
+</li>
+<li>
+<h1 id="49-no-per-device-sensor-barrier-tune-4-of-12-seeds-form-no-device-at-the-common-point">49 no per-device sensor-barrier tune; 4 of 12 seeds form no device at the common point.</h1>
+</li>
+<li>
+<h1 id="50-the-gate-1f-noise-placeholder-is-about-ten-times-typical-and-now-visible-on-the-sensor">50 the gate 1/f noise placeholder is about ten times typical and now visible on the sensor.</h1>
+</li>
+<li>
+<h1 id="51-python-m-phantomcontract-cannot-print-on-a-cp1252-windows-console-bug">51 <code>python -m phantom.contract</code> cannot print on a cp1252 Windows console (bug).</h1>
+</li>
+<li>Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins; #41 later.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<ul>
-<li>The owner tags <code>v0.2.0</code> on <code>f72daac</code> (2026-10-27: this session's environment refused the tag push with HTTP 403;
-  its branch pushes work). Merge #45's pull request.</li>
-<li>The qdt side lives in CowboyQuantum/qdt: #141 (the sequencer interpreter moves into qdt-lab, needs no phantom
-  release), then #140 and #142 against the tag (the adapter over <code>phantom.api.Session</code>, committed device files with
-  SHA-256, <code>python -m phantom.contract devices/*.json</code> in qdt's CI). Coordinate there when the owner says so.</li>
-<li>Later, separate: spin driven by gate voltages over time (#41).</li>
-<li>Open decisions: plan §8 #1 (solver); Step 8's cadence of phantom releases against qdt pins (held by the owner).</li>
-</ul>
+<p>The owner reviews #47's pull request (the changed and the four new protocols in its preview, ADR 0026), merges it;
+then decides whether to tag <code>v0.3.0</code> (ADR 0025) and when qdt (CowboyQuantum/qdt #140, #142) moves its pin.</p>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>Owner-dependent, never blocking: sign-offs for all 66 protocols; catalog entries #1–#14; confirmation (or
-  replacement) of the eight proposed reference entries; the papers for the P1 rows of Steps 2–6.</li>
-<li>The compiled lead and interdot rates are constant over voltage at runtime (<code>State</code> says so); a session's charge
-  dynamics use them everywhere.</li>
-<li>Compile moves the sensor gate onto its flank in one step and re-derives the dots, so a draw whose charge shifts
-  with the sensor gate lands off the 0.9-width target (seeds 0 and 3: 0.87 and 0.79 widths).</li>
-<li><code>spin_readout</code> takes a prepared triplet probability and does not read the session's charge or voltages (#41).</li>
-<li>A point evaluated alone and inside a batch agree within 1e-12 relative, not bit for bit (numpy's kernels); the
-  contract states it.</li>
-<li>The clean textbook layout's interdot barrier is high: at B_M = 0.2 V the clean t is 0.03 µeV. Across seeds 0–11 at
-  the gallery operating point the compiled t spans 0.003–900 µeV and seed 6's interface charges stop the sensor dot
-  from forming; the placeholder charge density dominates the spread until catalog entry #1 sets it. The gallery
-  device is seed 2 (t = 52 µeV, lead rates 1e9–1e11 Hz). The barrier gate's exponential scale is 7–10 mV per factor e,
-  a property of the closed-form potential without screening.</li>
-<li>No screening until the FEM backend exists. Trapping hysteresis (<code>disorder.trapping</code>) is not part of the compiled
-  device.</li>
-<li>Spin, valley, noise and disorder placeholders (<code>calibration: none</code>) as listed in the step files; the quasi-static
-  detuning noise takes the whole 1/f band; Step 4's lock-in dynamics on the master equation still owed; amplifier
-  noise absent from the SNR picture; the two-dot CI model cannot represent a plunger–barrier short.</li>
-<li>Cross-platform agreement (ADR 0014, 1e-9 relative): quantities that cancel digits (eigenvalue differences, finite
-  differences, argmax ties on a flat maximum, interpolation through near-equal values) have each broken the Windows
-  gallery comparison once; use closed forms, Hellmann–Feynman derivatives, grid points or secular equations instead.</li>
-<li>Pages source is <code>gh-pages</code> (root); the docs root and per-PR previews under <code>/pr-&lt;n&gt;/</code> are served.</li>
+<li>Owner-dependent, never blocking: sign-offs for all 70 protocols; catalog entries #1–#14; confirming the ten
+  <code>proposed</code> reference entries.</li>
+<li>The dots' lead and interdot rates are constant at runtime; no screening until the FEM backend; placeholders
+  (<code>calibration: none</code>) as listed in the step files and ADRs 0019–0026.</li>
+<li>Cross-platform agreement (ADR 0014): avoid digit-cancelling quantities; use closed forms, grid points, bisection.</li>
+<li>Pages source is <code>gh-pages</code> (root); per-PR previews under <code>/pr-&lt;n&gt;/</code>.</li>
 </ul>
 
 

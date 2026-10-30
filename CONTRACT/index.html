@@ -731,9 +731,10 @@
 which a consumer runs against the release it pins and against its own device files.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">phantom.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompileParams</span><span class="p">,</span> <span class="n">Device</span><span class="p">,</span> <span class="n">compile_device</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">two_dot_layout</span>
 
-<span class="n">op</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"B_L"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"P1"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"B_M"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s2">"P2"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"B_R"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"SG"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"R_L"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">"R_R"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">}</span>
+<span class="n">op</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"B_L"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"P1"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"B_M"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s2">"P2"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"B_R"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"SG"</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s2">"R_L"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">"R_R"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+      <span class="s2">"SB_L"</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s2">"SB_R"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"SR_L"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">"SR_R"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">}</span>
 <span class="n">device</span> <span class="o">=</span> <span class="n">compile_device</span><span class="p">(</span><span class="n">two_dot_layout</span><span class="p">(</span><span class="s2">"SiGe"</span><span class="p">,</span> <span class="mf">80.0</span><span class="p">),</span> <span class="n">CompileParams</span><span class="p">(</span><span class="n">operating_point_v</span><span class="o">=</span><span class="n">op</span><span class="p">),</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">device</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s2">"device.json"</span><span class="p">)</span>             <span class="c1"># canonical JSON, about 8 KB; Device.from_json reloads it</span>
+<span class="n">device</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s2">"device.json"</span><span class="p">)</span>             <span class="c1"># canonical JSON, about 13 KB; Device.from_json reloads it</span>
 
 <span class="n">run</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">noise_seed</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>        <span class="c1"># one run: a clock, the device's noise, the dot charge</span>
 <span class="n">run</span><span class="o">.</span><span class="n">hold</span><span class="p">(</span><span class="n">v_pulse</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>                   <span class="c1"># sit at v_pulse for 1 µs; the charge evolves there</span>
@@ -874,8 +875,9 @@ one matrix exponential, about 1 ms; without, about 0.05 ms.</p>
 </ul>
 <h2 id="knowable-and-truth">Knowable and truth</h2>
 <p><code>Device.knowable()</code> holds what a person running the device knows before measuring: the material, the
-gate names, the layout, the electron temperature, the programmed point, and the sensor, barrier and
-reservoir gates. <strong>Everything else on a <code>Device</code> is truth</strong>, including the seed (recompiling from it
+gate names, the layout, the electron temperature, the programmed point, the sensor, barrier and
+reservoir gates, and the sensor's own barrier and bath gates (<code>sensor_barrier_gates</code>,
+<code>sensor_reservoir_gates</code>, empty for a layout without them). <strong>Everything else on a <code>Device</code> is truth</strong>, including the seed (recompiling from it
 reproduces every draw), <code>params</code>, the scenario draw and <code>operating_point_v</code>, which holds the carried
 voltages and the sensor set point compilation chose. A consumer that hides truth from a user forwards
 <code>knowable()</code> and measurements, never the <code>Device</code>, <code>truth()</code> or <code>optimum()</code>. phantom has no hidden mode.</p>
@@ -886,10 +888,21 @@ voltages and the sensor set point compilation chose. A consumer that hides truth
 <li><code>sensor</code> (<code>SensorTruth</code>, None when the sensor gate does not move the sensor): with the other gates at
   <code>v_programmed</code> (the programmed point by default) and the dots' charge held at its thermal value there,
   the peak in programmed sensor-gate volts nearest <code>near_v</code>, the period, the sensor's charging energy,
-  its lever arm (charging energy / period), the width w of I ∝ sech²((V − V_peak)/w), the wing
-  V_peak + w·atanh(1/√3) (the inflection) and the sensitivity |dI/dV| = 4h/(3√3 w) there at bias
-  <code>v_sd</code>, h the linear-response peak height.</li>
+  its lever arm (charging energy / period), the thermal width w of I ∝ sech²((V − V_peak)/w), the
+  sensor's two tunnel rates at that peak and their lifetime width ħ(Γ_S + Γ_D) in sensor-gate volts,
+  the wing (the steepest point of the linear-response peak above it) and the sensitivity |dI/dV| there
+  at bias <code>v_sd</code>. The peak is the thermal sech² convolved with a Lorentzian of the lifetime width
+  (ADR 0026); with a negligible lifetime width the wing is V_peak + w·atanh(1/√3) and the sensitivity
+  4h/(3√3 w), h the linear-response peak height. The rates are those at the peak: along the sensor gate
+  they change by a factor e every few mV, so the truth states each peak with its own rates.</li>
 </ul>
+<p>The sensor of a compiled device is a dot with two barriers and a bath behind each (ADR 0026). Its peaks
+are a few hundred microvolts wide and tens of millivolts apart on the sensor gate, so the programmed
+sensor gate alone usually sits between peaks: tune it first, as on a device (the compiled set point in
+<code>operating_point_v</code>, the truth's peak and wing, and <code>optimum(device).sensor</code> are where a tune-up lands).
+<code>State.sensor_gamma_hz</code> gives its source and drain rates at any point: they follow the sensor's barrier,
+bath and plunger gates and every other gate's cross-talk, and a bath gate below its turn-on empties that
+side.</p>
 <h2 id="versions-and-releases">Versions and releases</h2>
 <ul>
 <li><code>phantom.__version__</code> follows semantic versioning in 0.x: the minor version rises for any breaking
@@ -913,7 +926,9 @@ equilibrium; bias in <code>sense</code>; sample semantics; a hold moves the char
 parts; <code>spin_readout</code> shapes and clock.</p>
 <h2 id="not-yet-in-the-contract">Not yet in the contract</h2>
 <ul>
-<li>Rates are compiled at the operating point and are constant over voltage at runtime.</li>
+<li>The dots' lead and interdot rates are compiled at the operating point and are constant over voltage
+  at runtime; the sensor's rates follow the gate voltages through a compiled exponential that holds
+  within about 20 % of the compile tier over ±10 mV and drifts beyond.</li>
 <li><code>spin_readout</code> takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.</li>
 </ul>

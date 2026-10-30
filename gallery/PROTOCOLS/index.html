@@ -733,7 +733,7 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <td><code>barrier-barrier-map</code></td>
 <td>(B1, B2) at fixed P</td>
 <td>current</td>
-<td>the region where a dot forms; diagonal Coulomb lines; pinch-off corners</td>
+<td>the region where a dot forms; diagonal Coulomb lines; pinch-off corners (built for the sensor dot as <code>sensor-barrier-barrier-map</code>, section I)</td>
 </tr>
 <tr>
 <td><code>plunger-vs-barrier-map</code></td>
@@ -1158,9 +1158,9 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 </tr>
 <tr>
 <td><code>optimum-sensor-flank</code></td>
-<td>SG over one peak period around the compiled set-point</td>
+<td>SG ±30 mV around the compiled set-point (about two periods of the sensor dot)</td>
 <td>sensor current, slope, the optimum's marker</td>
-<td>the Coulomb peak; the steepest flank chosen by the optimum</td>
+<td>the Coulomb peak; the steepest flank chosen by the optimum; peaks growing along SG as it opens the sensor's barriers</td>
 </tr>
 <tr>
 <td><code>optimum-coupling-target</code></td>
@@ -1183,8 +1183,32 @@ because it has its own physics (finite modulation amplitude, noise at the modula
 <tr>
 <td><code>compiled-device-draws</code></td>
 <td>seed (twelve devices from one layout)</td>
-<td>t, lead rates, valley splittings, contrast, infidelity</td>
-<td>a population with decades of spread in t and the lead rates; the trade between blockade contrast and gate fidelity; devices that do not form</td>
+<td>t, lead rates, sensor rates, valley splittings, contrast, infidelity</td>
+<td>a population with decades of spread in t, the lead rates and the sensor rates; the trade between blockade contrast and gate fidelity; devices that do not form</td>
+</tr>
+<tr>
+<td><code>sensor-bath-turn-on</code></td>
+<td>each sensor bath gate SR_L, SR_R from 0 to 0.8 V</td>
+<td>bath occupation, sensor current (log, 1 fA floor)</td>
+<td>each bath filling at its threshold; no current while a bath is empty; the bath gate's cross-talk on the adjacent sensor barrier (ADR 0026)</td>
+</tr>
+<tr>
+<td><code>sensor-barrier-barrier-map</code></td>
+<td>(SB_L, SB_R) ±60 mV at the compiled sensor plunger</td>
+<td>sensor current, effective tunnel rate</td>
+<td>the roster's <code>barrier-barrier-map</code> for the sensor dot: the pinch-off corner, a diagonal Coulomb line, the open corner</td>
+</tr>
+<tr>
+<td><code>sensor-barrier-rates</code></td>
+<td>SB_L ±40 mV from the leads' anchor</td>
+<td>both sensor rates at the compile tier and from the runtime exponential</td>
+<td>agreement at the anchor; the source rate steep, the drain rate through cross-talk; the attempt-rate ceiling</td>
+</tr>
+<tr>
+<td><code>sensor-peak-broadening</code></td>
+<td>SG across one peak at five symmetric sensor-barrier offsets</td>
+<td>sensor current; peak conductance in e²/h; lifetime over thermal width</td>
+<td>peaks rising while thermally broadened, then broadening with their height bounded by e²/h</td>
 </tr>
 </tbody>
 </table>
