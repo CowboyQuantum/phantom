@@ -28,15 +28,18 @@ from phantom.electrostatics.closed_form import GateBasis
 from phantom.layout.geometry import Gate, Layer, Layout, Stack
 from phantom.readout.master_equation import RateEquation
 from phantom.readout.measure import SensedDoubleDot
+from phantom.readout.rates import GateRates
 from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
-3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026)."""
-DEVICE_FORMAT_VERSION = 2
+3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026).
+4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027)."""
+DEVICE_FORMAT_VERSION = 3
 """Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
-energy, per-electron coupling and leads (ADR 0026)."""
+energy, per-electron coupling and leads (ADR 0026). 3: each barrier's attempt rate, tunnelling level
+and gate slopes (#53)."""
 
 
 def compiled_sensor(
@@ -99,6 +102,13 @@ class CompiledBarrier:
     height_ev: float
     width_nm: float
     rate_hz: float
+    """f_attempt·exp(−2S) at the operating point, Hz."""
+    attempt_rate_hz: float
+    """Attempt frequency of the dot the barrier is seen from, Hz: the ceiling of the rate at runtime."""
+    tunnelling_level_ev: float
+    """The level the rate is taken at, placed at the operating point and held fixed, eV."""
+    log_rate_slopes_per_v: tuple[float, ...]
+    """d ln Γ/dV against every gate at that level, 1/V: the runtime rate follows the gates (#53)."""
 
 
 @dataclass(frozen=True)
@@ -168,7 +178,7 @@ class Device:
             c_gate_af=tuple(tuple(r) for r in d["c_gate_af"]),
             temperature_k=float(d["temperature_k"]),
             sensor_alpha_v_per_v=tuple(d["sensor_alpha_v_per_v"]),
-            barriers=tuple(CompiledBarrier(tuple(b["between"]), b["height_ev"], b["width_nm"], b["rate_hz"]) for b in d["barriers"]),
+            barriers=tuple(CompiledBarrier(**{**b, "between": tuple(b["between"]), "log_rate_slopes_per_v": tuple(b["log_rate_slopes_per_v"])}) for b in d["barriers"]),
             tunnel_coupling_ev=float(d["tunnel_coupling_ev"]),
             barrier_gate=d["barrier_gate"],
             barrier_v_scale_v=float(d["barrier_v_scale_v"]),
@@ -253,8 +263,17 @@ class Device:
         return HubbardParams.from_ci(self.runtime_ci(), self.runtime_barrier(), barrier_gate=self.barrier_gate)
 
     def runtime_rates(self) -> RateEquation:
-        rates = {b.between: b.rate_hz for b in self.barriers}
-        return RateEquation(self.runtime_ci(), rates[("dot1", "lead_left")], rates[("dot2", "lead_right")], rates[("dot1", "dot2")])
+        """The dots' rate equation, its lead and interdot rates following the carried gate voltages
+        from their values at the operating point (#53)."""
+        by = {b.between: b for b in self.barriers}
+        left, right, inter = (by[k] for k in (("dot1", "lead_left"), ("dot2", "lead_right"), ("dot1", "dot2")))
+        gated = GateRates(
+            v_ref_v=tuple(self.operating_point_v),
+            gamma_ref_hz=(left.rate_hz, right.rate_hz, inter.rate_hz),
+            attempt_rate_hz=(left.attempt_rate_hz, right.attempt_rate_hz, inter.attempt_rate_hz),
+            log_rate_slopes_per_v=(left.log_rate_slopes_per_v, right.log_rate_slopes_per_v, inter.log_rate_slopes_per_v),
+        )
+        return RateEquation(self.runtime_ci(), left.rate_hz, right.rate_hz, inter.rate_hz, gated)
 
     def runtime_sensed(self, sample_dt_s: float = 1e-3, noise: bool = True) -> SensedDoubleDot:
         draw = self.scenario_draw()

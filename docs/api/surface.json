@@ -141,6 +141,21 @@
      "default": false,
      "name": "rate_hz",
      "type": "float"
+    },
+    {
+     "default": false,
+     "name": "attempt_rate_hz",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "tunnelling_level_ev",
+     "type": "float"
+    },
+    {
+     "default": false,
+     "name": "log_rate_slopes_per_v",
+     "type": "tuple[float, ...]"
     }
    ],
    "frozen": true,
@@ -214,7 +229,7 @@
   "DEVICE_FORMAT_VERSION": {
    "kind": "value",
    "type": "int",
-   "value": 2
+   "value": 3
   },
   "Device": {
    "fields": [
@@ -1064,17 +1079,17 @@
     {
      "default": false,
      "name": "gamma_left_hz",
-     "type": "float"
+     "type": "np.ndarray"
     },
     {
      "default": false,
      "name": "gamma_right_hz",
-     "type": "float"
+     "type": "np.ndarray"
     },
     {
      "default": false,
      "name": "gamma_interdot_hz",
-     "type": "float"
+     "type": "np.ndarray"
     },
     {
      "default": true,

@@ -11,12 +11,17 @@ of the same height and width transmits more, by one to two decades at the layout
 `wkb_rate_from_action_hz` takes the WKB action S = ∫ κ ds along the actual barrier
 (`electrostatics.barrier_action`) and gives Γ = f_attempt · exp(−2S); the compiled device and the
 gallery's dynamics protocols use it (ADR 0023), and the rectangular form remains as its bound and for
-the P0 limits. Screening waits for the FEM backend.
+the P0 limits. `GateRates` carries compiled rates to other gate voltages at runtime: the exponent
+moves with the action's compiled slopes and `saturating_rates_hz` caps the rate at the attempt rate
+(ADR 0026 for the sensor's leads, #53 for the qubit dots'). Screening waits for the FEM backend.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
+from scipy.special import expit
 
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2, HBAR_EV_S
 
@@ -52,3 +57,46 @@ def wkb_tunnel_rate_hz(
 ) -> np.ndarray:
     """Γ = f_attempt · T for the barrier (height, width) seen from a dot of the given curvature."""
     return attempt_rate_hz(curvature_ev_per_nm2, effective_mass_me) * wkb_transmission(height_ev, width_nm, effective_mass_me)
+
+
+def saturating_rates_hz(gamma_ref_hz: np.ndarray, attempt_rate_hz: np.ndarray | float, exponent: np.ndarray) -> np.ndarray:
+    """f_a · σ(ln(Γ_ref / (f_a − Γ_ref)) + x), σ(x) = 1/(1 + e⁻ˣ): a tunnel rate whose exponent moves by
+    `exponent` (..., k) from the reference rate `gamma_ref_hz` (k,), exponential while the barrier is
+    closed and saturating at the attempt rate f_a (k,) as it opens; exactly Γ_ref at x = 0 (ADR 0026)."""
+    g_ref = np.asarray(gamma_ref_hz, dtype=float)
+    f_a = np.asarray(attempt_rate_hz, dtype=float)
+    anchor = np.log(g_ref) - np.log(np.maximum(f_a - g_ref, 1e-12 * f_a))
+    return f_a * expit(anchor + exponent)
+
+
+@dataclass(frozen=True)
+class GateRates:
+    """Tunnel rates that follow the gate voltages (#53): k barriers compiled at a reference point, each
+    with the WKB rate there, the attempt rate of the dot it leaves and the slopes d ln Γ/dV of its
+    action against every gate at a tunnelling level held fixed (the leads' electrochemical potential,
+    as for the sensor's leads, ADR 0026). At other voltages the exponent moves linearly with the slopes
+    and `saturating_rates_hz` caps each rate at its attempt rate. Only the prefactors of the rate
+    equation move, so detailed balance and the Boltzmann stationary state are untouched."""
+
+    v_ref_v: tuple[float, ...]
+    """Carried gate voltages the rates are compiled at, one per gate, V."""
+    gamma_ref_hz: tuple[float, ...]
+    """Rate through each barrier at `v_ref_v`, Hz."""
+    attempt_rate_hz: tuple[float, ...]
+    """Attempt frequency of the dot each barrier is seen from, Hz: the ceiling of its rate."""
+    log_rate_slopes_per_v: tuple[tuple[float, ...], ...]
+    """d ln Γ/dV of each barrier with respect to every gate, 1/V."""
+
+    def __post_init__(self) -> None:
+        k, n = len(self.gamma_ref_hz), len(self.v_ref_v)
+        if len(self.attempt_rate_hz) != k or len(self.log_rate_slopes_per_v) != k:
+            raise ValueError("one attempt rate and one row of slopes per barrier")
+        if any(len(row) != n for row in self.log_rate_slopes_per_v):
+            raise ValueError("slopes need one entry per gate")
+        if not all(f > 0 for f in self.attempt_rate_hz) or not all(0 < g for g in self.gamma_ref_hz):
+            raise ValueError("rates must be positive")
+
+    def rates_hz(self, v: np.ndarray) -> np.ndarray:
+        """Γ of each barrier (..., k), Hz, at carried voltages `v` (..., gates)."""
+        dv = np.asarray(v, dtype=float) - np.asarray(self.v_ref_v)
+        return saturating_rates_hz(np.asarray(self.gamma_ref_hz), np.asarray(self.attempt_rate_hz), dv @ np.asarray(self.log_rate_slopes_per_v).T)

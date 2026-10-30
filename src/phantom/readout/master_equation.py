@@ -13,7 +13,11 @@ the electron temperature (ADR 0017):
   ratio is exp(−ΔU/kT).
 
 With equal lead chemical potentials the stationary distribution is exactly the Boltzmann one, which the
-CI model already uses for its thermal occupation (P0 test). Propagating the distribution along a sweep
+CI model already uses for its thermal occupation (P0 test). The rates are constants, or, with
+`gate_rates` (a compiled device, #53), they follow the gate voltages of each rate matrix through their
+compiled slopes and saturate at the attempt rate (`readout.rates.GateRates`): closing a barrier gate slows
+its lead by orders of magnitude while the equilibrium, which the prefactors do not enter, stays exact.
+Propagating the distribution along a sweep
 with the matrix exponential per sample gives the charge actually present: when a rate is small compared
 with the inverse dwell time the distribution lags, which is latching, and the lag depends on the sweep
 direction. With sequential tunnelling only (Γ_m = 0) a cold double dot can stay in a metastable charge
@@ -32,6 +36,7 @@ from scipy.linalg import expm
 
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.constants import K_B_EV_PER_K
+from phantom.readout.rates import GateRates
 
 MODEL_VERSION = 1
 
@@ -61,6 +66,16 @@ class RateEquation:
     """Dot 2 to the right lead."""
     gamma_interdot_hz: float = 0.0
     """Electron transfer between the dots (inelastic, phenomenological)."""
+    gate_rates: GateRates | None = None
+    """When given, the (left, right, interdot) rates at each gate point come from it (#53), and the
+    three constants above are its rates at the reference point; None keeps them constant."""
+
+    def rates_hz(self, v: np.ndarray) -> np.ndarray:
+        """(Γ_L, Γ_R, Γ_m) (..., 3), Hz, at carried voltages `v` (..., gates)."""
+        if self.gate_rates is not None:
+            return self.gate_rates.rates_hz(v)
+        v = np.asarray(v, dtype=float)
+        return np.broadcast_to(np.array([self.gamma_left_hz, self.gamma_right_hz, self.gamma_interdot_hz]), v.shape[:-1] + (3,)).copy()
 
     @property
     def kt_ev(self) -> float:
@@ -81,7 +96,11 @@ class RateEquation:
         w = np.zeros((k, k))
         index = {tuple(s): i for i, s in enumerate(states.tolist())}
         kt = self.kt_ev
-        moves = (((1, 0), self.gamma_left_hz), ((0, 1), self.gamma_right_hz), ((1, -1), self.gamma_interdot_hz))
+        if self.gate_rates is None:
+            g_l, g_r, g_m = self.gamma_left_hz, self.gamma_right_hz, self.gamma_interdot_hz
+        else:
+            g_l, g_r, g_m = (float(x) for x in self.gate_rates.rates_hz(v))
+        moves = (((1, 0), g_l), ((0, 1), g_r), ((1, -1), g_m))
         listed = states.tolist()
         for (dn1, dn2), gamma in moves:
             if gamma <= 0:
