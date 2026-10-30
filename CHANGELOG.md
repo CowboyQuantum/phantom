@@ -6,12 +6,19 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.3.0 — the sensor dot's barriers and bath (#47; untagged)
+## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53; untagged)
 
 The charge sensor becomes a dot like the qubit dots, with its own tunnel barriers and a bath behind each
-that can be tuned (ADR 0026). Every compiled device's sensor changes.
+that can be tuned (ADR 0026). Every compiled device's sensor changes. The qubit dots' lead and interdot
+rates follow the gates at runtime (ADR 0027), so a closed barrier latches and telegraphs in a session.
 
 ### Breaking
+- `State.gamma_left_hz`, `gamma_right_hz` and `gamma_interdot_hz` are arrays (...) at the carried
+  voltages, no longer the compiled constants (#53). A session with dynamics uses the rates at each
+  sample's voltages, so its output changes wherever the gates leave the operating point.
+- `DEVICE_FORMAT_VERSION` 3: each `CompiledBarrier` carries `attempt_rate_hz`, `tunnelling_level_ev` and
+  `log_rate_slopes_per_v`. Files compiled on earlier 0.3.0 commits (format 2) do not load; recompile
+  them from their seed.
 - `two_dot_layout` gains four gates after the first eight: sensor barriers `SB_L`, `SB_R` beside `SG` and
   sensor bath (reservoir) gates `SR_L`, `SR_R` beyond them; gate vectors are 12 long and every operating
   point needs the four. The sensor's search region spans its barriers. The gallery's and the contract's
@@ -45,6 +52,10 @@ that can be tuned (ADR 0026). Every compiled device's sensor changes.
 - `CompileParams.sensor_barrier_gates`, `sensor_reservoir_gates`, `bath_threshold_ev`, `bath_width_ev`.
 - `State.sensor_gamma_hz`; `Knowable.sensor_barrier_gates`, `sensor_reservoir_gates`;
   `SensorTruth.lifetime_width_v`, `gamma_source_hz`, `gamma_drain_hz`; `Device.switcher_scale`.
+- `readout.rates.GateRates` and `saturating_rates_hz` (the sensor's leads use it, bit for bit as before);
+  `RateEquation.gate_rates` and `rates_hz(v)`; `Device.runtime_rates()` gives the gated rate equation.
+- Gallery protocol `session-closing-barrier` (unsigned): the rates along B_L, a P1 sweep up and down
+  with B_L open and closed, and a telegraph trace at the closed transition.
 - `electrostatics.tunnelling_level_ev` (the level rule `barrier_action` already used, now shared) and
   `GateBasis.offset_at`.
 - Gallery protocols `sensor-bath-turn-on`, `sensor-barrier-barrier-map`, `sensor-barrier-rates`,
@@ -56,8 +67,11 @@ that can be tuned (ADR 0026). Every compiled device's sensor changes.
 ### Changed
 - Compile's sensor set point: one step and a re-derivation as before, then a last step with the
   re-derived sensor and its leads; the double dot is derived again at the final point.
-- Model versions: `layout.geometry` 2, `charge.derived` 2, `compile.device` 3, `device` 3,
-  `device.session` 2, `device.truth` 2, `readout.broadening` 1 (new); layer versions `layout` 2,
+- `session-hold-relaxation` overlays exp(−Γ_out t), Γ_out the total rate out of the held charge state at
+  the read point: the interdot path through dot 2's lead doubled the relaxation rate on the gallery
+  device, also before #53.
+- Model versions: `layout.geometry` 2, `charge.derived` 2, `compile.device` 4, `device` 4,
+  `device.session` 3, `device.truth` 2, `readout.broadening` 1 (new); layer versions `layout` 2,
   `charge` 4. The typed sensor (no leads) gives the same output as in 0.2.0.
 - `gate-leakage-iv` evaluates twelve gates: its budget rises from 2,408 to 3,612 points.
 

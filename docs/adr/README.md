@@ -30,3 +30,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0024 | The consumer contract: `phantom.api` above `compile`, a session with a forward clock, knowable fields apart from truth, a contract test consumers run, a checked surface snapshot, 0.x releases | Accepted (amended by 0025) |
 | 0025 | A session tags a release when the owner says so, on a green `main` with the changelog entry; the owner can always tag | Accepted |
 | 0026 | The sensor is a dot with its own barriers and bath: compiled leads, a lifetime-broadened current, its charging energy and coupling from the layout | Accepted |
+| 0027 | The qubit dots' rates follow the gates at runtime: compiled slopes of the WKB action at a fixed tunnelling level, capped at the attempt rate | Accepted |

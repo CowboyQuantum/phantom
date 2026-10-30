@@ -18,8 +18,9 @@ qdt's `qdt-sim` becomes an adapter that pins a phantom release and contains no p
 
 ## Gallery protocols (rendered by CI, signed off per protocol by a human; ADR 0008)
 - `session-charge-trace` — the charge a sample sees at a dot-lead degeneracy at three dwells, and the noisy read at 1 ms
-- `session-hold-relaxation` — the mean charge after a hold relaxing on exp(−Γ_L t), and one trajectory
-- each carries a `budget` (ADR 0009); both unsigned
+- `session-hold-relaxation` — the mean charge after a hold relaxing on exp(−Γ_out t) (every rate out of the held state at the read point), and one trajectory
+- `session-closing-barrier` — the dots' rates along B_L, a P1 sweep that latches into a loop with B_L closed, and a telegraph trace at the closed transition (#53, ADR 0027)
+- each carries a `budget` (ADR 0009); all unsigned
 
 ## Exit criteria
 - qdt CI green against the pinned phantom with `qdt-sim` under 300 lines — qdt side (CowboyQuantum/qdt#140, #141, #142)

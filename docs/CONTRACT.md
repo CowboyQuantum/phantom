@@ -110,6 +110,12 @@ sensor gate alone usually sits between peaks: tune it first, as on a device (the
 bath and plunger gates and every other gate's cross-talk, and a bath gate below its turn-on empties that
 side.
 
+The dots' own rates follow the gates too (ADR 0027): `State.gamma_left_hz`, `gamma_right_hz` and
+`gamma_interdot_hz` are arrays with the input's leading axes, the compiled rates moved by their slopes
+against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
+voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
+`Truth` states the rates at the operating point.
+
 ## Versions and releases
 
 - `phantom.__version__` follows semantic versioning in 0.x: the minor version rises for any breaking
@@ -137,8 +143,7 @@ parts; `spin_readout` shapes and clock.
 
 ## Not yet in the contract
 
-- The dots' lead and interdot rates are compiled at the operating point and are constant over voltage
-  at runtime; the sensor's rates follow the gate voltages through a compiled exponential that holds
-  within about 20 % of the compile tier over ±10 mV and drifts beyond.
+- Every rate, the dots' and the sensor's, follows the gate voltages through a compiled exponential that
+  holds within about 20 % of the compile tier's change over ±10 mV and drifts beyond (ADR 0026, 0027).
 - `spin_readout` takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.
