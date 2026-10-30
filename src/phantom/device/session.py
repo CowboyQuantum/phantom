@@ -56,7 +56,8 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 from scipy.linalg import expm
 
-from phantom.constants import K_B_EV_PER_K
+from phantom.constants import E_CHARGE_C, K_B_EV_PER_K
+from phantom.readout import sensor_dynamics
 from phantom.readout.master_equation import PROBABILITY_FLOOR, RateEquation
 from phantom.readout.measure import SensedDoubleDot
 from phantom.spin.exchange import exchange_j_ev
@@ -65,14 +66,15 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
-sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53)."""
+sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
+4: with dynamics, the sensor dot's charge is a process on the clock that acts back on the dots (#54)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
-charge, [..., 1] the spin readout."""
+charge, [..., 1] the spin readout, [..., 2] the sensor dot's charge and counted electrons."""
 
 WHITE_REFERENCE_DWELL_S = 1e-3
 """The dwell at which the noise draw states the white readout floor (`white_sigma_a_at_1ms`)."""
@@ -124,6 +126,10 @@ class Measurement:
     """Sensor current with noise, A."""
     n_present: np.ndarray
     """(..., 2) the charge that entered the sensor: an integer state (`charge="sampled"`) or ⟨N⟩."""
+    sensor_charge: np.ndarray | None = None
+    """(...) the sensor dot's charge at the end of each dwell, electrons on the level numbering of φ_s
+    (only its changes are physical): an integer (`sampled`) or its mean; None without dynamics or for a
+    typed sensor without leads (ADR 0028)."""
 
 
 @dataclass(frozen=True)
@@ -207,6 +213,11 @@ class Session:
         key = [int(device.seed), SESSION_STREAM] + ([] if self.noise_seed is None else [self.noise_seed])
         self._charge_rng = np.random.default_rng(key + [0])
         self._spin_rng = np.random.default_rng(key + [1])
+        self._sensor_rng = np.random.default_rng(key + [2])
+        self._sensor_dynamics = self.dynamics and sensor.leads is not None
+        self._m_states: np.ndarray | None = None
+        self._m_p: np.ndarray | None = None
+        self._bias_last = float(sensor.bias_v)
         self._t = 0.0
         self._v_last: np.ndarray | None = None
         self._states: np.ndarray | None = None
@@ -238,8 +249,9 @@ class Session:
             states, p = states[i : i + 1], np.ones(1)
         self._states, self._p = np.asarray(states, dtype=int), p
 
-    def _propagate(self, v_carried: np.ndarray, dt_s: float) -> np.ndarray:
-        """Evolve the charge for `dt_s` at `v_carried` (gates,); return what enters the sensor (2,)."""
+    def _propagate(self, v_carried: np.ndarray, dt_s: float, level_shift_ev: np.ndarray | None = None) -> np.ndarray:
+        """Evolve the charge for `dt_s` at `v_carried` (gates,), each dot's levels shifted by
+        `level_shift_ev` (2,) per electron; return what enters the sensor (2,)."""
         if self._states is None:
             self._start(v_carried)
         states, p = self._states, self._p
@@ -252,7 +264,7 @@ class Session:
                 q[index[tuple(s)]] += prob
         q /= q.sum()
         if dt_s > 0:
-            _, w = self._rates.rate_matrix(v_carried, active)
+            _, w = self._rates.rate_matrix(v_carried, active, level_shift_ev)
             q = np.maximum(expm(w * dt_s) @ q, 0.0)
             q /= q.sum()
         if self.charge == "sampled":
@@ -262,6 +274,62 @@ class Session:
             return active[i].astype(float)
         self._states, self._p = active, q
         return q @ active
+
+    # --- the sensor dot's charge (ADR 0028) -----------------------------------------------------------
+
+    def _back_action_ev(self, v_carried: np.ndarray, delta_phi_v: float) -> np.ndarray | None:
+        """(2,) shift of each dot's levels per electron from the sensor's charge, eV: −β_i·(M − M̄),
+        M the sensor's charge (its mean in `mean` mode) and M̄ the mean of its stationary state at these
+        voltages and the dots' present charge. The closed-form potential, which has no electrons, stands
+        for the sensor at its mean; its switching and its lag are what act back (ADR 0028)."""
+        if not self._sensor_dynamics or self._m_states is None or self._states is None:
+            return None
+        sensor = self._sensed.sensor
+        n = self._p @ self._states
+        phi = float(sensor.potential(v_carried, n, delta_phi_v))
+        lo, hi = sensor_dynamics.window_states(sensor, phi, self._bias_last)
+        c = sensor_dynamics.chain(sensor, phi, v_carried, self._bias_last, lo, hi)
+        m_bar = float(sensor_dynamics.stationary(c) @ c.states)
+        m = float(self._m_p @ self._m_states)
+        return -sensor.beta_v_per_e * sensor.lever_arm_ev_per_v * (m - m_bar)
+
+    def _sensor_step(self, phi: float, v_carried: np.ndarray, v_sd: float, dt_s: float) -> tuple[float, float]:
+        """Evolve the sensor's charge for `dt_s` at potential `phi` (with the dots' charge and the
+        switchers), carried voltages and bias; return (current over the dwell in A, charge after)."""
+        sensor = self._sensed.sensor
+        lo, hi = sensor_dynamics.window_states(sensor, phi, v_sd)
+        rng = self._sensor_rng
+        if self._m_states is None:
+            c = sensor_dynamics.chain(sensor, phi, v_carried, v_sd, lo, hi)
+            p = sensor_dynamics.stationary(c)
+            if self.charge == "sampled":
+                i = min(int(np.searchsorted(np.cumsum(p), rng.random(), side="right")), len(p) - 1)
+                self._m_states, self._m_p = c.states[i : i + 1], np.ones(1)
+            else:
+                self._m_states, self._m_p = c.states, p
+        held = self._m_states[self._m_p > PROBABILITY_FLOOR]
+        lo, hi = min(lo, int(held.min())), max(hi, int(held.max()))
+        c = sensor_dynamics.chain(sensor, phi, v_carried, v_sd, lo, hi)
+        q = np.zeros(hi - lo + 1)
+        for m, prob in zip(self._m_states.tolist(), self._m_p, strict=True):
+            if prob > PROBABILITY_FLOOR:
+                q[m - lo] += prob
+        q /= q.sum()
+        if self.charge == "mean":
+            after, counted = sensor_dynamics.propagate(c, q, dt_s)
+            self._m_states, self._m_p = c.states, after
+            return E_CHARGE_C * counted / dt_s + c.background_a, float(after @ c.states)
+        m0 = int(self._m_states[0])
+        if sensor_dynamics.expected_jumps(c, dt_s) <= sensor_dynamics.EXACT_JUMPS:
+            counted, m = sensor_dynamics.trajectory(sensor, phi, v_carried, v_sd, m0, dt_s, rng)
+        else:
+            after, mean = sensor_dynamics.propagate(c, q, dt_s)
+            _, var = sensor_dynamics.counting_cumulants(c)
+            counted = mean + np.sqrt(max(var, 0.0) * dt_s) * rng.standard_normal()
+            i = min(int(np.searchsorted(np.cumsum(after), rng.random(), side="right")), len(after) - 1)
+            m = int(c.states[i])
+        self._m_states, self._m_p = np.array([m]), np.ones(1)
+        return E_CHARGE_C * counted / dt_s + c.background_a, float(m)
 
     def _equilibrium(self, v_carried: np.ndarray) -> np.ndarray:
         """Charge without dynamics for points (n, gates): independent Boltzmann draws or ⟨N⟩."""
@@ -305,17 +373,28 @@ class Session:
         s = self._sensed.sensor_noise.trace(times)
         r = self._sensed.readout_noise.trace(times) * np.sqrt(WHITE_REFERENCE_DWELL_S / dwell_s)
         v_eff = self.device.effective_voltages(pts) + g[:, None]
-        if self.dynamics:
-            n_present = np.empty((n, 2))
-            for k in range(n):
-                n_present[k] = self._propagate(v_eff[k], dwell_s)
-        else:
-            n_present = self._equilibrium(v_eff)
         sensor = self._sensed.sensor
-        current = sensor.current_a(sensor.potential(v_eff, n_present, s), bias, v_eff) + r
+        m_sensor = None
+        if self._sensor_dynamics:
+            n_present, current, m_sensor = np.empty((n, 2)), np.empty(n), np.empty(n)
+            for k in range(n):
+                self._bias_last = float(bias[k])
+                n_present[k] = self._propagate(v_eff[k], dwell_s, self._back_action_ev(v_eff[k], float(s[k])))
+                phi = float(sensor.potential(v_eff[k], n_present[k], s[k]))
+                current[k], m_sensor[k] = self._sensor_step(phi, v_eff[k], float(bias[k]), dwell_s)
+            current = current + r
+            m_sensor = m_sensor.reshape(out_shape)
+        else:
+            if self.dynamics:
+                n_present = np.empty((n, 2))
+                for k in range(n):
+                    n_present[k] = self._propagate(v_eff[k], dwell_s)
+            else:
+                n_present = self._equilibrium(v_eff)
+            current = sensor.current_a(sensor.potential(v_eff, n_present, s), bias, v_eff) + r
         self._t = float(times[-1])
         self._v_last = pts[-1].copy()
-        return Measurement(times.reshape(out_shape), current.reshape(out_shape), n_present.reshape(out_shape + (2,)))
+        return Measurement(times.reshape(out_shape), current.reshape(out_shape), n_present.reshape(out_shape + (2,)), m_sensor)
 
     def hold(self, v_programmed: np.ndarray, duration_s: float) -> None:
         """Keep the gates at programmed `v` (gates,) for `duration_s`: the clock advances, the charge
@@ -326,8 +405,15 @@ class Session:
         if duration_s < 0:
             raise ValueError("duration_s must be non-negative: the clock only moves forward")
         if self.dynamics and duration_s > 0:
-            g = float(self._sensed.gate_noise.trace(np.array([self._t]))[0])
-            self._propagate(self.device.effective_voltages(v) + g, float(duration_s))
+            t = np.array([self._t])
+            g = float(self._sensed.gate_noise.trace(t)[0])
+            v_eff = self.device.effective_voltages(v) + g
+            if self._sensor_dynamics:
+                s = float(self._sensed.sensor_noise.trace(t)[0])
+                n = self._propagate(v_eff, float(duration_s), self._back_action_ev(v_eff, s))
+                self._sensor_step(float(self._sensed.sensor.potential(v_eff, n, s)), v_eff, self._bias_last, float(duration_s))
+            else:
+                self._propagate(v_eff, float(duration_s))
         self._t += float(duration_s)
         self._v_last = v.copy()
 

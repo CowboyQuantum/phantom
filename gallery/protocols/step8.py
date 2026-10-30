@@ -146,3 +146,58 @@ def session_closing_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     out["gamma_left_closed_hz"] = np.asarray(dev.at(centres["closed"]).gamma_left_hz)
     out["gamma_left_open_hz"] = np.asarray(dev.at(centres["open"]).gamma_left_hz)
     return out
+
+
+def _sensor_level_at(dev: Device, v: np.ndarray, offset_kt: float) -> np.ndarray:
+    """`v` with the sensor gate moved so the sensor's nearest level sits `offset_kt` kT above the
+    leads, with the dots in their ground state (the gallery device's sensor gate is not faulted)."""
+    sensor, j = dev.runtime_sensor(), dev.gate_names.index("SG")
+    out = v.copy()
+    for _ in range(2):
+        s = dev.at(out)
+        x = (float(sensor.potential(s.v_carried_v, s.n_ground)) - sensor.phase_v) / sensor.period_v
+        out[j] += (np.rint(x) - offset_kt * sensor.kt_ev / sensor.charging_energy_ev - x) * sensor.period_v / sensor.alpha_v_per_v[j]
+    return out
+
+
+def session_slow_sensor(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The sensor dot's charge in time (#54, ADR 0028). Its two barriers close together along the first
+    sweep (`State.sensor_gamma_hz`). Parked with the sensor's level `offset_kt` kT above the leads, a
+    `sampled` session (noise off) reads a smooth current with shot noise when the barriers are open and
+    single-electron bursts with the sensor's own telegraph when they are closed. Then P1 is swept across
+    dot 1's transition at `sweep_dwell_s` per point, read by the open and by the closed sensor."""
+    closing, trace, p1_sweep = p.sweep
+    inst = p.instance
+    closed = {g: float(dv) for g, dv in inst["closed_v"].items()}
+    offset, dwell, sweep_dwell = float(inst["offset_kt"]), float(inst["trace_dwell_s"]), float(inst["sweep_dwell_s"])
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        frac = np.linspace(float(closing["from"]), float(closing["to"]), int(closing["points"]))
+        names = dev.gate_names
+        line = np.broadcast_to(v0, frac.shape + v0.shape).copy()
+        for g, dv in closed.items():
+            line[:, names.index(g)] += frac * dv
+        shut = v0.copy()
+        for g, dv in closed.items():
+            shut[names.index(g)] += dv
+        parked = {"open": _sensor_level_at(dev, v0, offset), "closed": _sensor_level_at(dev, shut, offset)}
+        jp = names.index("P1")
+        centre = {k: _dot1_degeneracy(dev, v0=x) for k, x in parked.items()}
+    n_trace, n_p1 = int(trace["points"]), int(p1_sweep["points"])
+    dp1 = np.linspace(-float(p1_sweep["half_span_v"]), float(p1_sweep["half_span_v"]), n_p1)
+    out: dict[str, np.ndarray] = {"closing_fraction": frac, "sample": np.arange(n_trace, dtype=float), "dp1_v": dp1}
+    with ctx.run(len(frac) + 2 * n_trace + 2 * n_p1):
+        rates = dev.at(line).sensor_gamma_hz
+        out["gamma_source_hz"], out["gamma_drain_hz"] = rates[:, 0], rates[:, 1]
+        for k, x in parked.items():
+            m = dev.session(noise=False).sense(x, dwell, samples=n_trace)
+            out[f"current_{k}_a"], out[f"sensor_charge_{k}"] = m.current_a, m.sensor_charge - np.min(m.sensor_charge)
+            up = np.broadcast_to(centre[k], (n_p1,) + v0.shape).copy()
+            up[:, jp] += dp1
+            s = dev.session(noise=False).sense(up, sweep_dwell)
+            out[f"sweep_current_{k}_a"], out[f"sweep_n1_{k}"] = s.current_a, s.n_present[:, 0]
+        ctx.count(model_evals=len(frac) + 2 * n_trace + 2 * n_p1)
+    out["sensor_rates_closed_hz"] = dev.at(parked["closed"]).sensor_gamma_hz
+    out["sensor_rates_open_hz"] = dev.at(parked["open"]).sensor_gamma_hz
+    return out

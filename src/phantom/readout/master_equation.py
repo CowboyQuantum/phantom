@@ -86,12 +86,15 @@ class RateEquation:
         states, _ = self.charge.energies(self.charge.induced_charge(np.asarray(v, dtype=float)))
         return _unique_states(states)
 
-    def rate_matrix(self, v: np.ndarray, states: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def rate_matrix(self, v: np.ndarray, states: np.ndarray, level_shift_ev: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
         """(energies (k,), W (k, k)) over the given states at `v`; W[j, i] is the rate from i to j and
-        W[i, i] = −Σ_j W[j, i]."""
+        W[i, i] = −Σ_j W[j, i]. `level_shift_ev` (2,) adds that energy per electron on each dot (the
+        charge sensor's back-action, ADR 0028); the rates keep detailed balance in the shifted energies."""
         v = np.asarray(v, dtype=float)
         states = np.asarray(states, dtype=int)
         u = self.charge.state_energies_ev(v, states)
+        if level_shift_ev is not None:
+            u = u + states @ np.asarray(level_shift_ev, dtype=float)
         k = len(u)
         w = np.zeros((k, k))
         index = {tuple(s): i for i, s in enumerate(states.tolist())}
