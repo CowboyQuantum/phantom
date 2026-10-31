@@ -1,0 +1,26 @@
+id: stability-vs-sweep-rate
+name: Coarse stability map at three dwell times
+step: 4
+description: The layout-derived coarse map scanned with 1 ms, 10 microseconds and 100 nanoseconds per point, with the lead rates to the reservoirs taken from the WKB barriers of the landscape at the operating point and a master equation over the charge states. At the long dwell the map is the equilibrium honeycomb; as the dwell falls below one over the lead rate the charge lags behind the plunger, lines fade and shift along the fast axis (P2), and at the shortest dwell the charge is frozen. Noise-free; the lead rate used is recorded in the arrays.
+layers: [layout, electrostatics, charge, readout]
+runner: step4:stability_vs_sweep_rate
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: -0.02, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: -0.02, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  dwell_s: [1.0e-3, 1.0e-5, 1.0e-7]
+sweep:
+  - {gate: P1, half_span_v: 0.06, points: 80, unit: V, relative_to: operating_point, axis_role: slow}
+  - {gate: P2, half_span_v: 0.06, points: 80, unit: V, relative_to: operating_point, axis_role: fast}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: current_dwell0_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "1 ms per point"}
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: current_dwell1_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "10 us per point"}
+    - {kind: map, x: v_p1_v, y: v_p2_v, z: current_dwell2_a, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "sensor current (A)", title: "100 ns per point"}
+budget:
+  compile: {wall_s: 1.0, solver_calls: 0}
+  run: {wall_ms_per_point: 2.0, points: 19200, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

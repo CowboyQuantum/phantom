@@ -1,0 +1,18 @@
+id: psb-readout-window
+name: Pauli spin blockade readout window for two valley draws
+step: 6
+description: Mean (0,2) occupation against detuning for a pair prepared as a singlet and as a triplet, for two valley-splitting draws of the receiving dot. The singlet tunnels into (0,2) at the anticrossing, broadened by the tunnel coupling of 20 ueV and the temperature; the triplet is blocked until the detuning exceeds the valley splitting, where the (0,2) triplet with one electron in the upper valley becomes available. The contrast between the two curves is the readout window, and a small valley draw leaves almost none (ADR 0021).
+layers: [valley, spin]
+runner: step6:psb_readout_window
+instance: {t0_uev: 20.0, temperature_k: 0.15, radius_nm: 10.0, material: SiGe, valley_seeds: [1, 3]}
+sweep:
+  - {axis: detuning, from: -100.0, to: 300.0, points: 801, unit: ueV}
+readout: {channel: sensor_conductance, unit: (0,2) occupation}
+render:
+  panels:
+    - {kind: line, x: eps_uev, y: [occupation_singlet, occupation_triplet_draw0, occupation_triplet_draw1], xlabel: "detuning (ueV)", ylabel: "(0,2) occupation", title: "singlet; triplet for two valley draws"}
+    - {kind: line, x: eps_uev, y: [contrast_draw0, contrast_draw1], xlabel: "detuning (ueV)", ylabel: "singlet - triplet contrast", title: "the readout window"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.01, points: 1602, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
