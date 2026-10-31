@@ -259,24 +259,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Status
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -293,58 +275,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues-from-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues from this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -559,47 +489,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues-from-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues from this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -619,56 +508,66 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> none in flight. Step 8's phantom side is released as <code>v0.2.0</code> (on <code>f72daac</code>); Steps 1–7 built
-(their open items are on #16, #17, #25, #28, #32, #34, #37: sign-offs, catalog entries, P1 rows, the solver).
-<strong>Branch:</strong> <code>issue-47/sensor-barriers-bath</code> (#47) from <code>main</code> at <code>84f9efa</code>; its pull request is open for review.
-<strong>Last session:</strong> 2026-10-29 — the owner asked for the charge sensor dot to have its own barriers and a bath that
-can be tuned: built as #47, <a href="../adr/0026-the-sensor-is-a-dot-with-its-own-barriers-and-bath/">ADR 0026</a>, 0.3.0
-(untagged, breaking: <code>CHANGELOG.md</code>).</p>
+<p><strong>Current step:</strong> none in flight. Step 8's phantom side was released as <code>v0.2.0</code> (on <code>f72daac</code>). Steps 1–7
+are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28,</p>
+<h1 id="32-34-and-37-030-is-untagged-and-now-carries-47-53-and-54-changelogmd">32, #34 and #37. 0.3.0 is untagged and now carries #47, #53 and #54 (<code>CHANGELOG.md</code>).</h1>
+<p><strong>Branch:</strong> <code>issue-54/sensor-charge-dynamics</code> (PR #56, against <code>main</code>). <code>main</code> is at <code>45e27a0</code>, the merge of</p>
+<h1 id="55-53">55 (#53).</h1>
+<p><strong>Last session:</strong> 2026-10-30. The owner asked for better charge dynamics for the sensor and for the
+gates to modulate them. Two decisions were taken that day:
+- <strong>Back-action:</strong> on, always with dynamics.
+- <strong>Release:</strong> both changes fold into the untagged 0.3.0.</p>
 <h2 id="done-this-session">Done this session</h2>
 <ul>
-<li><code>two_dot_layout</code> gains <code>SB_L</code>, <code>SB_R</code>, <code>SR_L</code>, <code>SR_R</code> after the first eight gates (<code>src/phantom/layout/geometry.py</code>).</li>
-<li>A compiled sensor with leads is a dot like the qubit dots: E_c and β from the three-dot capacitance matrix
-  (<code>charge/derived.py</code>), rates through its barriers with gate slopes and an attempt-rate ceiling, baths with a
-  turn-on (<code>readout/sensor.py</code>), a lifetime-broadened current (<code>readout/broadening.py</code>), compiled in
-  <code>compile/device.py</code>; <code>Device</code> format 2; <code>State</code>, <code>Knowable</code>, <code>SensorTruth</code> extended; contract and API snapshot
-  updated. The typed sensor is unchanged for layouts without sensor reservoirs.</li>
-<li>Reference programmed point adds <code>SB_L 0.4, SB_R 0.3, SR_L 0.7, SR_R 0.7</code> (set for seed 2).</li>
-<li><code>tests/test_sensor_leads.py</code> (18 P0); 155 tests; four protocols (<code>gallery/protocols/step7c.py</code>), 70 rendering
-  within budget, all unsigned; two <code>proposed</code> reference entries; <code>docs/MODELS.md</code>, <code>measured.json</code> re-recorded.</li>
+<li><strong>#53 (<a href="../adr/0027-the-qubit-dots-rates-follow-the-gates-at-runtime/">ADR 0027</a>): the qubit dots'
+  rates follow the gates.</strong></li>
+<li>Each <code>CompiledBarrier</code> carries its attempt rate, a tunnelling level held fixed, and the slopes of
+    ln Γ against every gate.</li>
+<li>At runtime, <code>readout.rates.GateRates</code> and <code>saturating_rates_hz</code> (shared with the sensor's leads)
+    give the rates, and <code>RateEquation.gate_rates</code> uses them.</li>
+<li><code>State</code>'s three rates are arrays. <code>DEVICE_FORMAT_VERSION</code> 3.</li>
+<li>New protocol <code>session-closing-barrier</code>. With B_L 0.1 V lower, Γ_L is about 10⁴ Hz, a sweep at
+    3 µs per point opens a 3.5 mV loop, and a parked session telegraphs.</li>
+<li><code>session-hold-relaxation</code> now overlays the total rate out of the held state. The interdot path
+    had doubled the relaxation rate before as well.</li>
+<li>Tests: <code>tests/test_dot_rates.py</code>, 9 P0.</li>
+<li><strong>#54 (<a href="../adr/0028-the-sensor-dots-charge-is-a-process-in-time-with-back-action/">ADR 0028</a>): the
+  sensor dot's charge is a process in time.</strong></li>
+<li>With dynamics, the sensor's charge is a birth–death chain over its levels with broadened
+    occupations, so its stationary current is exactly ADR 0026's.</li>
+<li>A sample reads the electrons that left to the drain during its dwell: from exact trajectories at
+    ≤ 200 jumps per dwell, otherwise a Gaussian with the full-counting-statistics variance.</li>
+<li>Back-action is −β_i·(M − M̄), against the sensor's stationary mean.</li>
+<li>New code: <code>readout.sensor_dynamics</code> and <code>Measurement.sensor_charge</code>.</li>
+<li>New protocol <code>session-slow-sensor</code>.</li>
+<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 10 P0.</li>
+<li><strong>Totals:</strong> 174 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>The pull request for #47: CI's ubuntu reference run and the Windows comparison (first cross-platform check of
-  the sensor slopes' central differences and the wing bisection, ADR 0014), and the preview at <code>/pr-&lt;n&gt;/</code>.</li>
-</ul>
-<h2 id="open-issues-from-this-session">Open issues from this session</h2>
-<ul>
-<li>
-<h1 id="48-sensor-rates-sensitivity-and-the-bath-gates-cross-talk-no-screening-plan-8-1">48 sensor rates' sensitivity and the bath gate's cross-talk (no screening; plan §8 #1).</h1>
-</li>
-<li>
-<h1 id="49-no-per-device-sensor-barrier-tune-4-of-12-seeds-form-no-device-at-the-common-point">49 no per-device sensor-barrier tune; 4 of 12 seeds form no device at the common point.</h1>
-</li>
-<li>
-<h1 id="50-the-gate-1f-noise-placeholder-is-about-ten-times-typical-and-now-visible-on-the-sensor">50 the gate 1/f noise placeholder is about ten times typical and now visible on the sensor.</h1>
-</li>
-<li>
-<h1 id="51-python-m-phantomcontract-cannot-print-on-a-cp1252-windows-console-bug">51 <code>python -m phantom.contract</code> cannot print on a cp1252 Windows console (bug).</h1>
-</li>
-<li>Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins; #41 later.</li>
+<li>PR #56 (#54) waits for the owner's review of its preview at <code>/pr-56/</code>. Its first Windows gallery
+  comparison failed by 1.5·10⁻⁹, from an exponential at ΓT ≈ 10⁸. The fix in <code>9a58df2</code> replaces it with
+  the relaxed closed form beyond 50 relaxation times (ADR 0028).</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>The owner reviews #47's pull request (the changed and the four new protocols in its preview, ADR 0026), merges it;
-then decides whether to tag <code>v0.3.0</code> (ADR 0025) and when qdt (CowboyQuantum/qdt #140, #142) moves its pin.</p>
+<p>The owner reviews and merges #56. They also decide whether to tag <code>v0.3.0</code>
+(ADR 0025) and when qdt moves its pin (CowboyQuantum/qdt #140, #142, and #169 for the run option).</p>
+<h2 id="open-issues">Open issues</h2>
+<h1 id="48-rates-unscreened-sensitivity-now-also-the-dots-p1-moves-_l-more-than-b_l-49-per-device">48 rates' unscreened sensitivity (now also the dots': P1 moves Γ_L more than B_L); #49 per-device</h1>
+<p>sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin driven by voltages.
+Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.</p>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li>Owner-dependent, never blocking: sign-offs for all 70 protocols; catalog entries #1–#14; confirming the ten
-  <code>proposed</code> reference entries.</li>
-<li>The dots' lead and interdot rates are constant at runtime; no screening until the FEM backend; placeholders
-  (<code>calibration: none</code>) as listed in the step files and ADRs 0019–0026.</li>
-<li>Cross-platform agreement (ADR 0014): avoid digit-cancelling quantities; use closed forms, grid points, bisection.</li>
-<li>Pages source is <code>gh-pages</code> (root); per-PR previews under <code>/pr-&lt;n&gt;/</code>.</li>
+<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 72 protocols; catalog entries #1–#14;
+  confirming the ten <code>proposed</code> reference entries.</li>
+<li><strong>Rates:</strong> linearised exponents within about 20 % of the compile tier over ±10 mV, drifting beyond
+  that. No screening until the FEM backend exists.</li>
+<li><strong>Sensor process:</strong> the split is first order within a dwell. The noise is sequential with broadened
+  occupations. There is no joint energy between the dots and the sensor (ADR 0028).</li>
+<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0028.</li>
+<li><strong>Cross-platform (ADR 0014):</strong> avoid digit-cancelling quantities; use closed forms, grid points and
+  bisection.</li>
+<li><strong>Pages:</strong> the source is <code>gh-pages</code> (root); per-PR previews are under <code>/pr-&lt;n&gt;/</code>.</li>
 </ul>
 
 

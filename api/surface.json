@@ -676,6 +676,11 @@
      "default": false,
      "name": "n_present",
      "type": "np.ndarray"
+    },
+    {
+     "default": true,
+     "name": "sensor_charge",
+     "type": "np.ndarray | None"
     }
    ],
    "frozen": true,

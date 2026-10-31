@@ -908,6 +908,13 @@ side.</p>
 against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
 voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
 <code>Truth</code> states the rates at the operating point.</p>
+<p>With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
+is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
+stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths
+reads single-electron bursts while its charge switches. <code>Measurement.sensor_charge</code> holds that charge at
+the end of each dwell (only its changes are physical). The sensor acts back: its charge relative to its
+stationary mean shifts each dot's levels by −β_i per electron. Without dynamics nothing of this applies,
+and a long <code>mean</code>-mode dwell still reads <code>State.sensor_current_a</code> (within 1e-6).</p>
 <h2 id="versions-and-releases">Versions and releases</h2>
 <ul>
 <li><code>phantom.__version__</code> follows semantic versioning in 0.x: the minor version rises for any breaking
@@ -933,6 +940,8 @@ parts; <code>spin_readout</code> shapes and clock.</p>
 <ul>
 <li>Every rate, the dots' and the sensor's, follows the gate voltages through a compiled exponential that
   holds within about 20 % of the compile tier's change over ±10 mV and drifts beyond (ADR 0026, 0027).</li>
+<li>Within one dwell the sensor sees the dots' charge at its end and the dots see the sensor's at its
+  start (a first-order splitting, ADR 0028).</li>
 <li><code>spin_readout</code> takes a prepared triplet probability; spin driven by gate voltages over time is
   issue #41.</li>
 </ul>

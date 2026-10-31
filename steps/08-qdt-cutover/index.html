@@ -611,6 +611,7 @@
 <li><code>session-charge-trace</code> — the charge a sample sees at a dot-lead degeneracy at three dwells, and the noisy read at 1 ms</li>
 <li><code>session-hold-relaxation</code> — the mean charge after a hold relaxing on exp(−Γ_out t) (every rate out of the held state at the read point), and one trajectory</li>
 <li><code>session-closing-barrier</code> — the dots' rates along B_L, a P1 sweep that latches into a loop with B_L closed, and a telegraph trace at the closed transition (#53, ADR 0027)</li>
+<li><code>session-slow-sensor</code> — the sensor's rates as its barriers close, shot noise against single-electron bursts and the sensor's own charge at a parked point, and a dot transition read by a fast and a slow sensor (#54, ADR 0028)</li>
 <li>each carries a <code>budget</code> (ADR 0009); all unsigned</li>
 </ul>
 <h2 id="exit-criteria">Exit criteria</h2>
