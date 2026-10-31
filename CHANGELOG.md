@@ -6,7 +6,7 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53, #54; untagged)
+## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53, #54; `v0.3.0` at `6920f19`)
 
 The charge sensor becomes a dot like the qubit dots, with its own tunnel barriers and a bath behind each
 that can be tuned (ADR 0026). Every compiled device's sensor changes. The qubit dots' lead and interdot
