@@ -20,6 +20,7 @@ qdt's `qdt-sim` becomes an adapter that pins a phantom release and contains no p
 - `session-charge-trace` — the charge a sample sees at a dot-lead degeneracy at three dwells, and the noisy read at 1 ms
 - `session-hold-relaxation` — the mean charge after a hold relaxing on exp(−Γ_out t) (every rate out of the held state at the read point), and one trajectory
 - `session-closing-barrier` — the dots' rates along B_L, a P1 sweep that latches into a loop with B_L closed, and a telegraph trace at the closed transition (#53, ADR 0027)
+- `session-slow-sensor` — the sensor's rates as its barriers close, shot noise against single-electron bursts and the sensor's own charge at a parked point, and a dot transition read by a fast and a slow sensor (#54, ADR 0028)
 - each carries a `budget` (ADR 0009); all unsigned
 
 ## Exit criteria

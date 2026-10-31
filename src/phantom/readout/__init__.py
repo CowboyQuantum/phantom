@@ -1,7 +1,8 @@
 """phantom.readout — Lead tunnel rates, master equation, latching, charge-sensor (SET) and RF response, noise processes (white, telegraph, 1/f, fluctuator ensembles) with explicit time steps. Seeded from qdt-sim's noise models (Step 1).
 
 Modules: `sensor` (SET sensor and single-dot transport current; a sensor dot's barriers and baths, `SensorLeads`),
-`broadening` (lifetime-broadened tunnelling through one level: occupation, lineshape, wing), `noise` (seeded processes with a time
+`broadening` (lifetime-broadened tunnelling through one level: occupation, lineshape, wing), `sensor_dynamics` (the sensor
+dot's charge as a process in time and the electrons it passes in a dwell), `noise` (seeded processes with a time
 axis), `measure` (a CI double dot read by the sensor with noise), `lockin` (the `sensor_lockin`
 hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only), `loading` (Step 1 placeholder for
 rate-limited loading; superseded for dynamics by `master_equation`), `rates` (WKB tunnel rates from barrier height
