@@ -1,7 +1,7 @@
 """phantom.spin — Few-qubit spin dynamics under pulses: Zeeman with gate-dependent g, exchange from `charge`, driving, hyperfine, Lindblad with dephasing from charge noise; Pauli spin blockade readout with the valley draw.
 
 Modules: `exchange` (J from the Hubbard two-electron sector, the detuning axis, dJ/dε, quasi-static
-averaging), `dynamics` (rotating-frame Hamiltonians, Lindblad propagator, Rabi and Ramsey limits, the
+averaging; J of the valence electrons in a compiled device's CI window, #60), `dynamics` (rotating-frame Hamiltonians, Lindblad propagator, Rabi and Ramsey limits, the
 spin draw, EDSR drive strength), `psb` (singlet and triplet charge steps, the readout window set by the
 valley splitting, visibility), `blockade` (bias triangles with Pauli blockade lifted by the valley
 splitting and by mixing), `mixing` (the spin funnel), `elzerman` (spin-dependent tunnelling shots),
@@ -35,7 +35,9 @@ from phantom.spin.exchange import (
     exchange_j_ev,
     exchange_second_order_ev,
     exchange_sensitivity_ev_per_ev,
+    local_exchange_ev,
     quasi_static_average,
+    singlet_exchange_ev,
     symmetric_point_v,
 )
 from phantom.spin.gates import average_gate_fidelity, entanglement_fidelity, swap_gate_fidelity
@@ -80,6 +82,7 @@ __all__ = [
     "exchange_sensitivity_ev_per_ev",
     "filter_frequency_hz",
     "funnel_singlet_probability",
+    "local_exchange_ev",
     "log_grid_hz",
     "omega_spectrum",
     "one_over_f_amplitude_sq",
@@ -93,6 +96,7 @@ __all__ = [
     "ramsey_probability",
     "readout_visibility",
     "rotating_frame_hamiltonian_ev",
+    "singlet_exchange_ev",
     "singlet_return_probability",
     "singlet_state",
     "swap_gate_fidelity",
