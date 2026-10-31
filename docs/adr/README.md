@@ -36,3 +36,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0030 | The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge | Accepted |
 | 0031 | The exchange of the dots' valence electrons follows the gates: the singlet secular equation on the CI window's local sector at the gated coupling and the shaped dots; the Pauli readout at the gated coupling | Accepted |
 | 0032 | The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden & Halperin's f(g), an effective interdot capacitance in the CI model | Accepted |
+| 0033 | Runtime gallery protocols run on a stored device: compiled once, committed, checked against a fresh compile | Accepted |

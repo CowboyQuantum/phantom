@@ -96,6 +96,11 @@ hexagons to the diagonal lines of one superdot.
   `spin.exchange` 3; `charge.shape` 2. Without a coupling and a
   shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.
 - The device file grows from about 14 kB to 62 kB (the shape grid); compile takes about 0.2 s more.
+- The runtime gallery protocols run on a device compiled once and stored under `docs/gallery/devices/`
+  (ADR 0033): compile's last digits differ between platforms by about 1e-12, which a latched transition
+  read on the sensor's flank amplified past the 1e-9 cross-platform tolerance. `scripts/gallery.py
+  --record-devices` stores them; `compile.compile_provenance()` gives what a device records about the code
+  (now including `charge.shape`). CI keeps the Windows arrays when the comparison fails.
 
 ## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53, #54; `v0.3.0` at `6920f19`)
 

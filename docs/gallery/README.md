@@ -43,6 +43,11 @@ The candidate roster for every step is `PROTOCOLS.md`; rows become protocol file
 | `signed_by`, `signed_on` | GitHub handle and date |
 | `notes` | what the review concluded the sweep must show, and what was changed to get there |
 
+The runtime protocols run on a device compiled once and stored under `devices/` (ADR 0033), so every
+platform runs the same compiled numbers. After a change to compile, `uv run python scripts/gallery.py
+--record-devices` stores them again; a stale or missing device stops the gallery, and
+`tests/test_gallery_devices.py` checks each stored device against a fresh compile within 1e-9.
+
 CI computes `array_sha256` on `ubuntu-latest`, the reference platform (ADR 0010), and fails if it differs from a signed record; the Windows job compares its arrays to the reference within 1e-9 relative (ADR 0014). A protocol
 with no record renders and is labelled *unsigned*. A session writes a record only when the human says
 so, naming them; their approval of the PR is the signature.

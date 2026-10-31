@@ -38,8 +38,13 @@ it closes. Decisions taken that day:
   - Reference entries `golden1996-peak-splitting`, `waugh1995-tunable-coupling` and
     `kemble1935-wkb-barrier` (`proposed`), plus the item `honeycomb-vs-interdot-coupling` of
     `vanderwiel2003-double-dot-transport`.
+- **Cross-platform (ADR 0033, this branch).** `session-closing-barrier` failed the Windows comparison at
+  1.1–2.2e-9. The Windows arrays (CI now keeps them on failure) showed compile's own numbers differing by
+  about 1e-12 between platforms, amplified about a thousand-fold by a latched transition read on the
+  sensor's flank. The runtime protocols now run on a device compiled once and stored under
+  `docs/gallery/devices/` (`--record-devices`); a P0 test checks it against a fresh compile within 1e-9.
 - **Release `v0.3.0`:** tagged and released as for `v0.2.0` (PR #57).
-- **Totals:** 208 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.
+- **Totals:** 210 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.
 
 ## In flight
 - PR #67 (#66): waits for the owner's review of `honeycomb-vs-barrier`.
