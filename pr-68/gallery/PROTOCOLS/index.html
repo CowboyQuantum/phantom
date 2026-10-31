@@ -1,0 +1,1301 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Protocol roster — proposed, for the owner to edit - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#protocol-roster-proposed-for-the-owner-to-edit" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Protocol roster — proposed, for the owner to edit
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#a-electrical-health-layout-electrostatics-step-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Electrical health (layout, electrostatics) — Step 2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#b-single-dot-and-sensor-formation-charge-readout-step-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Single dot and sensor formation (charge, readout) — Step 1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#c-double-dot-charge-stability-charge-readout-step-1-extended-in-step-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Double-dot charge stability (charge, readout) — Step 1, extended in Step 4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#d-noise-and-drift-readout-disorder-step-1-extended-in-steps-3-and-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D. Noise and drift (readout, disorder) — Step 1, extended in Steps 3 and 4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e-readout-hardware-readout-step-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E. Readout hardware (readout) — Step 4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#f-valley-and-excited-states-valley-charge-step-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F. Valley and excited states (valley, charge) — Step 5
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#g-spin-readout-exchange-and-control-spin-step-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G. Spin readout, exchange and control (spin) — Step 6
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#h-disorder-draws-layout-electrostatics-disorder-step-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H. Disorder draws (layout, electrostatics, disorder) — Step 3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#i-compiled-device-and-optimum-device-compile-optimum-step-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I. Compiled device and optimum (device, compile, optimum) — Step 7
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#j-the-consumer-session-device-step-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        J. The consumer session (device) — Step 8
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#candidates-not-included-for-the-owner-to-decide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Candidates not included, for the owner to decide
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="protocol-roster-proposed-for-the-owner-to-edit">Protocol roster — proposed, for the owner to edit</h1>
+<p>A candidate list of measurement protocols for the gallery (ADR 0008), gathered from the usual course of
+bringing up a gate-defined Si/SiGe or Si-MOS spin-qubit device: electrical health, forming dots and a
+sensor, double-dot charge stability, noise and drift, spin readout and control. Every row is <code>proposed</code>
+until the owner has reviewed it. Rows become one <code>protocols/&lt;id&gt;.yaml</code> each when their step opens.</p>
+<p>Conventions: <code>P</code> plunger, <code>B</code> barrier, <code>S</code> sensor plunger, <code>V_sd</code> source–drain bias, <code>B_ext</code> external
+field, <code>f</code> microwave frequency, <code>t</code> time, <code>ε</code> detuning, <code>τ</code> evolution or burst time. Readout channels:
+<code>current</code>, <code>sensor_conductance</code>, <code>sensor_lockin</code> (demodulated sensor response to a square-wave
+modulation of a named gate, with modulation amplitude and frequency as parameters), <code>rf_response</code>,
+<code>charge_state</code>, <code>spin_outcome</code>. "Step" is where the physics first exists; a protocol may be re-rendered
+at every later step. Any protocol can be rendered for a clean instance and for N disorder draws side by
+side once Step 3 exists; that is a render option, not a separate protocol. A numerical derivative of any
+map is likewise a render option; the hardware derivative (<code>sensor_lockin</code>) is a protocol of its own
+because it has its own physics (finite modulation amplitude, noise at the modulation frequency).</p>
+<h2 id="a-electrical-health-layout-electrostatics-step-2">A. Electrical health (layout, electrostatics) — Step 2</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>potential-map-layout</code></td>
+<td>(x, y) in the 2DEG plane at a named gate setting, gate polygons overlaid</td>
+<td>potential energy (meV)</td>
+<td>two wells and the barriers between them; the dot positions the layout implies</td>
+</tr>
+<tr>
+<td><code>potential-cut-along-channel</code></td>
+<td>position along the dot-to-dot axis, repeated for several barrier voltages</td>
+<td>potential energy (meV)</td>
+<td>the barrier height falling as the gate opens; the well depths</td>
+</tr>
+<tr>
+<td><code>gate-leakage-iv</code></td>
+<td>each gate vs. ground, wide V range</td>
+<td>leakage current</td>
+<td>~0 inside the safe window; onset of leakage at the extremes; an open gate shows no accumulation anywhere</td>
+</tr>
+<tr>
+<td><code>ohmic-iv</code></td>
+<td>V_sd, all gates accumulated</td>
+<td>current</td>
+<td>linear; series resistance</td>
+</tr>
+<tr>
+<td><code>turn-on-global</code></td>
+<td>all gates together</td>
+<td>current</td>
+<td>threshold, then saturation; MOS vs. SiGe threshold scale</td>
+</tr>
+<tr>
+<td><code>turn-on-single-gate</code></td>
+<td>one P, others fixed accumulated</td>
+<td>current</td>
+<td>threshold and saturation for that gate</td>
+</tr>
+<tr>
+<td><code>turn-on-single-gate-layout</code></td>
+<td>one barrier swept with every other gate open, from the layout</td>
+<td>current</td>
+<td>the channel opens where the energy under that barrier, the highest point along the channel, crosses the threshold; threshold and slope from the lever arms (Step 2)</td>
+</tr>
+<tr>
+<td><code>pinch-off-barrier</code></td>
+<td>one B, others fixed</td>
+<td>current</td>
+<td>exponential pinch-off; pinch-off voltage</td>
+</tr>
+<tr>
+<td><code>pinch-off-crosstalk</code></td>
+<td>B_i pinch-off repeated vs. V of gate j</td>
+<td>pinch-off voltage of i</td>
+<td>straight line; slope is the cross-capacitance ratio</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis</code></td>
+<td>one gate up then down</td>
+<td>current</td>
+<td>overlap for a clean device; a loop when charge trapping is present (Step 3)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="b-single-dot-and-sensor-formation-charge-readout-step-1">B. Single dot and sensor formation (charge, readout) — Step 1</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>coulomb-oscillations-single-dot</code></td>
+<td>P with barriers set</td>
+<td>current</td>
+<td>periodic peaks; spacing from the addition energy; peak width from temperature and lead coupling</td>
+</tr>
+<tr>
+<td><code>diamonds-single-dot</code></td>
+<td>(P, V_sd)</td>
+<td>current or dI/dV</td>
+<td>Coulomb diamonds; slopes equal the lever arms; height equals the addition energy</td>
+</tr>
+<tr>
+<td><code>barrier-barrier-map</code></td>
+<td>(B1, B2) at fixed P</td>
+<td>current</td>
+<td>the region where a dot forms; diagonal Coulomb lines; pinch-off corners (built for the sensor dot as <code>sensor-barrier-barrier-map</code>, section I)</td>
+</tr>
+<tr>
+<td><code>plunger-vs-barrier-map</code></td>
+<td>(P1 fast, lead barrier B_L slow) on the layout; dot 1's lead swept</td>
+<td>sensor_conductance, charge present and at equilibrium, lead rate per row</td>
+<td>the dot-1 lines tilt with the lever arm; as the barrier closes the WKB rate drops below the inverse dwell and the lines fade, latch along the row and carry across rows (master equation, Step 4)</td>
+</tr>
+<tr>
+<td><code>sensor-coulomb-peak</code></td>
+<td>S</td>
+<td>sensor_conductance</td>
+<td>one peak; the steep flank where the sensor is operated</td>
+</tr>
+<tr>
+<td><code>sensor-compensation-map</code></td>
+<td>(S, P of a dot)</td>
+<td>sensor_conductance</td>
+<td>tilted peak lines broken at the dot's charge transitions; slope gives the compensation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="c-double-dot-charge-stability-charge-readout-step-1-extended-in-step-4">C. Double-dot charge stability (charge, readout) — Step 1, extended in Step 4</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stability-coarse-2dot</code></td>
+<td>(P1, P2), wide</td>
+<td>sensor_conductance or charge_state</td>
+<td>honeycomb; transitions stop toward (0,0); lines of both dots visible with different slopes</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-layout</code></td>
+<td>as above, but every parameter except the sensor's per-electron coupling derived from a layout file; the sensor gate set on its flank first</td>
+<td>sensor_conductance</td>
+<td>the same honeycomb, with period e/C_gate and slopes from the derived cross lever arms (Step 2)</td>
+</tr>
+<tr>
+<td><code>stability-fine-2dot</code></td>
+<td>(P1, P2) around one pair of triple points</td>
+<td>sensor_conductance</td>
+<td>interdot line; broadening grows with t_c; the two triple points</td>
+</tr>
+<tr>
+<td><code>stability-lockin-p1</code></td>
+<td>(P1, P2) with a 0.5 mV square wave on P1</td>
+<td>sensor_lockin, plus the lead-rate map</td>
+<td>dot-1 lines as signed lines; where the lead rate is below the chop frequency the charge cannot follow and lines latch or vanish; where it is far above, lines are lifetime-broadened and fainter</td>
+</tr>
+<tr>
+<td><code>stability-lockin-p2</code></td>
+<td>same with the chop on P2</td>
+<td>sensor_lockin, plus N1 present</td>
+<td>dot-2 lines strong, dot-1 lines weak</td>
+</tr>
+<tr>
+<td><code>stability-lockin-common</code></td>
+<td>same with the chop on P1 and P2 together</td>
+<td>sensor_lockin</td>
+<td>both dots' lead lines; the interdot line weak</td>
+</tr>
+<tr>
+<td><code>stability-lockin-detuning</code></td>
+<td>same with the chop on P1 up and P2 down</td>
+<td>sensor_lockin, plus N1 present</td>
+<td>the interdot line strongest; lead lines of the two dots with opposite sign</td>
+</tr>
+<tr>
+<td><code>interdot-detuning-cut</code></td>
+<td>ε across (1,0)–(0,1) at fixed P1+P2</td>
+<td>sensor_conductance</td>
+<td>a step whose width gives t_c (and electron temperature at small t_c)</td>
+</tr>
+<tr>
+<td><code>tunnel-coupling-vs-barrier</code></td>
+<td>detuning cut repeated vs. B_interdot</td>
+<td>step width</td>
+<td>exponential t_c(V_B)</td>
+</tr>
+<tr>
+<td><code>detuning-cut-vs-temperature</code></td>
+<td>detuning cut vs. electron temperature</td>
+<td>step width</td>
+<td>thermal broadening floor; where t_c dominates</td>
+</tr>
+<tr>
+<td><code>bias-triangles</code></td>
+<td>(P1, P2) at finite V_sd</td>
+<td>current</td>
+<td>triangle pairs; edges give lever arms; excited-state lines inside</td>
+</tr>
+<tr>
+<td><code>stability-vs-sweep-rate</code></td>
+<td>(P1 slow, P2 fast) at several dwell times, lead rates from the layout's WKB barriers</td>
+<td>sensor_conductance</td>
+<td>the equilibrium honeycomb at long dwell; lines fade and shift along the fast axis as the dwell falls below one over the lead rate; frozen at the shortest (Step 4)</td>
+</tr>
+<tr>
+<td><code>stability-direction</code></td>
+<td>the same map at a lagging dwell, fast axis forward and backward</td>
+<td>sensor_conductance, charge difference</td>
+<td>latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4)</td>
+</tr>
+<tr>
+<td><code>stability-direction</code></td>
+<td>the same map at a lagging dwell, fast axis forward and backward</td>
+<td>sensor_conductance, charge difference</td>
+<td>latched transitions on opposite sides of their equilibrium position: the hysteresis of a latched diagram (Step 4)</td>
+</tr>
+<tr>
+<td><code>lead-rate-time-trace</code></td>
+<td>t after a plunger step across a transition, for several lead-barrier settings</td>
+<td>charge on the dot</td>
+<td>exponential relaxation whose rate is the WKB lead rate the layout predicts; decades of rate over a few hundred mV of barrier (Step 4)</td>
+</tr>
+<tr>
+<td><code>crosstalk-lines</code></td>
+<td>(P_i, P_j) for every pair incl. barriers</td>
+<td>sensor_conductance</td>
+<td>transition-line slopes; the full cross-capacitance (virtual-gate) matrix</td>
+</tr>
+</tbody>
+</table>
+<h2 id="d-noise-and-drift-readout-disorder-step-1-extended-in-steps-3-and-4">D. Noise and drift (readout, disorder) — Step 1, extended in Steps 3 and 4</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>noise-time-trace</code></td>
+<td>t at a fixed sensor flank, seconds to minutes</td>
+<td>sensor_conductance</td>
+<td>white noise, telegraph switching, slow drift, each visible</td>
+</tr>
+<tr>
+<td><code>noise-psd</code></td>
+<td>derived from the trace</td>
+<td>PSD</td>
+<td>1/f slope and amplitude at 1 Hz; white floor; Lorentzian bumps from fluctuators</td>
+</tr>
+<tr>
+<td><code>charge-noise-sensor-referred</code></td>
+<td>PSD at the sensor flank, divided by the flank slope and by the sensor's lever arm to a dot gate</td>
+<td>equivalent gate-voltage noise (V/√Hz) and energy noise (eV/√Hz) vs. f</td>
+<td>the charge-noise amplitude at 1 Hz and the 1/f exponent, in gate-referred units that can be compared with published values and with the qubit-side <code>charge-noise-spectroscopy-cpmg</code>; the same disorder draw must give both</td>
+</tr>
+<tr>
+<td><code>drift-repeated-cuts</code></td>
+<td>one P cut repeated over hours on a drawn device</td>
+<td>transition position vs. t</td>
+<td>slow drift from the 1/f ensemble's slowest fluctuators and jumps when a switcher flips (Step 4)</td>
+</tr>
+<tr>
+<td><code>stability-repeat-diff</code></td>
+<td>stability map twice, hours apart</td>
+<td>difference</td>
+<td>rigid shifts vs. local changes; which lines moved</td>
+</tr>
+<tr>
+<td><code>switcher-histogram</code></td>
+<td>long trace on a drawn device</td>
+<td>dwell-time histograms of the dominant switcher</td>
+<td>exponential dwell times in each level with the drawn up and down rates (Step 4)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="e-readout-hardware-readout-step-4">E. Readout hardware (readout) — Step 4</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rf-resonance</code></td>
+<td>carrier f, several sensor resistances</td>
+<td>rf_response amplitude and phase</td>
+<td>the tank resonance; the dip to zero at the matched resistance; the phase flipping by half a turn across the match (Step 4)</td>
+</tr>
+<tr>
+<td><code>rf-sensor-flank</code></td>
+<td>S at the resonance</td>
+<td>DC current, sensor resistance, reflected amplitude</td>
+<td>the same flank as the DC peak in reflected signal, steepest where the resistance crosses the match (Step 4)</td>
+</tr>
+<tr>
+<td><code>single-shot-histogram</code></td>
+<td>many consecutive shots at a readout point</td>
+<td>counts vs. integrated signal, shot sequence</td>
+<td>bimodal histogram, one electron apart; both peaks moved by 1/f and telegraph noise between shots (Step 4)</td>
+</tr>
+<tr>
+<td><code>snr-vs-integration-time</code></td>
+<td>integration time</td>
+<td>SNR, fidelity</td>
+<td>square-root growth while white noise dominates, saturation and decline once slow noise moves the distributions (Step 4)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="f-valley-and-excited-states-valley-charge-step-5">F. Valley and excited states (valley, charge) — Step 5</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>magnetospectroscopy-transition</code></td>
+<td>charge-transition position vs. B_ext</td>
+<td>sensor_conductance</td>
+<td>kink where the Zeeman energy equals the valley splitting</td>
+</tr>
+<tr>
+<td><code>pulsed-gate-spectroscopy</code></td>
+<td>pulse amplitude vs. P</td>
+<td>sensor_conductance</td>
+<td>excited-state lines; orbital and valley spacings</td>
+</tr>
+<tr>
+<td><code>valley-splitting-draws</code></td>
+<td>N disorder draws</td>
+<td>valley splitting</td>
+<td>the distribution across dots and the fraction below a usable threshold</td>
+</tr>
+<tr>
+<td><code>t1-hot-spot</code></td>
+<td>relaxation time vs. B_ext</td>
+<td>T1</td>
+<td>the dip where the Zeeman and valley energies cross</td>
+</tr>
+</tbody>
+</table>
+<h2 id="g-spin-readout-exchange-and-control-spin-step-6">G. Spin readout, exchange and control (spin) — Step 6</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>psb-bias-triangles</code></td>
+<td>(P1, P2) at finite V_sd across (1,1)–(0,2)</td>
+<td>current</td>
+<td>current suppressed at the triangle base; lifted at B_ext = 0 or by mixing</td>
+</tr>
+<tr>
+<td><code>psb-readout-window</code></td>
+<td>ε after loading a random spin state</td>
+<td>sensor_conductance</td>
+<td>the detuning window where singlet and triplet differ; latched vs. unlatched variants</td>
+</tr>
+<tr>
+<td><code>spin-funnel</code></td>
+<td>(ε, B_ext) with a short wait</td>
+<td>singlet probability</td>
+<td>the funnel of S–T₋ mixing</td>
+</tr>
+<tr>
+<td><code>elzerman-trace</code></td>
+<td>t after pulsing to the read level</td>
+<td>charge_state</td>
+<td>spin-dependent tunnel-out blips; the read window</td>
+</tr>
+<tr>
+<td><code>esr-line</code></td>
+<td>(B_ext, f)</td>
+<td>spin_outcome</td>
+<td>one resonance line per dot; slope gives the g-factor; splitting between dots</td>
+</tr>
+<tr>
+<td><code>rabi-chevron</code></td>
+<td>(f − f₀, τ)</td>
+<td>spin_outcome</td>
+<td>the chevron; Rabi frequency vs. drive</td>
+</tr>
+<tr>
+<td><code>ramsey-fringes</code></td>
+<td>τ at fixed detuning</td>
+<td>spin_outcome</td>
+<td>fringes with a decaying envelope; T₂*</td>
+</tr>
+<tr>
+<td><code>exchange-fingerprint</code></td>
+<td>(ε, τ) after a singlet is separated into (1,1)</td>
+<td>singlet probability</td>
+<td>the fingerprint: oscillations whose frequency J(ε)/h rises toward the (0,2) anticrossing and whose visibility decays with charge noise, fastest where dJ/dε is largest</td>
+</tr>
+<tr>
+<td><code>exchange-house-cells</code></td>
+<td>(P1, P2) around the evolve coordinate, with J held at a high value by the interdot barrier, at fixed τ</td>
+<td>singlet probability</td>
+<td>the house-cell pattern: cells of constant singlet return bounded by the charge-transition lines of the honeycomb and by contours of constant J; the evolve point sits inside a cell; cell edges move with the barrier setting</td>
+</tr>
+<tr>
+<td><code>exchange-vs-detuning</code></td>
+<td>J extracted from the fingerprint vs. ε</td>
+<td>J</td>
+<td>the J(ε) curve; its slope dJ/dε, which sets charge-noise sensitivity</td>
+</tr>
+<tr>
+<td><code>exchange-vs-barrier</code></td>
+<td>J extracted vs. B_interdot at the symmetric point</td>
+<td>J</td>
+<td>exponential</td>
+</tr>
+<tr>
+<td><code>charge-noise-spectroscopy-cpmg</code></td>
+<td>number of π pulses at fixed total τ, on a charge-sensitive qubit state (exchange or detuning)</td>
+<td>coherence vs. filter frequency</td>
+<td>S_ε(f) over the kHz–MHz decades, with the exponent of the 1/f^α law; must join the sensor <code>noise-psd</code> at low frequency with the same amplitude scaling</td>
+</tr>
+<tr>
+<td><code>charge-noise-spectroscopy-j-vs-ramsey</code></td>
+<td>Ramsey T₂* vs. ε (through dJ/dε)</td>
+<td>T₂*</td>
+<td>T₂* ∝ 1/(dJ/dε) × noise amplitude; a direct check that the same charge-noise draw governs the qubit and the sensor</td>
+</tr>
+<tr>
+<td><code>exchange-gate-fidelity</code></td>
+<td>operating ε of a SWAP gate (J on for πħ/J), noiseless and for two noise draws</td>
+<td>average gate fidelity</td>
+<td>the sweet spot at the symmetric point; infidelity growing as (dJ/dε σ_ε)² toward the anticrossing; the two draws differ by their 1/f amplitude (Step 6 exit criterion)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h-disorder-draws-layout-electrostatics-disorder-step-3">H. Disorder draws (layout, electrostatics, disorder) — Step 3</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>potential-map-disorder</code></td>
+<td>(x, y) landscape, clean beside three seeded draws</td>
+<td>potential energy (meV), gate outlines</td>
+<td>the gate layer shifted and resized; charge dips and bumps (visible at MOS densities, below a meV for SiGe)</td>
+</tr>
+<tr>
+<td><code>stability-coarse-2dot-disorder</code></td>
+<td>(P1, P2) coarse map, clean beside three draws, each re-derived</td>
+<td>sensor_conductance</td>
+<td>lines tilt and shift, periods change between draws; an extra family of lines when a draw has an unintentional minimum</td>
+</tr>
+<tr>
+<td><code>unintentional-dots</code></td>
+<td>charge-density severity, many draws</td>
+<td>extra minima in the channel (count)</td>
+<td>the mean and 90th percentile of extra minima and the fraction of affected draws rising with density; the P1 row compares with a published MOS/SiGe comparison</td>
+</tr>
+<tr>
+<td><code>fault-signatures-stability</code></td>
+<td>(P1, P2) coarse map, programmed voltages, clean wiring and named faults</td>
+<td>sensor_conductance</td>
+<td>one dot's lines faint (sensor asymmetry); a barrier following a plunger (short) changes that dot's slopes and spacing; an open barrier floating at a stuck potential shifts the lines</td>
+</tr>
+<tr>
+<td><code>gate-leakage-pair</code></td>
+<td>one gate swept, others grounded, with a finite resistance to a neighbour</td>
+<td>leakage current of both gates</td>
+<td>equal and opposite linear currents on the pair on top of the dielectric leakage; the healthy curve flat</td>
+</tr>
+<tr>
+<td><code>gate-hysteresis-trapping</code></td>
+<td>one gate up then down with trapping</td>
+<td>current, trapped fraction</td>
+<td>a loop: the downward trace turns off at a shifted voltage; the trapped fraction charges above capture and releases below release</td>
+</tr>
+</tbody>
+</table>
+<h2 id="i-compiled-device-and-optimum-device-compile-optimum-step-7">I. Compiled device and optimum (device, compile, optimum) — Step 7</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compiled-device-roundtrip</code></td>
+<td>(P1, P2) coarse map from a compiled device and from its JSON reload</td>
+<td>sensor_conductance, difference</td>
+<td>the honeycomb of the compiled device; a difference that is identically zero; a device file of a few kilobytes</td>
+</tr>
+<tr>
+<td><code>virtual-gates-map</code></td>
+<td>(P1, P2) raw beside (virtual P1, virtual P2) from the optimum's virtual-gate matrix</td>
+<td>sensor_conductance</td>
+<td>tilted lines in raw plungers; each dot's lines perpendicular to its own virtual axis</td>
+</tr>
+<tr>
+<td><code>optimum-sensor-flank</code></td>
+<td>SG ±30 mV around the compiled set-point (about two periods of the sensor dot)</td>
+<td>sensor current, slope, the optimum's marker</td>
+<td>the Coulomb peak; the steepest flank chosen by the optimum; peaks growing along SG as it opens the sensor's barriers</td>
+</tr>
+<tr>
+<td><code>optimum-coupling-target</code></td>
+<td>interdot barrier gate around the operating point</td>
+<td>t at the compile tier and from the runtime exponential; chosen voltages</td>
+<td>the exponential holding near the operating point and flattening where the dots merge; the optimum's choices on the compile-tier curve</td>
+</tr>
+<tr>
+<td><code>optimum-readout-point</code></td>
+<td>detuning; time after the read pulse</td>
+<td>blockade contrast, Elzerman empty probability, the chosen points</td>
+<td>the read point at the contrast maximum; the read time at the empty-probability peak</td>
+</tr>
+<tr>
+<td><code>optimum-sweet-spot</code></td>
+<td>detuning through the symmetric point</td>
+<td>SWAP infidelity, J</td>
+<td>the infidelity minimum at the chosen sweet spot</td>
+</tr>
+<tr>
+<td><code>compiled-device-draws</code></td>
+<td>seed (twelve devices from one layout)</td>
+<td>t, lead rates, sensor rates, valley splittings, contrast, infidelity</td>
+<td>a population with decades of spread in t, the lead rates and the sensor rates; the trade between blockade contrast and gate fidelity; devices that do not form</td>
+</tr>
+<tr>
+<td><code>sensor-bath-turn-on</code></td>
+<td>each sensor bath gate SR_L, SR_R from 0 to 0.8 V</td>
+<td>bath occupation, sensor current (log, 1 fA floor)</td>
+<td>each bath filling at its threshold; no current while a bath is empty; the bath gate's cross-talk on the adjacent sensor barrier (ADR 0026)</td>
+</tr>
+<tr>
+<td><code>sensor-barrier-barrier-map</code></td>
+<td>(SB_L, SB_R) ±60 mV at the compiled sensor plunger</td>
+<td>sensor current, effective tunnel rate</td>
+<td>the roster's <code>barrier-barrier-map</code> for the sensor dot: the pinch-off corner, a diagonal Coulomb line, the open corner</td>
+</tr>
+<tr>
+<td><code>sensor-barrier-rates</code></td>
+<td>SB_L ±40 mV from the leads' anchor</td>
+<td>both sensor rates at the compile tier and from the runtime exponential</td>
+<td>agreement at the anchor; the source rate steep, the drain rate through cross-talk; the attempt-rate ceiling</td>
+</tr>
+<tr>
+<td><code>sensor-peak-broadening</code></td>
+<td>SG across one peak at five symmetric sensor-barrier offsets</td>
+<td>sensor current; peak conductance in e²/h; lifetime over thermal width</td>
+<td>peaks rising while thermally broadened, then broadening with their height bounded by e²/h</td>
+</tr>
+</tbody>
+</table>
+<h2 id="j-the-consumer-session-device-step-8">J. The consumer session (device) — Step 8</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>sweep</th>
+<th>readout</th>
+<th>must show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session-charge-trace</code></td>
+<td>samples at a dot-lead degeneracy, dwell 0.02, 0.5 and 50 times 1/Γ_L, and 1 ms with noise</td>
+<td>charge present, sensor current</td>
+<td>runs of one charge state at the short dwell; independent draws at the long dwell; the noisy read at 1 ms</td>
+</tr>
+<tr>
+<td><code>session-hold-relaxation</code></td>
+<td>time after a step from a held point to one an electron away</td>
+<td>mean charge, exp(−Γ_L t), one trajectory</td>
+<td>the mean on the exponential; one trajectory stepping once</td>
+</tr>
+</tbody>
+</table>
+<h2 id="candidates-not-included-for-the-owner-to-decide">Candidates not included, for the owner to decide</h2>
+<ul>
+<li>Multi-dot arrays (linear 3+ dots): per-pair stability maps and sensor coverage. Deferred until a layout step defines arrays.</li>
+<li>Anything for germanium holes (ADR 0002 lists it as later): g-tensor anisotropy, spin–orbit field.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

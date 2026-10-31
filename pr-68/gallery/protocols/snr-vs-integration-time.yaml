@@ -1,0 +1,22 @@
+id: snr-vs-integration-time
+name: Readout signal-to-noise and fidelity against integration time
+step: 4
+description: The two-state discrimination at the sensor flank for integration times from 10 microseconds to 30 ms, 400 shots each. The signal-to-noise ratio grows as the square root of the integration time while white readout noise dominates (the dotted law is the square-root extrapolation from the shortest time), then saturates and falls once shots are long enough for 1/f drift and telegraph switching to move the two distributions. The second panel is the single-shot fidelity at the midpoint threshold. Placeholder noise (calibration none).
+layers: [charge, readout]
+runner: step4:snr_vs_integration_time
+instance:
+  seed: 0
+  sensor_flank_widths: 0.9
+  tau_s: [1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2]
+  n_shots: 400
+sweep:
+  - {axis: integration_time, points: 8, unit: s}
+readout: {channel: sensor_conductance, unit: dimensionless}
+render:
+  panels:
+    - {kind: line, x: tau_s, y: [snr, sqrt_law], xlabel: "integration time (s)", ylabel: "signal-to-noise ratio", log_x: true, log_y: true, title: "SNR and the square-root law"}
+    - {kind: line, x: tau_s, y: fidelity, xlabel: "integration time (s)", ylabel: "fidelity", log_x: true, title: "single-shot fidelity"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 5.0, points: 3200, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
