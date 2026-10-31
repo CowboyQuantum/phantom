@@ -545,6 +545,11 @@ dots' positions and shape, and later the exchange. Decisions taken that day:
     left a seam at t ≈ 1 meV. The statics now use ±4, and the dynamics a window chosen by t/E_add
     (<code>dynamics_window</code>). A 10⁻¹⁵ perturbation now moves <code>interdot-line-vs-barrier</code> by 3·10⁻¹¹, and a P0
     test holds the seam below 10⁻¹⁰.</li>
+<li><strong>The session's propagator.</strong> <code>session-closing-barrier</code> then differed by 1.1·10⁻⁹ on Windows. A latched
+    slow transition is read through entries of exp(W·dt) that <code>expm</code> keeps only to about ε‖W·dt‖ in
+    absolute terms. <code>propagator</code> keeps every entry's relative accuracy (non-negative Taylor steps and
+    squarings). <code>State</code> also keeps its last diagonalisation, which cuts that protocol's compile phase
+    from 1.0 s to 0.6 s.</li>
 <li><strong>Release <code>v0.3.0</code>:</strong> tagged and released as for <code>v0.2.0</code> (PR #57).</li>
 <li><strong>Totals:</strong> 193 tests; 74 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
