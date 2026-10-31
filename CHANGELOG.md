@@ -58,7 +58,9 @@ release.
 ### Changed
 - `session-closing-barrier` sweeps three ways: barriers open, B_L closed alone (loaded through dot 2),
   and B_L and B_M closed (latching, telegraph); its budget rises from 1,665 to 2,067 points.
-- Model versions: `charge.hybrid` 1 (new), `charge.shape` 1 (new), `readout.master_equation` 2,
+- The hybridized window is ±4 in the statics and follows t in the dynamics, so the window's truncation no
+  longer leaves a seam at the middle of an interdot segment, where rint(n_g) changes (ADR 0030).
+- Model versions: `charge.hybrid` 2 (new), `charge.shape` 1 (new), `readout.master_equation` 3,
   `compile.device` 5, `device` 6, `device.session` 6, `optimum.targets` 3. Without a coupling and a
   shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.
 - The device file grows from about 14 kB to 62 kB (the shape grid); compile takes about 0.2 s more.

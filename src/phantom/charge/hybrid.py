@@ -18,10 +18,14 @@ half the slopes of ln Γ_m, since the interdot rate and t² come from the same t
 t ∝ √T, ADR 0027). It saturates at t_max = ħω₀/π, which is compile's estimate t = ħω₀√T/π at full
 transmission (the barrier between the dots gone).
 
-The window is the CI window's (2w+1)² grid around the gate-induced charge, its centre held at or above
-zero electrons. A state with a negative occupation is left out: its energy is +inf and it couples to
-nothing. Each total charge is one block, a chain of at most 2w + 1 states, so a gate point costs a few
-small symmetric diagonalisations, done in batches.
+The window is a (2w+1)² grid around the gate-induced charge, its centre held at or above zero
+electrons. A state with a negative occupation is left out: its energy is +inf and it couples to nothing.
+Each total charge is one block, a chain of at most 2w + 1 states, so a gate point costs a few small
+symmetric diagonalisations, done in batches. Truncating a chain leaves out admixtures of order
+(t/E_add)^(2w); the centre rint(n_g) changes at half-integer n_g, the middle of every interdot segment, so
+the truncation must stay far below the cross-platform tolerance there (ADR 0014). The statics use
+`STATIC_WINDOW` = 4 (below 10⁻¹² up to t's ceiling), and the dynamics `dynamics_window(t / E_add)`, the
+smallest window whose truncation is below 10⁻¹³.
 """
 
 from __future__ import annotations
@@ -33,7 +37,22 @@ from scipy.special import expit
 
 from phantom.charge.shape import ShapeGrid
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: the statics' window is ±4 and the dynamics' follows t (#59, ADR 0029): the truncation no longer
+shows at the middle of an interdot segment."""
+
+STATIC_WINDOW = 4
+"""Half-width of the hybridized window in the statics: chains of up to nine states."""
+
+
+def dynamics_window(t_over_e_add: float) -> int:
+    """The smallest window half-width whose truncation, about (t/E_add)^(2w), stays below 10⁻¹³ at the
+    ratio of t to the smaller addition energy: 2 below 10⁻³, 3 below 1.5·10⁻², 4 above (measured on the
+    reference device, where the error at t/E_add = 0.1 is 2·10⁻⁵, 4·10⁻⁹ and 2·10⁻¹³ for w = 2, 3, 4)."""
+    if t_over_e_add < 1e-3:
+        return 2
+    return 3 if t_over_e_add < 1.5e-2 else 4
+
 
 EXCLUDED_GAP_EV = 1.0
 """How far above the block's highest allowed level a left-out state is put before the diagonalisation,
@@ -219,4 +238,4 @@ def eigenbasis(states: np.ndarray, u: np.ndarray, t_ev: float) -> tuple[np.ndarr
     return energies, vectors
 
 
-__all__ = ["EXCLUDED_GAP_EV", "MODEL_VERSION", "InterdotCoupling", "WindowEigenstates", "boltzmann", "eigenbasis", "grid_offsets", "window_eigenstates"]
+__all__ = ["EXCLUDED_GAP_EV", "MODEL_VERSION", "STATIC_WINDOW", "InterdotCoupling", "WindowEigenstates", "boltzmann", "dynamics_window", "eigenbasis", "grid_offsets", "window_eigenstates"]

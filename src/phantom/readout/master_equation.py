@@ -49,18 +49,20 @@ a coupling, a few small diagonalisations more.
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass
 
 import numpy as np
 from scipy.linalg import expm
 
 from phantom.charge.ci import ConstantInteractionParams
-from phantom.charge.hybrid import eigenbasis
+from phantom.charge.hybrid import dynamics_window, eigenbasis
 from phantom.constants import K_B_EV_PER_K
 from phantom.readout.rates import GateRates
 
-MODEL_VERSION = 2
-"""2: with an interdot coupling, the rate equation runs over the hybridized eigenstates (#58)."""
+MODEL_VERSION = 3
+"""2: with an interdot coupling, the rate equation runs over the hybridized eigenstates (#58). 3: its
+window follows t (`dynamics_window`), and with a shape its energies use C(V) (#59)."""
 
 PROBABILITY_FLOOR = 1e-12
 """States below this probability are dropped from the active set between samples."""
@@ -137,8 +139,14 @@ class RateEquation:
         return K_B_EV_PER_K * max(self.charge.temperature_k, 1e-6)
 
     def window_states(self, v: np.ndarray) -> np.ndarray:
-        """The CI occupation window at `v`, without duplicates."""
-        states, _ = self.charge.energies(self.charge.induced_charge(np.asarray(v, dtype=float)))
+        """The CI occupation window at `v`, without duplicates; with a coupling, as wide as t there needs
+        (`charge.hybrid.dynamics_window`) for the truncated chains to stay exact (ADR 0029)."""
+        v = np.asarray(v, dtype=float)
+        ci = self.charge
+        if ci.coupling is not None:
+            ratio = float(ci.tunnel_coupling_ev(v)) / float(np.min(ci.addition_energies_ev()))
+            ci = dataclasses.replace(ci, window=max(ci.window, dynamics_window(ratio)))
+        states, _ = ci.energies(ci.induced_charge(v), None if ci.shape is None else ci._c_inv(v))
         return _unique_states(states)
 
     def rate_matrix(self, v: np.ndarray, states: np.ndarray, level_shift_ev: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:

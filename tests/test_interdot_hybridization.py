@@ -200,3 +200,22 @@ def test_a_session_reads_the_eigenstates(device: Device):
     assert np.all(np.abs(frac - 0.5) < 0.2), "each sample reads an eigenstate's split, not 0 or 1"
     m = device.session(noise=False, charge="mean").sense(centre, 1.0).n_present
     np.testing.assert_allclose(m, s.n_mean, atol=1e-9)
+
+
+def test_the_middle_of_an_interdot_segment_has_no_seam(device: Device):
+    """The window is centred on rint(n_g), which changes at the middle of every interdot segment
+    (n_g = N + ½). With t near a meV a chain truncated at ±2 states would leave a seam of 2·10⁻⁵ e there;
+    the statics' ±4 window and the dynamics' window chosen by t keep it below 10⁻¹² (ADR 0014, 0029)."""
+    jb = device.gate_names.index("B_M")
+    v0 = np.array(device.programmed_point_v)
+    v0[jb] += 0.012
+    centre, d = _interdot_point(device, v0)
+    vc = device.effective_voltages(centre)
+    ci = device.runtime_ci()
+    assert np.allclose(ci.induced_charge(vc) % 1.0, 0.5, atol=1e-9), "on the tie"
+    assert float(ci.tunnel_coupling_ev(vc)) > 5e-4
+    step = 1e-12 * d
+    below, above = ci.mean_occupation(device.effective_voltages(centre - step)), ci.mean_occupation(device.effective_voltages(centre + step))
+    np.testing.assert_allclose(above, below, atol=1e-10)
+    m = device.session(noise=False, charge="mean").sense(centre, 1.0).n_present
+    np.testing.assert_allclose(m, device.at(centre).n_mean, atol=1e-9), "the dynamics' window agrees with the statics'"

@@ -55,6 +55,16 @@ operating point. The runtime interpolates each gate's changes and adds them. Spe
     grid (t from half the interdot change). The compiled slopes still serve every other gate.
 - **The consumer surface.** `State` gains `dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and
   `dots_merged`. `optimum(device).coupling` inverts t along the barrier gate by Brent's method.
+- **The hybridized window (amends ADR 0029).**
+  - The window centres on rint(n_g), which changes at the middle of every interdot segment
+    (n_g = N + ½), the very point a tune-up reads. With t near a meV the ±2 chains of ADR 0029 left a seam
+    of 2·10⁻⁵ e there. The first Windows comparison of this change differed by 1.8·10⁻⁵ when last-digit
+    rounding put a point on the other side.
+  - The statics now use a ±4 window. Its truncation, about (t/E_add)^(2w), stays below 10⁻¹² up to t's
+    ceiling, at about 25 µs per point instead of 7.
+  - The dynamics use the smallest window whose truncation is below 10⁻¹³ at each sample's t
+    (`dynamics_window`): ±2 below t/E_add = 10⁻³, ±3 below 1.5·10⁻², ±4 above.
+  - `charge.hybrid` 2, `readout.master_equation` 3.
 - **Release.** 0.4.0. Model versions: `charge.shape` 1, `compile.device` 5, `device` 6,
   `device.session` 6, `optimum.targets` 3.
 

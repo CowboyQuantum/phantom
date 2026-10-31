@@ -34,7 +34,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from phantom.charge.hybrid import InterdotCoupling, WindowEigenstates, boltzmann, window_eigenstates
+from phantom.charge.hybrid import (
+    STATIC_WINDOW,
+    InterdotCoupling,
+    WindowEigenstates,
+    boltzmann,
+    window_eigenstates,
+)
 from phantom.charge.shape import ShapeGrid
 from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
@@ -210,7 +216,8 @@ class ConstantInteractionParams:
         """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`)."""
         v = np.asarray(v, dtype=float)
         c_inv = None if self.shape is None else self._c_inv(v)
-        return window_eigenstates(self.induced_charge(v), self.window, lambda states, n_g: self._grid_energies(states, n_g, c_inv), self.tunnel_coupling_ev(v), level_shift_ev)
+        window = max(self.window, STATIC_WINDOW)
+        return window_eigenstates(self.induced_charge(v), window, lambda states, n_g: self._grid_energies(states, n_g, c_inv), self.tunnel_coupling_ev(v), level_shift_ev)
 
     def _grid_energies(self, states: np.ndarray, n_g: np.ndarray, c_inv: np.ndarray | None = None) -> np.ndarray:
         """U(N) (..., K) of the states (..., K, 2) around `n_g` (..., 2), +inf for a negative occupation."""

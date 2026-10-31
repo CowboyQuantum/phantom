@@ -34,8 +34,13 @@ dots' positions and shape, and later the exchange. Decisions taken that day:
   - **Tests** now follow one transition by its electron count, because barrier gates move the plunger
     lines (absolute charge). The isolated-dot configuration is B_L −0.11 and B_M −0.05.
   - New protocol `dot-shape-vs-barrier`. Tests: `tests/test_dot_shape.py`, 9 P0.
+  - **The hybridized window (amends ADR 0029).** The first Windows comparison of this PR differed by
+    1.8·10⁻⁵ at the middle of an interdot segment. There rint(n_g) ties, and the ±2 chains' truncation
+    left a seam at t ≈ 1 meV. The statics now use ±4, and the dynamics a window chosen by t/E_add
+    (`dynamics_window`). A 10⁻¹⁵ perturbation now moves `interdot-line-vs-barrier` by 3·10⁻¹¹, and a P0
+    test holds the seam below 10⁻¹⁰.
 - **Release `v0.3.0`:** tagged and released as for `v0.2.0` (PR #57).
-- **Totals:** 192 tests; 74 protocols within budget, all unsigned; contract OK; ledger re-recorded.
+- **Totals:** 193 tests; 74 protocols within budget, all unsigned; contract OK; ledger re-recorded.
 
 ## In flight
 - The PR for #59 waits for the owner's review of its preview at `/pr-<n>/`. Start with
