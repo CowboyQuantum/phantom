@@ -918,6 +918,13 @@ charge hybridize through it. An interdot line is then the two-level polarization
 eigenstates, and a session's dynamics run over them. A dot is isolated only when its own barrier and the
 interdot barrier are both closed: with B_M open, dot 2's lead loads dot 1 in second order in t.
 <code>optimum(device).coupling</code> inverts this t along the barrier gate.</p>
+<p>The barrier gates also move and reshape the dots (ADR 0030). Compile re-derives the double dot along
+each barrier gate, and at runtime the capacitances, lever arms and offsets at the dots, t and the rates
+follow it. <code>State.dot_positions_nm</code>, <code>dot_radii_nm</code> and <code>addition_energies_ev</code> report the shape, and
+<code>State.dots_merged</code> flags a point where a barrier gate is opened past the last point at which the
+potential forms two dots; the shape there is held at that point, and the charge model is not meant to
+describe it. Because the dots' charge is counted absolutely, a barrier gate moves the plunger lines by more
+than its cross-capacitance.</p>
 <p>With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
 stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths
