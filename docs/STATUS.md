@@ -53,7 +53,7 @@ it closes. Decisions taken that day:
 - This branch's PR: the changelog heading names the tag, and this file.
 
 ## Next action
-qdt moves its pin to `v0.4.0` when the owner decides. Its adapter must handle:
+qdt moves its pin to `v0.4.0` when the owner decides; the handoff is CowboyQuantum/qdt #172. Its adapter must handle:
 - device format 5;
 - the eigenstate charge in `n_present` (round it to label charge states);
 - the new `State` fields (rates, coupling, shape, exchange frequency, interdot conductance and splitting);
