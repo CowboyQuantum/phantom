@@ -38,7 +38,8 @@ flowchart LR
 
   subgraph charge
     DER["derived.derive_double_dot<br/>C_dot from radii, C_gate = C_dot·α → ConstantInteractionParams; sensor α from the basis; sensor E_c and β from the three-dot capacitance matrix (ADR 0026)"]
-    CI["ci.ConstantInteractionParams<br/>occupation N(V) at width kT; lever arms, triple points"]
+    CI["ci.ConstantInteractionParams<br/>occupation N(V) at width kT; lever arms, triple points; with a coupling, the hybridized window's thermal ⟨N⟩ (ADR 0029)"]
+    HYB["hybrid.InterdotCoupling, window_eigenstates, eigenbasis<br/>t(V): compiled t moved by ½ the slopes of ln Γ_m, capped at ħω₀/π; the window's charge states of one total charge hybridize by −t, one chain per total charge (ADR 0029)"]
     HB["hubbard.HubbardParams<br/>N(V) with tunnel coupling; t → 0 gives CI"]
     BAR["dot.Barrier t(V_B), dot.Dot E_c(radius)"]
   end
@@ -61,7 +62,7 @@ flowchart LR
 
   subgraph device
     DEV["device.Device<br/>the compiled record: layout, scenario and noise draws, dots, CI capacitances, sensor coupling, barriers with their rates, attempt rates and gate slopes (ADR 0027), t and its gate scale, valley splittings, g-factors; JSON; runtime_* builders; compiled_sensor with the draw's coupling asymmetry (compile's set point and the runtime read the same sensor); a sensor dot with leads: E_c, β, SensorLeads; switcher amplitudes in its units"]
-    STA["session.state_at (Device.at)<br/>carried V, ⟨N⟩ and ground state, φ_s and I(V_sd), t, J, the dots' rates at V (ADR 0027) and the sensor's; no time, no noise"]
+    STA["session.state_at (Device.at)<br/>carried V, ⟨N⟩ and ground state of the hybridized window, φ_s and I(V_sd), t at V (ADR 0029), J, the dots' rates at V (ADR 0027) and the sensor's; no time, no noise"]
     SES["session.Session (Device.session)<br/>forward clock; sense(V, dwell, samples, V_sd), hold, wait: noise at each sample time, charge as a Markov trajectory or ⟨N⟩ by expm(W·dwell) with W at each sample's V; with dynamics the sensor's charge on the same clock, its counted electrons per dwell as the current and its back-action on the dots (ADR 0028); spin_readout"]
     TRU["truth.truth / knowable<br/>hidden parameters, charge lattice through the wiring, sensor peak, wing and sensitivity; the fields a user may see"]
   end
@@ -82,7 +83,7 @@ flowchart LR
     RATES["loading.LeadRateLandscape / LeadBarrier<br/>dot-to-lead rate Γ(V); lifetime width ħΓ<br/>(Step 1 placeholder, kept for its protocols)"]
     LAT["loading.latched_occupation<br/>charge actually present given Γ and dwell time (placeholder)"]
     WKB["rates.wkb_tunnel_rate_hz<br/>Γ from barrier height and width at the lead Fermi level; attempt rate from the dot curvature; GateRates: compiled Γ moved by its slopes, saturating at the attempt rate"]
-    ME["master_equation.RateEquation<br/>rate matrix over the CI window with detailed balance; rates constant or GateRates(V) (ADR 0027); sweep() propagates by expm per sample: latching = lag"]
+    ME["master_equation.RateEquation<br/>rate matrix over the CI window with detailed balance; rates constant or GateRates(V) (ADR 0027); with a coupling, over the eigenstates: leads weighted by |⟨l|c†|k⟩|², interdot relaxation by the bond weights, projection when the gates move (ADR 0029); sweep() propagates by expm per sample: latching = lag"]
     RF["rf.TankCircuit<br/>series L into (R_sensor ∥ C_p): reflection Γ(f), resonance, matching"]
     SS["single_shot.single_shots<br/>consecutive integrated shots on the noise processes; SNR, fidelity"]
     SENS["sensor.SensorSETParams<br/>φ_s = αV + βN + δφ → current I(φ_s, V_sd); with SensorLeads (ADR 0026): Γ_S, Γ_D(V) through the sensor barriers, saturating at the attempt rate, times each bath's turn-on; I = eΓ_SΓ_D/(Γ_S+Γ_D)·Σ[n_γ(μ−eV/2) − n_γ(μ+eV/2)]"]
@@ -105,6 +106,9 @@ flowchart LR
   VAL --> CMP
   CMP --> DEV
   DEV --> CI
+  DEV --> HYB
+  HYB --> CI
+  HYB --> ME
   DEV --> HB
   DEV --> ME
   DEV --> MEAS
@@ -240,6 +244,8 @@ Which protocol uses which path (Step 1):
 | `plunger-vs-barrier-map` | Layout → per barrier row: WKB lead rate → RateEquation.sweep along P1, carried across rows → sensor (Step 4 re-render) |
 | `stability-vs-sweep-rate`, `stability-direction` | Layout → dots and barriers → WKB rates → RateEquation.sweep along the raster → sensor (Step 4) |
 | `lead-rate-time-trace` | Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4) |
+| `interdot-line-vs-barrier` | Device → runtime_coupling t(V) → hybridized CI window → State.n_mean and sensor along detuning at several B_M, beside the two-level polarization (#58) |
+| `session-closing-barrier` | Device → GateRates and t(V) → RateEquation over eigenstates in a Session: open, B_L closed alone (loaded through dot 2), B_L and B_M closed (latching, telegraph) (#53, #58) |
 
 ## Module dependency graph (generated; do not edit by hand)
 
@@ -271,6 +277,7 @@ flowchart LR
     charge_derived["derived"]
     charge_dot["dot"]
     charge_hubbard["hubbard"]
+    charge_hybrid["hybrid"]
   end
   subgraph readout
     readout_broadening["broadening"]
@@ -310,6 +317,7 @@ flowchart LR
   api --> device_session
   api --> device_truth
   api --> readout_sensor
+  charge_ci --> charge_hybrid
   charge_ci --> constants
   charge_derived --> charge_ci
   charge_derived --> charge_dot
@@ -335,6 +343,7 @@ flowchart LR
   compile_device --> spin_dynamics
   compile_device --> valley_splitting
   contract --> api
+  device_session --> charge_hybrid
   device_session --> constants
   device_session --> readout_master_equation
   device_session --> readout_measure
@@ -364,6 +373,7 @@ flowchart LR
   readout_lockin --> readout_loading
   readout_lockin --> readout_measure
   readout_master_equation --> charge_ci
+  readout_master_equation --> charge_hybrid
   readout_master_equation --> constants
   readout_master_equation --> readout_rates
   readout_measure --> charge_ci
@@ -400,6 +410,7 @@ flowchart LR
 | `charge.derived` | Charge-model parameters derived from a layout instead of typed (Step 2, ADR 0013). |
 | `charge.dot` | Dots and barriers as the named parts of a charge model. |
 | `charge.hubbard` | Two-site extended Hubbard model of a few-electron double dot. |
+| `charge.hybrid` | Interdot tunnelling in the constant-interaction window: the charge states hybridize (#58, ADR 0029). |
 | `compile.backends` | Electrostatics backends for `compile` (ADR 0023). |
 | `compile.device` | `compile_device`: layout + material + seed → a versioned, serialisable `Device` (ADR 0001, 0023). |
 | `constants` | Physical constants (CODATA 2018), below every layer so any layer may import them (ADR 0004). |
@@ -444,97 +455,98 @@ flowchart LR
 ## Runtimes (generated from `docs/gallery/measured.json` and the protocol files; do not edit by hand)
 
 <!-- runtimes:start -->
-Last recorded on 2026-10-30 at commit `41add9a` on macOS-26.6.2-arm64-arm-64bit (python 3.12.12, numpy 2.5.4), by `scripts/gallery.py --record`. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact `gallery-ubuntu-latest` (ADR 0010).
+Last recorded on 2026-10-31 at commit `746ab04` on macOS-26.6.2-arm64-arm-64bit (python 3.12.12, numpy 2.5.4), by `scripts/gallery.py --record`. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact `gallery-ubuntu-latest` (ADR 0010).
 
 ### Per model (microseconds per point or sample)
 
 | model | what is timed | points | us per point |
 |---|---|---|---|
-| `charge.ci.ConstantInteractionParams.mean_occupation` | thermal occupation per gate point | 10,000 | 1.229 |
-| `charge.hubbard.HubbardParams.mean_occupation` | 16x16 diagonalisation per gate point | 10,000 | 5.63 |
+| `charge.ci.ConstantInteractionParams.mean_occupation` | thermal occupation per gate point | 10,000 | 1.244 |
+| `charge.hubbard.HubbardParams.mean_occupation` | 16x16 diagonalisation per gate point | 10,000 | 5.755 |
 | `readout.sensor.SensorSETParams.current_a` | sensor current per point | 100,000 | 0.055 |
-| `readout.sensor.SensorSETParams.current_a (with leads)` | rates, bath occupations and 10 complex digammas per point | 100,000 | 0.901 |
-| `readout.noise.TelegraphNoise.trace` | one fluctuator per sample | 100,000 | 0.438 |
-| `readout.noise.OneOverFNoise.trace` | 24 fluctuators per sample | 10,000 | 10.769 |
-| `readout.measure.SensedDoubleDot.sweep_a (noisy)` | occupation + sensor + three noise traces per point | 10,000 | 12.541 |
-| `readout.lockin.lockin_sweep_a_per_v` | 8 evaluations per point, noisy | 2,500 | 99.434 |
-| `readout.lockin.lockin_sweep_dynamic_a_per_v` | 8 evaluations + rate dynamics per point, noisy | 2,500 | 103.913 |
-| `readout.loading.latched_occupation` | per scan step | 100,000 | 0.515 |
+| `readout.sensor.SensorSETParams.current_a (with leads)` | rates, bath occupations and 10 complex digammas per point | 100,000 | 0.9 |
+| `readout.noise.TelegraphNoise.trace` | one fluctuator per sample | 100,000 | 0.441 |
+| `readout.noise.OneOverFNoise.trace` | 24 fluctuators per sample | 10,000 | 10.986 |
+| `readout.measure.SensedDoubleDot.sweep_a (noisy)` | occupation + sensor + three noise traces per point | 10,000 | 12.684 |
+| `readout.lockin.lockin_sweep_a_per_v` | 8 evaluations per point, noisy | 2,500 | 102.263 |
+| `readout.lockin.lockin_sweep_dynamic_a_per_v` | 8 evaluations + rate dynamics per point, noisy | 2,500 | 102.011 |
+| `readout.loading.latched_occupation` | per scan step | 100,000 | 0.507 |
 
 ### Per protocol (declared budget beside the last measurement)
 
 | protocol | points | compile budget s / measured | run budget ms per point / measured | evaluations per point |
 |---|---|---|---|---|
-| `charge-noise-spectroscopy-cpmg` | 9 | 0.5 / 0.0004 | 50.0 / 2.64894 | 1 |
-| `charge-noise-spectroscopy-j-vs-ramsey` | 41 | 0.5 / 0.0001 | 30.0 / 1.2316 | 1 |
-| `compiled-device-draws` | 12 | 6.0 / 1.5441 | 100.0 / 7.40319 | 1 |
-| `compiled-device-roundtrip` | 29,282 | 2.0 / 0.1771 | 0.1 / 0.00298 | 1 |
-| `coulomb-oscillations-single-dot` | 1,201 | 0.5 / 0.0 | 0.05 / 0.00214 | 1 |
-| `crosstalk-lines` | 57,600 | 0.5 / 0.2872 | 0.05 / 0.00152 | 1 |
-| `diamonds-single-dot` | 64,521 | 0.5 / 0.0 | 0.02 / 7e-05 | 1 |
-| `drift-repeated-cuts` | 24,000 | 1.0 / 0.0005 | 0.1 / 0.01651 | 1 |
+| `charge-noise-spectroscopy-cpmg` | 9 | 0.5 / 0.0004 | 50.0 / 2.66375 | 1 |
+| `charge-noise-spectroscopy-j-vs-ramsey` | 41 | 0.5 / 0.0001 | 30.0 / 1.2591 | 1 |
+| `compiled-device-draws` | 12 | 6.0 / 1.5158 | 100.0 / 9.75937 | 1 |
+| `compiled-device-roundtrip` | 29,282 | 2.0 / 0.1658 | 0.1 / 0.00809 | 1 |
+| `coulomb-oscillations-single-dot` | 1,201 | 0.5 / 0.0 | 0.05 / 0.00145 | 1 |
+| `crosstalk-lines` | 57,600 | 0.5 / 0.225 | 0.05 / 0.00125 | 1 |
+| `diamonds-single-dot` | 64,521 | 0.5 / 0.0 | 0.02 / 6e-05 | 1 |
+| `drift-repeated-cuts` | 24,000 | 1.0 / 0.0003 | 0.1 / 0.01713 | 1 |
 | `elzerman-trace` | 802,000 | 0.5 / 0.0 | 0.001 / 1e-05 | 1 |
 | `esr-line` | 120,701 | 0.5 / 0.0001 | 0.002 / 1e-05 | 2 |
-| `exchange-fingerprint` | 60,501 | 0.5 / 0.0001 | 0.02 / 0.00029 | 1 |
-| `exchange-gate-fidelity` | 41 | 0.5 / 0.0001 | 100.0 / 16.60973 | 1 |
-| `exchange-house-cells` | 22,801 | 0.5 / 0.0001 | 0.4 / 0.01036 | 8 |
-| `exchange-vs-barrier` | 251 | 0.5 / 0.0001 | 0.2 / 0.00362 | 1 |
-| `exchange-vs-detuning` | 401 | 0.5 / 0.0001 | 0.2 / 0.01024 | 5 |
-| `fault-signatures-stability` | 57,600 | 2.0 / 0.1219 | 0.1 / 0.01251 | 1 |
-| `gate-hysteresis-trapping` | 722 | 0.5 / 0.1087 | 1.0 / 0.06086 | 1 |
-| `gate-hysteresis` | 361 | 0.5 / 0.1155 | 1.0 / 0.07597 | 1 |
-| `gate-leakage-iv` | 3,612 | 0.5 / 0.0 | 0.02 / 6e-05 | 1 |
-| `gate-leakage-pair` | 201 | 0.5 / 0.0 | 0.02 / 0.00016 | 1 |
-| `lead-rate-time-trace` | 900 | 1.0 / 0.1393 | 2.0 / 0.1561 | 1 |
+| `exchange-fingerprint` | 60,501 | 0.5 / 0.0001 | 0.02 / 0.00032 | 1 |
+| `exchange-gate-fidelity` | 41 | 0.5 / 0.0002 | 100.0 / 17.00681 | 1 |
+| `exchange-house-cells` | 22,801 | 0.5 / 0.0001 | 0.4 / 0.01034 | 8 |
+| `exchange-vs-barrier` | 251 | 0.5 / 0.0001 | 0.2 / 0.00349 | 1 |
+| `exchange-vs-detuning` | 401 | 0.5 / 0.0001 | 0.2 / 0.0106 | 5 |
+| `fault-signatures-stability` | 57,600 | 2.0 / 0.1215 | 0.1 / 0.01261 | 1 |
+| `gate-hysteresis-trapping` | 722 | 0.5 / 0.1091 | 1.0 / 0.07314 | 1 |
+| `gate-hysteresis` | 361 | 0.5 / 0.1082 | 1.0 / 0.06707 | 1 |
+| `gate-leakage-iv` | 3,612 | 0.5 / 0.0 | 0.02 / 5e-05 | 1 |
+| `gate-leakage-pair` | 201 | 0.5 / 0.0 | 0.02 / 0.00015 | 1 |
+| `interdot-line-vs-barrier` | 7,241 | 3.0 / 0.1446 | 0.2 / 0.02288 | 1 |
+| `lead-rate-time-trace` | 900 | 1.0 / 0.1187 | 2.0 / 0.16824 | 1 |
 | `magnetospectroscopy-transition` | 1,803 | 0.5 / 0.0001 | 0.01 / 1e-05 | 1 |
-| `noise-psd` | 30,000 | 0.5 / 0.0002 | 0.1 / 0.01233 | 1 |
-| `noise-time-trace` | 30,000 | 0.5 / 0.0002 | 0.1 / 0.01205 | 1 |
-| `ohmic-iv` | 201 | 0.5 / 0.0 | 0.02 / 2e-05 | 1 |
-| `optimum-coupling-target` | 44 | 2.0 / 0.2671 | 0.1 / 0.00036 | 1 |
-| `optimum-readout-point` | 1,202 | 2.0 / 0.1361 | 0.1 / 9e-05 | 1 |
-| `optimum-sensor-flank` | 1,601 | 2.0 / 0.1447 | 0.1 / 0.00213 | 1 |
-| `optimum-sweet-spot` | 41 | 2.0 / 0.137 | 100.0 / 7.29972 | 1 |
+| `noise-psd` | 30,000 | 0.5 / 0.0002 | 0.1 / 0.01259 | 1 |
+| `noise-time-trace` | 30,000 | 0.5 / 0.0002 | 0.1 / 0.01239 | 1 |
+| `ohmic-iv` | 201 | 0.5 / 0.0 | 0.02 / 1e-05 | 1 |
+| `optimum-coupling-target` | 44 | 2.0 / 0.2543 | 0.1 / 0.00076 | 1 |
+| `optimum-readout-point` | 1,202 | 2.0 / 0.1341 | 0.1 / 9e-05 | 1 |
+| `optimum-sensor-flank` | 1,601 | 2.0 / 0.1422 | 0.1 / 0.00725 | 1 |
+| `optimum-sweet-spot` | 41 | 2.0 / 0.1414 | 100.0 / 7.52126 | 1 |
 | `pinch-off-barrier` | 601 | 0.5 / 0.0 | 0.02 / 1e-05 | 1 |
-| `pinch-off-crosstalk` | 24,321 | 0.5 / 0.1099 | 0.01 / 1e-05 | 1 |
-| `plunger-vs-barrier-map` | 12,000 | 5.0 / 0.209 | 2.0 / 0.16162 | 1 |
-| `potential-cut-along-channel` | 1,203 | 0.5 / 0.1106 | 0.01 / 0.00041 | 1 |
-| `potential-map-disorder` | 344,424 | 1.0 / 0.4392 | 0.001 / 0.0 | 1 |
-| `potential-map-layout` | 86,106 | 0.5 / 0.1107 | 0.001 / 0.0 | 1 |
-| `psb-bias-triangles` | 25,921 | 0.5 / 0.0001 | 0.05 / 0.00035 | 3 |
-| `psb-readout-window` | 1,602 | 0.5 / 0.0 | 0.01 / 5e-05 | 1 |
+| `pinch-off-crosstalk` | 24,321 | 0.5 / 0.1119 | 0.01 / 1e-05 | 1 |
+| `plunger-vs-barrier-map` | 12,000 | 5.0 / 0.2192 | 2.0 / 0.17581 | 1 |
+| `potential-cut-along-channel` | 1,203 | 0.5 / 0.1116 | 0.01 / 0.00025 | 1 |
+| `potential-map-disorder` | 344,424 | 1.0 / 0.4399 | 0.001 / 0.0 | 1 |
+| `potential-map-layout` | 86,106 | 0.5 / 0.1099 | 0.001 / 0.0 | 1 |
+| `psb-bias-triangles` | 25,921 | 0.5 / 0.0001 | 0.05 / 0.00036 | 3 |
+| `psb-readout-window` | 1,602 | 0.5 / 0.0001 | 0.01 / 5e-05 | 1 |
 | `pulsed-gate-spectroscopy` | 60,501 | 0.5 / 0.0 | 0.01 / 1e-05 | 1 |
-| `rabi-chevron` | 20,301 | 0.5 / 0.0 | 0.02 / 0.00112 | 1 |
+| `rabi-chevron` | 20,301 | 0.5 / 0.0 | 0.02 / 0.0012 | 1 |
 | `ramsey-fringes` | 1,202 | 0.5 / 0.0 | 0.01 / 3e-05 | 1 |
-| `rf-resonance` | 4,004 | 0.5 / 0.0 | 0.01 / 3e-05 | 1 |
-| `rf-sensor-flank` | 601 | 0.5 / 0.0 | 0.02 / 0.00131 | 1 |
-| `sensor-barrier-barrier-map` | 14,641 | 2.0 / 0.129 | 0.1 / 0.00201 | 1 |
-| `sensor-barrier-rates` | 41 | 2.0 / 0.2457 | 0.1 / 0.00043 | 1 |
-| `sensor-bath-turn-on` | 1,602 | 2.0 / 0.1298 | 0.1 / 0.00214 | 1 |
-| `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00128 | 1 |
-| `sensor-peak-broadening` | 4,005 | 2.0 / 0.1301 | 0.1 / 0.00132 | 1 |
-| `session-charge-trace` | 1,600 | 2.0 / 0.1622 | 2.0 / 0.72447 | 1 |
-| `session-closing-barrier` | 1,665 | 2.0 / 0.1882 | 2.0 / 0.32053 | 1 |
-| `session-hold-relaxation` | 600 | 2.0 / 0.17 | 2.0 / 0.32766 | 1 |
-| `session-slow-sensor` | 1,253 | 2.0 / 0.1887 | 2.0 / 0.336 | 1 |
-| `single-shot-histogram` | 2,000 | 0.5 / 0.0005 | 0.5 / 0.21923 | 1 |
-| `snr-vs-integration-time` | 3,200 | 0.5 / 0.0003 | 5.0 / 0.72971 | 1 |
-| `spin-funnel` | 120,701 | 0.5 / 0.0001 | 0.01 / 2e-05 | 1 |
-| `stability-coarse-2dot-disorder` | 57,600 | 2.0 / 0.5316 | 0.1 / 0.01241 | 1 |
-| `stability-coarse-2dot-layout` | 22,500 | 0.5 / 0.2294 | 0.1 / 0.0122 | 1 |
-| `stability-coarse-2dot` | 40,000 | 0.5 / 0.0002 | 0.1 / 0.01222 | 1 |
-| `stability-direction` | 12,800 | 1.0 / 0.1106 | 2.0 / 0.15682 | 1 |
-| `stability-fine-2dot` | 22,500 | 0.5 / 0.0003 | 0.1 / 0.01229 | 1 |
-| `stability-lockin-common` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10306 | 8 |
-| `stability-lockin-detuning` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10259 | 8 |
-| `stability-lockin-p1` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.1027 | 8 |
-| `stability-lockin-p2` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10262 | 8 |
-| `stability-vs-sweep-rate` | 19,200 | 1.0 / 0.1161 | 2.0 / 0.16542 | 1 |
-| `switcher-histogram` | 600,000 | 1.0 / 0.0003 | 0.05 / 0.01629 | 1 |
-| `t1-hot-spot` | 1,803 | 0.5 / 0.0001 | 0.01 / 2e-05 | 1 |
-| `turn-on-global` | 201 | 0.5 / 0.1173 | 1.0 / 0.0679 | 1 |
-| `turn-on-single-gate-layout` | 361 | 0.5 / 0.109 | 1.0 / 0.08556 | 1 |
+| `rf-resonance` | 4,004 | 0.5 / 0.0 | 0.01 / 2e-05 | 1 |
+| `rf-sensor-flank` | 601 | 0.5 / 0.0 | 0.02 / 0.00133 | 1 |
+| `sensor-barrier-barrier-map` | 14,641 | 2.0 / 0.1329 | 0.1 / 0.00681 | 1 |
+| `sensor-barrier-rates` | 41 | 2.0 / 0.2532 | 0.1 / 0.00053 | 1 |
+| `sensor-bath-turn-on` | 1,602 | 2.0 / 0.1406 | 0.1 / 0.00695 | 1 |
+| `sensor-coulomb-peak` | 601 | 0.5 / 0.0 | 0.02 / 0.00126 | 1 |
+| `sensor-peak-broadening` | 4,005 | 2.0 / 0.1334 | 0.1 / 0.00114 | 1 |
+| `session-charge-trace` | 1,600 | 2.0 / 0.2241 | 2.0 / 0.90889 | 1 |
+| `session-closing-barrier` | 2,067 | 2.0 / 0.8693 | 2.0 / 0.52194 | 1 |
+| `session-hold-relaxation` | 600 | 2.0 / 0.2358 | 2.0 / 0.54367 | 1 |
+| `session-slow-sensor` | 1,253 | 2.0 / 0.3116 | 2.0 / 0.52785 | 1 |
+| `single-shot-histogram` | 2,000 | 0.5 / 0.0004 | 0.5 / 0.23208 | 1 |
+| `snr-vs-integration-time` | 3,200 | 0.5 / 0.0003 | 5.0 / 0.7402 | 1 |
+| `spin-funnel` | 120,701 | 0.5 / 0.0001 | 0.01 / 1e-05 | 1 |
+| `stability-coarse-2dot-disorder` | 57,600 | 2.0 / 0.4529 | 0.1 / 0.0126 | 1 |
+| `stability-coarse-2dot-layout` | 22,500 | 0.5 / 0.22 | 0.1 / 0.01272 | 1 |
+| `stability-coarse-2dot` | 40,000 | 0.5 / 0.0002 | 0.1 / 0.01246 | 1 |
+| `stability-direction` | 12,800 | 1.0 / 0.1103 | 2.0 / 0.17103 | 1 |
+| `stability-fine-2dot` | 22,500 | 0.5 / 0.0003 | 0.1 / 0.01228 | 1 |
+| `stability-lockin-common` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10474 | 8 |
+| `stability-lockin-detuning` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10367 | 8 |
+| `stability-lockin-p1` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.104 | 8 |
+| `stability-lockin-p2` | 40,000 | 0.5 / 0.0003 | 0.5 / 0.10382 | 8 |
+| `stability-vs-sweep-rate` | 19,200 | 1.0 / 0.1152 | 2.0 / 0.17844 | 1 |
+| `switcher-histogram` | 600,000 | 1.0 / 0.0003 | 0.05 / 0.01632 | 1 |
+| `t1-hot-spot` | 1,803 | 0.5 / 0.0001 | 0.01 / 1e-05 | 1 |
+| `turn-on-global` | 201 | 0.5 / 0.1113 | 1.0 / 0.06776 | 1 |
+| `turn-on-single-gate-layout` | 361 | 0.5 / 0.1111 | 1.0 / 0.06488 | 1 |
 | `turn-on-single-gate` | 601 | 0.5 / 0.0 | 0.02 / 3e-05 | 1 |
-| `unintentional-dots` | 125 | 1.0 / 0.0 | 1000.0 / 294.81759 | 1 |
-| `valley-splitting-draws` | 108,000 | 0.5 / 0.0 | 0.01 / 0.00048 | 1 |
-| `virtual-gates-map` | 29,282 | 2.0 / 0.1355 | 0.1 / 0.00268 | 1 |
+| `unintentional-dots` | 125 | 1.0 / 0.0 | 1000.0 / 304.26307 | 1 |
+| `valley-splitting-draws` | 108,000 | 0.5 / 0.0 | 0.01 / 0.0005 | 1 |
+| `virtual-gates-map` | 29,282 | 2.0 / 0.1339 | 0.1 / 0.00769 | 1 |
 <!-- runtimes:end -->
