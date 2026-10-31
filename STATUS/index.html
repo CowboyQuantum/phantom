@@ -509,88 +509,83 @@
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
 <p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>) and <code>v0.3.0</code> (on <code>6920f19</code>). 0.4.0 is
-untagged: it carries #58 (merged as #61) and #59 (this branch), and #60 is planned for it. Steps 1–7 are
-built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32,</p>
-<h1 id="34-and-37">34 and #37.</h1>
-<p><strong>Branch:</strong> <code>issue-59/barrier-shaped-dots</code> (PR against <code>main</code>). <code>main</code> is at <code>663a7ab</code>, the merge of #61.
-<strong>Last session:</strong> 2026-10-31. The owner found in a simulated tune-up that the barrier gates did not
-change the interdot coupling at all. They asked for the barrier gates to set the interdot coupling, the
-dots' positions and shape, and later the exchange. Decisions taken that day:
+untagged and complete once this branch merges: #58 (merged as #61), #59 (merged as #62) and #60 (this
+branch). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on</p>
+<h1 id="16-17-25-28-32-34-and-37">16, #17, #25, #28, #32, #34 and #37.</h1>
+<p><strong>Branch:</strong> <code>issue-60/exchange-follows-barriers</code> (PR against <code>main</code>). <code>main</code> is at <code>204de96</code>, the merge of</p>
+<h1 id="62">62.</h1>
+<p><strong>Last session:</strong> 2026-10-31. In a simulated tune-up the owner found that the barrier gates did not change
+the interdot coupling at all. They asked for the barrier gates to set the interdot coupling, the dots'
+positions and shape, and the exchange frequency. Decisions taken that day:
 - <strong>t in the signal:</strong> hybridize the charge states, in the statics and the dynamics.
 - <strong>Dot shape:</strong> a grid compiled along the barrier gates and interpolated at runtime.
 - <strong>Slicing:</strong> #58 → #59 → #60, released together as 0.4.0.</p>
 <h2 id="done-this-session">Done this session</h2>
 <ul>
-<li><strong>#58 (ADR 0029, merged as #61):</strong> the interdot coupling follows every gate and hybridizes the charge
-  states. See <code>CHANGELOG.md</code>.</li>
-<li><strong>#59 (<a href="../adr/0030-the-barrier-gates-reshape-the-dots-through-a-compiled-grid/">ADR 0030</a>): the barrier
-  gates reshape the dots.</strong></li>
-<li><strong>Compile.</strong> The double dot is re-derived on 17 nodes along each of B_L, B_M and B_R (±0.2 V). Minima
-    are refined between grid points (<code>refined_dot</code>), and the capacitance helper is
-    <code>capacitance_matrix_af</code>. Each grid ends where the potential stops forming two dots, and that end is
-    marked merged. <code>charge.shape.ShapeGrid</code>; <code>Device.shape</code>; device format 4.</li>
-<li><strong>Runtime.</strong> PCHIP per gate, with the changes added and held beyond each end.
-    <code>ConstantInteractionParams.shape</code> gives C(V) and n_g = C(V)(α(V)·V − Δo(V))/E. <code>InterdotCoupling</code> and
-    <code>GateRates</code> take their exponents along the barrier gates from the grid. Without a shape, everything
-    is 0.3.0's.</li>
-<li><strong>State</strong> gains <code>dot_positions_nm</code>, <code>dot_radii_nm</code>, <code>addition_energies_ev</code> and <code>dots_merged</code>.
-    <code>optimum.coupling</code> inverts t along B_M by Brent's method.</li>
-<li><strong>On the reference device,</strong> B_M +0.15 V draws the dots 18 nm together, C_m grows by 40 % and dot 1's
-    addition energy falls by 1 meV. The dots merge at about +0.13 V from the tuned point.</li>
-<li><strong>Tests</strong> now follow one transition by its electron count, because barrier gates move the plunger
-    lines (absolute charge). The isolated-dot configuration is B_L −0.11 and B_M −0.05.</li>
-<li>New protocol <code>dot-shape-vs-barrier</code>. Tests: <code>tests/test_dot_shape.py</code>, 9 P0.</li>
-<li><strong>The hybridized window (amends ADR 0029).</strong> The first Windows comparison of this PR differed by
-    1.8·10⁻⁵ at the middle of an interdot segment. There rint(n_g) ties, and the ±2 chains' truncation
-    left a seam at t ≈ 1 meV. The statics now use ±4, and the dynamics a window chosen by t/E_add
-    (<code>dynamics_window</code>). A 10⁻¹⁵ perturbation now moves <code>interdot-line-vs-barrier</code> by 3·10⁻¹¹, and a P0
-    test holds the seam below 10⁻¹⁰.</li>
-<li><strong>The session's propagator.</strong> <code>session-closing-barrier</code> then differed by 1.1·10⁻⁹ on Windows. A latched
-    slow transition is read through entries of exp(W·dt) that <code>expm</code> keeps only to about ε‖W·dt‖ in
-    absolute terms. <code>propagator</code> keeps every entry's relative accuracy (non-negative Taylor steps and
-    squarings). <code>State</code> also keeps its last diagonalisation, which cuts that protocol's compile phase
-    from 1.0 s to 0.6 s.</li>
+<li><strong>#58 (ADR 0029, #61):</strong> t follows every gate and hybridizes the charge states. An interdot line widens
+  with B_M, and closing B_L alone no longer isolates dot 1.</li>
+<li><strong>#59 (ADR 0030, #62):</strong> the barrier gates move and reshape the dots through a grid compiled along each
+  of them: positions, sizes, lever arms, capacitances, t and the rates; the merge is flagged.</li>
+<li>It also fixed two cross-platform weaknesses that its Windows comparisons exposed.</li>
+<li>The hybridized window is ±4 in the statics and follows t in the dynamics, which removes the seam at
+    the middle of interdot segments.</li>
+<li>The session propagates with <code>readout.master_equation.propagator</code>, which keeps every entry's
+    relative digits.</li>
+<li><strong>#60 (<a href="../adr/0031-the-exchange-of-the-valence-electrons-follows-the-gates/">ADR 0031</a>, this
+  branch):</strong> the exchange of the dots' valence electrons follows the gates.</li>
+<li><code>spin.exchange.local_exchange_ev</code> solves the singlet secular equation on the CI window's local
+    sector: (N₁, N₂) with (N₁±1, N₂∓1), at the gated t and the shaped C(V). Its gaps are formed from
+    N − n_g directly.</li>
+<li><code>State.exchange_ev</code> uses it, and <code>State.exchange_frequency_hz</code> = J/h. <code>Session.spin_readout</code>
+    reads at the last point's t.</li>
+<li>The secular solver (<code>singlet_exchange_ev</code>) no longer divides zero by zero where t = 0.</li>
+<li>On the reference device's (23, 28) cell, J/h runs from about 1 kHz to tens of GHz along B_M.</li>
+<li>New protocol <code>exchange-frequency-vs-barrier</code>. Tests: <code>tests/test_local_exchange.py</code>, 5 P0.</li>
 <li><strong>Release <code>v0.3.0</code>:</strong> tagged and released as for <code>v0.2.0</code> (PR #57).</li>
-<li><strong>Totals:</strong> 193 tests; 74 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
+<li><strong>Totals:</strong> 199 tests; 75 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>The PR for #59 waits for the owner's review of its preview at <code>/pr-&lt;n&gt;/</code>. Start with
-  <code>dot-shape-vs-barrier</code>, then <code>interdot-line-vs-barrier</code> and <code>session-closing-barrier</code>.</li>
+<li>The PR for #60 waits for the owner's review of its preview at <code>/pr-&lt;n&gt;/</code>. Start with
+  <code>exchange-frequency-vs-barrier</code>.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>After #59 merges: #60. The exchange J comes from the singlet secular equation on the local (1,1)-like
-sector of the CI window, at the gated t and at the U and V₁₂ of the shaped C(V). PSB reads at the gated t.
-The exchange's bisection should also stop dividing by zero along B_M (a RuntimeWarning on <code>main</code> too; J
-stays finite). Whether to tag 0.4.0, and when qdt moves its pin, are the owner's decisions.</p>
+<p>The owner reviews and merges #60. 0.4.0 is then complete: its tag (ADR 0025), and when qdt moves its
+pin, are the owner's decisions. qdt's adapter must handle:
+- device format 4;
+- the eigenstate charge in <code>n_present</code> (round it to label charge states);
+- the new <code>State</code> fields;
+- J per point.</p>
 <h2 id="open-issues">Open issues</h2>
-<h1 id="59-and-60-this-line-of-work-48-the-unscreened-sensitivity-of-the-rates-and-t-the-plungers-move-t">59 and #60 (this line of work); #48 the unscreened sensitivity of the rates and t (the plungers move t</h1>
-<p>as much as B_M); #49 per-device sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41
-spin driven by voltages. Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence
-against qdt's pins.</p>
+<h1 id="48-the-unscreened-sensitivity-of-the-rates-t-and-now-j-49-per-device-sensor-barrier-tune-50-gate">48 the unscreened sensitivity of the rates, t and now J; #49 per-device sensor-barrier tune; #50 gate</h1>
+<p>1/f placeholder; #51 cp1252 console; #41 spin driven by voltages. Candidates for new issues:
+- the spin layer's sweet spot and gate fidelity on the device's local sector (ADR 0031, deferred);
+- the plungers and the sensor's β on the shape grid (ADR 0030);
+- a charge-dephasing rate and a Landau–Zener step for the hybridized dynamics (ADR 0029).</p>
+<p>Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.</p>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 74 protocols; catalog entries #1–#14;
+<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 75 protocols; catalog entries #1–#14;
   confirming the ten <code>proposed</code> reference entries.</li>
+<li><strong>Exchange (ADR 0031):</strong></li>
+<li>J jumps where the ground charge state changes.</li>
+<li>The sector has spinless orbitals and one valley.</li>
+<li>The spin layer's Hubbard models and the coherence optimum keep the few-electron J at their
+    symmetric point.</li>
 <li><strong>Shape (ADR 0030):</strong></li>
 <li>The gates' changes add, with no cross terms.</li>
-<li>C_m comes from the sphere formula, so a merged double dot never becomes one dot; points past the
-    merge are held and flagged.</li>
-<li>The compile tier's curvature has pixel noise of about 1 %.</li>
-<li>The sensor's β and the attempt rates stay at the operating point. The plungers are not on the grid.</li>
-<li>A rate along a barrier gate levels off at about half the attempt rate.</li>
-<li><strong>Hybridization (ADR 0029):</strong></li>
-<li>The projection between samples assumes a dwell long against ħ/Ω. There is no charge dephasing and
-    no Landau–Zener step.</li>
-<li>The model is spinless.</li>
-<li><code>State.exchange_ev</code> still uses the barrier-only exponential, until #60.</li>
-<li><strong>Rates and t:</strong> linear in the gates other than the barrier gates, within about 20 % over ±10 mV. No
-  screening until the FEM backend exists.</li>
-<li><strong>Sensor process:</strong> first-order split within a dwell; sequential noise; no joint dot–sensor energy
-  (ADR 0028).</li>
-<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0030.</li>
-<li><strong>Cross-platform (ADR 0014):</strong> avoid digit-cancelling quantities. Condition diagonalisations and sum
-  charges relative to a centre.</li>
+<li>C_m comes from the sphere formula, so a merged double dot is held and flagged, not modelled.</li>
+<li>The compile tier's curvature has about 1 % pixel noise.</li>
+<li>The sensor's β, the attempt rates and the plungers are not on the grid.</li>
+<li><strong>Hybridization (ADR 0029):</strong> the projection assumes a dwell long against ħ/Ω, with no charge
+  dephasing; the model is spinless.</li>
+<li><strong>Rates and t:</strong> linear in the non-barrier gates; no screening until the FEM backend exists.</li>
+<li><strong>Sensor process:</strong> first-order split; sequential noise; no joint dot–sensor energy (ADR 0028).</li>
+<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0031.</li>
+<li><strong>Cross-platform (ADR 0014):</strong></li>
+<li>Avoid digit-cancelling quantities. Condition diagonalisations and sum charges relative to a centre.</li>
+<li>Keep window truncation far below 1e-9 at rint ties.</li>
+<li>Propagate generators with non-negative steps. Form gaps from N − n_g.</li>
 <li><strong>Pages:</strong> the source is <code>gh-pages</code> (root); per-PR previews are under <code>/pr-&lt;n&gt;/</code>.</li>
 </ul>
 

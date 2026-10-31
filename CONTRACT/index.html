@@ -925,6 +925,11 @@ follow it. <code>State.dot_positions_nm</code>, <code>dot_radii_nm</code> and <c
 potential forms two dots; the shape there is held at that point, and the charge model is not meant to
 describe it. Because the dots' charge is counted absolutely, a barrier gate moves the plunger lines by more
 than its cross-capacitance.</p>
+<p>The exchange follows them as well (ADR 0031). <code>State.exchange_ev</code> is the singlet–triplet splitting of the
+last electron on each dot in the ground charge state, at the gated t and the shaped dots, and
+<code>State.exchange_frequency_hz</code> is J/h. It is a qubit pair's exchange where both dots hold an odd number of
+electrons (read the parity from <code>n_ground</code>), and it jumps where the ground charge state changes.
+<code>Session.spin_readout</code> reads at the interdot coupling of the last point the session was given.</p>
 <p>With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
 stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths
