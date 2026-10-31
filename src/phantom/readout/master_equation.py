@@ -181,7 +181,7 @@ class RateEquation:
         if ci.coupling is not None:
             ratio = float(ci.tunnel_coupling_ev(v)) / float(np.min(ci.addition_energies_ev()))
             ci = dataclasses.replace(ci, window=max(ci.window, dynamics_window(ratio)))
-        states, _ = ci.energies(ci.induced_charge(v), None if ci.shape is None else ci._c_inv(v))
+        states, _ = ci.energies(ci.induced_charge(v), None if not ci.varies else ci._c_inv(v))
         return _unique_states(states)
 
     def rate_matrix(self, v: np.ndarray, states: np.ndarray, level_shift_ev: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:

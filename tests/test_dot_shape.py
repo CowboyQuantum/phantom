@@ -4,6 +4,8 @@ capacitances and induced charges, the dots drawn together and coupled more stron
 they merge, each lead barrier moving its own dot, and t and the rates following the moved dots. Analytic
 limits and invariants only."""
 
+import dataclasses
+
 import numpy as np
 import pytest
 
@@ -18,6 +20,11 @@ from phantom.electrostatics.dots import refined_dot
 @pytest.fixture(scope="module")
 def device() -> Device:
     return reference_device()
+
+
+def _geometric_ci(device: Device):
+    """The runtime CI model without the interdot splitting (#66): the shape's own capacitances."""
+    return dataclasses.replace(device.runtime_ci(), splitting=None)
 
 
 def _along(device: Device, gate: str, dv: np.ndarray) -> np.ndarray:
@@ -37,7 +44,7 @@ def _compile_tier(device: Device, v: np.ndarray) -> tuple[np.ndarray, np.ndarray
 def test_at_the_operating_point_it_is_the_compiled_device(device: Device):
     v0 = device.operating_point()
     assert np.all(device.shape.change(v0) == 0.0)
-    c, n_g = device.runtime_ci().local(v0)
+    c, n_g = _geometric_ci(device).local(v0)
     np.testing.assert_array_equal(c, np.array(device.c_dot_af))
     np.testing.assert_allclose(n_g, v0 @ np.array(device.c_gate_af).T / E_UNIT_V_PER_E_AF, rtol=1e-12)
     s = device.at(v0)
@@ -63,7 +70,7 @@ def test_at_the_nodes_and_between_them_it_follows_the_compile_tier(device: Devic
         v[j] = x
         pos, c = _compile_tier(device, v)
         s = device.at(device_programmed(device, v))
-        runtime_c = device.runtime_ci().local(v)[0]
+        runtime_c = _geometric_ci(device).local(v)[0]
         on_node = np.any(np.isclose(nodes, x, atol=1e-12))
         np.testing.assert_allclose(s.dot_positions_nm - [[d.x_nm, d.y_nm] for d in device.dots], pos - ref_pos, atol=1e-9 if on_node else 0.5)
         np.testing.assert_allclose(runtime_c - np.array(device.c_dot_af), c - ref_c, atol=1e-12 if on_node else 0.02 * np.abs(ref_c).max())
@@ -81,7 +88,7 @@ def test_the_capacitances_and_induced_charge_are_continuous(device: Device):
     """Along each barrier gate in 1 mV steps the capacitances and the induced charge have no jumps: their
     second differences stay far below their first, at the nodes and where the potential's grid minimum
     changes pixel alike."""
-    ci = device.runtime_ci()
+    ci = _geometric_ci(device)
     for gate in ("B_L", "B_M", "B_R"):
         j = device.gate_names.index(gate)
         nodes = device.shape.nodes_v[device.shape.gate_indices.index(j)]
@@ -102,7 +109,7 @@ def test_opening_b_m_draws_the_dots_together_until_they_merge(device: Device):
     v = _along(device, "B_M", np.linspace(-0.15, top, 31))
     states = device.at(np.stack([device_programmed(device, x) for x in v]))
     gap = np.hypot(*(states.dot_positions_nm[:, 1] - states.dot_positions_nm[:, 0]).T)
-    cm = -device.runtime_ci().local(v)[0][:, 0, 1]
+    cm = -_geometric_ci(device).local(v)[0][:, 0, 1]
     assert np.all(np.diff(gap) <= 1e-9) and gap[-1] < gap[0] - 5, "the dots approach"
     assert np.all(np.diff(cm) >= -1e-9) and cm[-1] > 1.2 * cm[0], "and couple more strongly"
     assert np.all(np.diff(states.tunnel_coupling_ev) >= 0) and states.tunnel_coupling_ev[-1] > 1e3 * states.tunnel_coupling_ev[0], "t rises"

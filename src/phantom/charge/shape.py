@@ -18,7 +18,8 @@ The quantities (`QUANTITIES`, per dot where indexed):
 - `x_nm`, `y_nm` (2,): the dot's position, nm, refined between the grid points of the basis;
 - `radius_nm` (2,): the harmonic radius, nm;
 - `log_rate` (3,): the exponents −2S of the barriers to the left lead, to the right lead and between
-  the dots, at the tunnelling levels compile holds fixed (ADR 0027).
+  the dots, at the tunnelling levels compile holds fixed (ADR 0027);
+- `barrier_top_ev` (1,): the interdot barrier's top above its tunnelling level, eV (#66).
 
 At a dot the potential is φ_i = α_i·V − o_i (U = −eφ + o). With the shape, the CI model's gate-induced
 charge is n_g = C(V)·(α(V)·V − Δo(V)) / E_UNIT, so the honeycomb follows the moving dots. By the envelope
@@ -33,12 +34,13 @@ from functools import cached_property
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: the interdot barrier's top on the grid (#66)."""
 
 
 def quantity_layout(n_gates: int) -> dict[str, slice]:
     """Where each quantity sits in a node's row of length `row_length(n_gates)`."""
-    sizes = (("alpha", 2 * n_gates), ("offset_ev", 2), ("c11_af", 1), ("c22_af", 1), ("cm_af", 1), ("x_nm", 2), ("y_nm", 2), ("radius_nm", 2), ("log_rate", 3))
+    sizes = (("alpha", 2 * n_gates), ("offset_ev", 2), ("c11_af", 1), ("c22_af", 1), ("cm_af", 1), ("x_nm", 2), ("y_nm", 2), ("radius_nm", 2), ("log_rate", 3), ("barrier_top_ev", 1))
     out, start = {}, 0
     for name, size in sizes:
         out[name] = slice(start, start + size)

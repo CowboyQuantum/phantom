@@ -25,6 +25,10 @@ eigenstates, and the energies and the derived quantities above stay those of the
 With a `shape` (#59, ADR 0030) the capacitances, the lever arms and the offsets at the dots follow the
 barrier gates (`charge.shape`): at each gate point C_dot(V) and n_g = C_dot(V)·(α(V)·V − Δo(V))/E_UNIT. The
 fields `c_dot_af` and `c_gate_af` and the derived quantities above are those at the operating point.
+
+With a `splitting` (#66, ADR 0032) the interdot conductance adds an effective interdot capacitance
+ΔC_m(V)·[[1, −1], [−1, 1]] to the energies (`charge.splitting`), so the triple points separate from a
+grid towards a superdot as the barrier opens; the gate-induced charge keeps the geometric capacitances.
 """
 
 from __future__ import annotations
@@ -42,6 +46,7 @@ from phantom.charge.hybrid import (
     window_eigenstates,
 )
 from phantom.charge.shape import ShapeGrid
+from phantom.charge.splitting import InterdotSplitting
 from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
 MODEL_VERSION = 2
@@ -75,6 +80,9 @@ class ConstantInteractionParams:
     """The interdot tunnel coupling at the gate voltages; None keeps the charge states classical."""
     shape: ShapeGrid | None = None
     """The capacitances, lever arms and offsets along the barrier gates; None keeps them fixed."""
+    splitting: InterdotSplitting | None = None
+    """The interdot conductance and the triple-point splitting it sets (#66): an effective interdot
+    capacitance added to the energies; None keeps the geometric capacitances."""
 
     def __post_init__(self) -> None:
         n_g = len(self.gate_names)
@@ -91,14 +99,22 @@ class ConstantInteractionParams:
         """Gate-induced charge on (dot 1, dot 2) in electrons for gate voltages `v` (last axis = gates)."""
         if self.shape is None:
             return np.asarray(v, dtype=float) @ self.c_gate_af.T / E_UNIT_V_PER_E_AF
-        return self.local(v)[1]
+        return self._geometric(np.asarray(v, dtype=float))[1]
 
     def local(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """(C_dot (..., 2, 2) in aF, n_g (..., 2) in electrons) at gate voltages `v` (..., gates): with a
         `shape`, the capacitances and the induced charge of the dots as the barrier gates have shaped them."""
         v = np.asarray(v, dtype=float)
+        c, n_g = self._geometric(v)
+        if self.splitting is not None:
+            _, extra = self.splitting.splitting(v, c)
+            c = c + extra[..., None, None] * np.array([[1.0, -1.0], [-1.0, 1.0]])
+        return c, n_g
+
+    def _geometric(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """(C_dot (..., 2, 2), n_g (..., 2)) from the geometry alone: the shape grid, no splitting."""
         if self.shape is None:
-            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), self.induced_charge(v)
+            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), v @ self.c_gate_af.T / E_UNIT_V_PER_E_AF
         g = self.shape
         change = g.change(v)
         c11, c22, cm = (g.quantity(change, k)[..., 0] for k in ("c11_af", "c22_af", "cm_af"))
@@ -107,11 +123,27 @@ class ConstantInteractionParams:
         phi = np.einsum("...ig,...g->...i", alpha, v) - g.quantity(change, "offset_ev")
         return c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF
 
+    @property
+    def varies(self) -> bool:
+        """Whether the capacitances depend on the gate voltages (a `shape` or a `splitting`)."""
+        return self.shape is not None or self.splitting is not None
+
     def _c_inv(self, v: np.ndarray) -> np.ndarray:
-        """C_dot⁻¹: (2, 2) without a `shape`, (..., 2, 2) at gate voltages `v` with one."""
-        if self.shape is None:
+        """C_dot⁻¹: (2, 2) when the capacitances are fixed, (..., 2, 2) at gate voltages `v` otherwise."""
+        if not self.varies:
             return np.linalg.inv(self.c_dot_af)
         return np.linalg.inv(self.local(v)[0])
+
+    def interdot_splitting(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """(g, f) (...) at gate voltages `v`: the interdot conductance per channel and the fractional
+        triple-point splitting; without a `splitting`, (0, the geometric f_C = 2C_m/(C_t + C_m))."""
+        v = np.asarray(v, dtype=float)
+        c, _ = self._geometric(v)
+        if self.splitting is None:
+            c_t, c_m = 0.5 * (c[..., 0, 0] + c[..., 1, 1]), -c[..., 0, 1]
+            return np.zeros(v.shape[:-1]), 2 * c_m / (c_t + c_m)
+        f, _ = self.splitting.splitting(v, c)
+        return self.splitting.conductance(v), f
 
     def addition_energies_at_ev(self, v: np.ndarray) -> np.ndarray:
         """(..., 2) each dot's addition energy E_UNIT·(C_dot⁻¹)_ii at gate voltages `v`, eV."""
@@ -167,7 +199,7 @@ class ConstantInteractionParams:
         if self.coupling is not None:
             eig = self.eigenstates(v)
             return eig.states, eig.populations(boltzmann(eig.energies_ev, self._kt(kt_ev)))
-        states, u = self.energies(self.induced_charge(v), None if self.shape is None else self._c_inv(v))
+        states, u = self.energies(self.induced_charge(v), None if not self.varies else self._c_inv(v))
         if kt_ev is None:
             kt = K_B_EV_PER_K * max(self.temperature_k, 1e-6)
         else:
@@ -189,7 +221,7 @@ class ConstantInteractionParams:
         if self.coupling is not None:
             eig = self.eigenstates(v)
             return eig.dominant_state(np.argmin(eig.energies_ev, axis=-1))
-        states, u = self.energies(self.induced_charge(v), None if self.shape is None else self._c_inv(v))
+        states, u = self.energies(self.induced_charge(v), None if not self.varies else self._c_inv(v))
         idx = np.argmin(u, axis=-1)
         return np.take_along_axis(states, idx[..., None, None], axis=-2)[..., 0, :]
 
@@ -227,7 +259,7 @@ class ConstantInteractionParams:
         return self._eigenstates(v, level_shift_ev)
 
     def _eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None) -> WindowEigenstates:
-        c_inv = None if self.shape is None else self._c_inv(v)
+        c_inv = None if not self.varies else self._c_inv(v)
         window = max(self.window, STATIC_WINDOW)
         return window_eigenstates(self.induced_charge(v), window, lambda states, n_g: self._grid_energies(states, n_g, c_inv), self.tunnel_coupling_ev(v), level_shift_ev)
 
