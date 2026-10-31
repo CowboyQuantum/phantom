@@ -92,6 +92,17 @@ def sensor_coupling(c_dot_af: np.ndarray, dots: tuple[DerivedDot, DerivedDot], s
     return float(E_UNIT_V_PER_E_AF * inv[2, 2]), -E_UNIT_V_PER_E_AF * inv[2, :2]
 
 
+def capacitance_matrix_af(d1: DerivedDot, d2: DerivedDot, epsilon_r: float) -> np.ndarray:
+    """The CI matrix [[C₁, −C_m], [−C_m, C₂]] in aF of two dots: each dot's disk capacitance from its
+    harmonic radius divided by (1 − Σ_j α_j), so that the gate capacitances C_dot·α are part of the total,
+    and the sphere formula for C_m at the dots' separation."""
+    alpha = np.stack([d1.lever_arms, d2.lever_arms])  # [dot, gate]
+    c_self = np.array([Dot("dot1", d1.radius_nm, epsilon_r).self_capacitance_af, Dot("dot2", d2.radius_nm, epsilon_r).self_capacitance_af])
+    c_total = c_self / np.clip(1.0 - alpha.sum(axis=1), 0.05, None)
+    cm = mutual_capacitance_af(d1.radius_nm, d2.radius_nm, np.hypot(d1.x_nm - d2.x_nm, d1.y_nm - d2.y_nm), epsilon_r)
+    return np.array([[c_total[0], -cm], [-cm, c_total[1]]])
+
+
 def derive_double_dot(
     layout: Layout,
     operating_point_v: np.ndarray,
@@ -114,10 +125,7 @@ def derive_double_dot(
     alpha = np.stack([d1.lever_arms, d2.lever_arms])  # [dot, gate]
     # The CI diagonal is the dot's total capacitance: its own (disk) capacitance plus the gate
     # capacitances, and C_gate = C_dot·α, so C_ii = C_self / (1 − Σ_j α_ij).
-    c_self = np.array([Dot("dot1", d1.radius_nm, eps).self_capacitance_af, Dot("dot2", d2.radius_nm, eps).self_capacitance_af])
-    c_total = c_self / np.clip(1.0 - alpha.sum(axis=1), 0.05, None)
-    cm = mutual_capacitance_af(d1.radius_nm, d2.radius_nm, np.hypot(d1.x_nm - d2.x_nm, d1.y_nm - d2.y_nm), eps)
-    c_dot = np.array([[c_total[0], -cm], [-cm, c_total[1]]])
+    c_dot = capacitance_matrix_af(d1, d2, eps)
     ci = ConstantInteractionParams(
         gate_names=layout.gate_names,
         c_dot_af=c_dot,

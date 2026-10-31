@@ -282,3 +282,43 @@ def session_slow_sensor(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     out["sensor_rates_closed_hz"] = dev.at(parked["closed"]).sensor_gamma_hz
     out["sensor_rates_open_hz"] = dev.at(parked["open"]).sensor_gamma_hz
     return out
+
+
+def dot_shape_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The barrier gates reshape the dots (#59, ADR 0030). Along each of B_L, B_M and B_R around the tuned
+    point, `Device.at` gives the dots' positions, radii and addition energies, the interdot coupling and
+    whether the dots have merged, and the runtime CI model gives C_m. Charge maps over P1 and P2 at three
+    B_M show the honeycomb as the barrier between the dots opens."""
+    lines, maps = p.sweep
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        ci = dev.runtime_ci()
+        dv = np.linspace(float(lines["from"]), float(lines["to"]), int(lines["points"]))
+        half, n = float(maps["half_span_v"]), int(maps["points"])
+        x = np.linspace(-half, half, n)
+        at = [float(b) for b in maps["at"]]
+        i1, i2, jb = (dev.gate_names.index(g) for g in ("P1", "P2", "B_M"))
+    out: dict[str, np.ndarray] = {"dv_v": dv, "dp_v": x}
+    with ctx.run(3 * len(dv) + len(at) * n * n):
+        for gate in ("B_L", "B_M", "B_R"):
+            j = dev.gate_names.index(gate)
+            line = np.broadcast_to(v0, dv.shape + v0.shape).copy()
+            line[:, j] += dv
+            s = dev.at(line)
+            key = gate.lower()
+            out[f"x1_{key}_nm"], out[f"x2_{key}_nm"] = s.dot_positions_nm[:, 0, 0], s.dot_positions_nm[:, 1, 0]
+            out[f"r1_{key}_nm"], out[f"r2_{key}_nm"] = s.dot_radii_nm[:, 0], s.dot_radii_nm[:, 1]
+            out[f"e1_{key}_mev"], out[f"e2_{key}_mev"] = 1e3 * s.addition_energies_ev[:, 0], 1e3 * s.addition_energies_ev[:, 1]
+            out[f"cm_{key}_af"] = -ci.local(s.v_carried_v)[0][:, 0, 1]
+            out[f"t_{key}_ev"] = s.tunnel_coupling_ev
+            out[f"merged_{key}"] = s.dots_merged.astype(float)
+        for k, b in enumerate(at):
+            grid = np.broadcast_to(v0, (n, n) + v0.shape).copy()
+            grid[..., jb] += b
+            grid[..., i1] += x[:, None]
+            grid[..., i2] += x[None, :]
+            nm = dev.at(grid).n_mean
+            out[f"charge_map{k}"] = nm[..., 0] + 0.5 * nm[..., 1]  # [P1, P2]: every charge state its own shade
+        ctx.count(model_evals=3 * len(dv) + len(at) * n * n)
+    return out

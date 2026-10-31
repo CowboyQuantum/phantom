@@ -31,6 +31,8 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.special import expit
 
+from phantom.charge.shape import ShapeGrid
+
 MODEL_VERSION = 1
 
 EXCLUDED_GAP_EV = 1.0
@@ -51,6 +53,9 @@ class InterdotCoupling:
     """The ceiling of t, eV: ħω₀/π, the coupling through a transmission of one."""
     log_slopes_per_v: tuple[float, ...]
     """Slopes of the exponent of t against every gate, 1/V: half those of ln Γ_m."""
+    shape: ShapeGrid | None = None
+    """When given, the exponent along its barrier gates is half the change of the interdot action on
+    its grid (#59), and the slopes count for the other gates only."""
 
     def __post_init__(self) -> None:
         if not (self.t_ref_ev > 0 and self.t_max_ev > 0):
@@ -61,9 +66,15 @@ class InterdotCoupling:
     def tunnel_coupling_ev(self, v: np.ndarray) -> np.ndarray:
         """t (...) in eV at carried voltages `v` (..., gates): t_max · σ(ln(t_ref/(t_max − t_ref)) + s·ΔV),
         exactly t_ref at the reference point (the form of `readout.rates.saturating_rates_hz`)."""
-        dv = np.asarray(v, dtype=float) - np.asarray(self.v_ref_v)
+        v = np.asarray(v, dtype=float)
+        dv = v - np.asarray(self.v_ref_v)
         anchor = np.log(self.t_ref_ev) - np.log(max(self.t_max_ev - self.t_ref_ev, 1e-12 * self.t_max_ev))
-        return self.t_max_ev * expit(anchor + dv @ np.asarray(self.log_slopes_per_v))
+        if self.shape is None:
+            return self.t_max_ev * expit(anchor + dv @ np.asarray(self.log_slopes_per_v))
+        slopes = np.array(self.log_slopes_per_v)
+        slopes[list(self.shape.gate_indices)] = 0.0
+        along = 0.5 * self.shape.quantity(self.shape.change(v), "log_rate")[..., 2]
+        return self.t_max_ev * expit(anchor + dv @ slopes + along)
 
 
 def grid_offsets(window: int) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:

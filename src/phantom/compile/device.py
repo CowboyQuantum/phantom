@@ -17,6 +17,9 @@ The compile tier runs every draw and every derivation once per device instance:
    and their slopes against every gate at that level held fixed (#53, as the sensor's in 4a),
    the interdot tunnel coupling estimate t ≈ ħω₀ √T / π, and the barrier gate's exponential scale
    from two nearby evaluations;
+5a. the double dot re-derived on a grid along each barrier gate (`shape_gates`): its lever arms,
+   offsets, capacitances, positions, radii and barrier actions, as changes from the operating point
+   (#59, ADR 0030);
 6. the valley splitting of each dot from its harmonic radius (`valley`), and the g-factors (`spin`).
 
 The `Device` (`phantom.device`) holds parameters only: the layout (as data), the scenario draw, the dots, the CI
@@ -38,7 +41,8 @@ import numpy as np
 import phantom
 from phantom.charge import ci as charge_ci
 from phantom.charge import derived as charge_derived
-from phantom.charge.derived import derive_double_dot
+from phantom.charge.derived import capacitance_matrix_af, derive_double_dot
+from phantom.charge.shape import ShapeGrid, quantity_layout
 from phantom.compile.backends import Backend, basis_for
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2
 from phantom.device import (
@@ -53,7 +57,7 @@ from phantom.disorder import scenario as disorder_scenario
 from phantom.disorder.scenario import ScenarioParams, draw_scenario
 from phantom.electrostatics import closed_form as electrostatics_closed_form
 from phantom.electrostatics.closed_form import GateBasis
-from phantom.electrostatics.dots import barrier_action, line_cut, tunnelling_level_ev
+from phantom.electrostatics.dots import barrier_action, line_cut, refined_dot, tunnelling_level_ev
 from phantom.layout.geometry import Layout, MaterialClass
 from phantom.readout import rates as readout_rates
 from phantom.readout.rates import attempt_rate_hz
@@ -63,10 +67,11 @@ from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 4
+MODEL_VERSION = 5
 """2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
 3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026).
-4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027)."""
+4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027).
+5: the double dot's shape along the barrier gates, on a grid (`Device.shape`, #59, ADR 0030)."""
 
 SENSOR_SLOPE_STEP_V = 0.01
 """Half-step of the central differences that give the rates' slopes against each gate (the sensor's
@@ -104,6 +109,13 @@ class CompileParams:
     valley: ValleyParams | None = None
     """Defaults to `ValleyParams.for_material(layout.material)`."""
     spin: SpinParams = field(default_factory=SpinParams)
+    shape_gates: tuple[str, ...] = ("B_L", "B_M", "B_R")
+    """The barrier gates along which the dots' shape is compiled on a grid (#59, ADR 0030); gates the
+    layout lacks are skipped."""
+    shape_span_v: float = 0.2
+    """Half-span of each shape grid around the operating point, V."""
+    shape_points: int = 17
+    """Nodes per shape grid (odd, so the operating point is one)."""
 
 
 # --- compile --------------------------------------------------------------------------------------
@@ -267,6 +279,81 @@ def interdot_tunnel_coupling_ev(basis: GateBasis, v: np.ndarray, d1, d2, mass: f
     return float(hbar_omega * np.sqrt(trans) / np.pi), h, w, f_attempt * trans
 
 
+SHAPE_JUMP_NM = 12.0
+"""A dot moving farther than this between neighbouring nodes is taken as another minimum: the grid ends."""
+
+
+def _shape_row(layout: Layout, basis: GateBasis, v: np.ndarray, params: CompileParams, mass: float, ends: tuple, levels: tuple[float, float, float]) -> np.ndarray | None:
+    """One node of the shape grid at carried voltages `v` (`charge.shape.quantity_layout`), or None
+    when the potential does not form two dots there. Positions are refined between grid points
+    (`refined_dot`), and the capacitances and actions are taken with the refined dots."""
+    try:
+        derived = derive_double_dot(layout, v, temperature_k=params.temperature_k, basis=basis)
+    except ValueError:
+        return None
+    u = basis.energy_ev(v)
+    d1, d2 = (refined_dot(basis, u, d) for d in derived.dots)
+    c = capacitance_matrix_af(d1, d2, layout.stack.epsilon_well)
+    starts = (d1, d2, d1)
+    points = (ends[0], ends[1], (d2.x_nm, d2.y_nm))
+    log_rate = [-2.0 * float(barrier_action(basis, v, d, pt, mass, level_ev=lv)[2]) for d, pt, lv in zip(starts, points, levels, strict=True)]
+    return np.concatenate(
+        [
+            np.stack([d1.lever_arms, d2.lever_arms]).ravel(),
+            [basis.offset_at(d1.x_nm, d1.y_nm), basis.offset_at(d2.x_nm, d2.y_nm)],
+            [c[0, 0], c[1, 1], -c[0, 1]],
+            [d1.x_nm, d2.x_nm, d1.y_nm, d2.y_nm],
+            [d1.radius_nm, d2.radius_nm],
+            log_rate,
+        ]
+    )
+
+
+def _shape_grid(layout: Layout, basis: GateBasis, v: np.ndarray, params: CompileParams, mass: float, ends: tuple, levels: tuple[float, float, float]) -> ShapeGrid | None:
+    """The double dot re-derived on `shape_points` nodes along each shape gate, ±`shape_span_v` around
+    `v` with the other gates there (#59, ADR 0030). Each gate's grid runs outward from the operating
+    point until the potential stops forming two dots, or a dot jumps by more than `SHAPE_JUMP_NM` (it
+    merged and another minimum took its place); the changes are taken from the operating point's node."""
+    gates = [g for g in params.shape_gates if g in layout.gate_names]
+    if not gates:
+        return None
+    n = int(params.shape_points)
+    centre = n // 2
+    offsets = np.linspace(-params.shape_span_v, params.shape_span_v, n)
+    xy = quantity_layout(len(v))
+    idx, nodes, changes, below, above = [], [], [], [], []
+    for g in gates:
+        j = layout.gate_names.index(g)
+        rows: dict[int, np.ndarray] = {}
+        ended = {}
+        for step in (1, -1):
+            k, last = centre, None
+            while 0 <= k < n:
+                w = v.copy()
+                w[j] += offsets[k]
+                row = _shape_row(layout, basis, w, params, mass, ends, levels)
+                if row is not None and last is not None:
+                    jump = np.hypot(row[xy["x_nm"]] - last[xy["x_nm"]], row[xy["y_nm"]] - last[xy["y_nm"]])
+                    row = row if float(np.max(jump)) <= SHAPE_JUMP_NM else None
+                if row is None:
+                    break
+                rows[k], last = row, row
+                k += step
+            ended[step] = 0 <= k < n
+        keys = sorted(rows)
+        if len(keys) < 2:
+            continue
+        ref = rows[centre]
+        idx.append(j)
+        nodes.append(tuple(float(v[j] + offsets[k]) for k in keys))
+        changes.append(tuple(tuple(float(x) for x in rows[k] - ref) for k in keys))
+        below.append(bool(ended[-1]))
+        above.append(bool(ended[1]))
+    if not idx:
+        return None
+    return ShapeGrid(tuple(idx), len(v), tuple(nodes), tuple(changes), tuple(below), tuple(above))
+
+
 def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     """Run every draw and derivation once; return the `Device` (ADR 0023)."""
     material = layout.material
@@ -301,6 +388,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     t_p = interdot_tunnel_coupling_ev(basis, vp, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
     t_m = interdot_tunnel_coupling_ev(basis, vm, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
     v_scale = float(2 * dv / np.log(max(t_p, 1e-300) / max(t_m, 1e-300))) if t_p > t_m > 0 else 0.05
+    shape = _shape_grid(perturbed, basis, v, params, mass, (res[r_l], res[r_r]), tuple(b.tunnelling_level_ev for b in barriers))
     valley_params = params.valley or ValleyParams.for_material(material)
     radii = np.array([d1.radius_nm, d2.radius_nm] + ([sensor.sensor_dot.radius_nm] if sensor.sensor_dot else []))
     valleys = draw_valley_splitting_uev(valley_params, radii, np.random.default_rng(seed + 1))
@@ -349,6 +437,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         sensor_charging_energy_ev=sensor.sensor_charging_energy_ev,
         sensor_beta_v_per_e=None if sensor.sensor_beta_v_per_e is None else (float(sensor.sensor_beta_v_per_e[0]), float(sensor.sensor_beta_v_per_e[1])),
         sensor_leads=sensor_leads,
+        shape=shape,
     )
 
 

@@ -67,13 +67,15 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 5
+MODEL_VERSION = 6
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
 sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
 4: with dynamics, the sensor dot's charge is a process on the clock that acts back on the dots (#54).
 5: the interdot coupling follows every gate and hybridizes the charge states; the charge and its
-dynamics live on the eigenstates (#58, ADR 0029)."""
+dynamics live on the eigenstates (#58, ADR 0029). 6: the dots' capacitances, lever arms, offsets, t and
+rates follow their shape along the barrier gates; `State` reports their positions, radii, addition
+energies and whether they merged (#59, ADR 0030)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -117,6 +119,16 @@ class State:
     sensor_gamma_hz: np.ndarray | None = None
     """(..., 2) the sensor's source and drain rates at the carried voltages, Hz, through its barriers
     and baths (ADR 0026); None for a typed sensor without leads."""
+    dot_positions_nm: np.ndarray | None = None
+    """(..., 2, 2) (x, y) of each dot's potential minimum at the carried voltages, nm: the compiled
+    position moved along the barrier gates (#59)."""
+    dot_radii_nm: np.ndarray | None = None
+    """(..., 2) each dot's harmonic radius at the carried voltages, nm."""
+    addition_energies_ev: np.ndarray | None = None
+    """(..., 2) each dot's addition energy E_UNIT·(C_dot⁻¹)_ii at the carried voltages, eV."""
+    dots_merged: np.ndarray | None = None
+    """(...) True where a barrier gate is opened beyond the last point at which the potential forms two
+    dots (a dot merged with its neighbour or its lead): the shape there is held at that point (#59)."""
 
 
 @dataclass(frozen=True)
@@ -176,7 +188,28 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
         gamma_right_hz=gammas[..., 1],
         gamma_interdot_hz=gammas[..., 2],
         sensor_gamma_hz=sensor.rates_hz(vc),
+        **_shape_at(device, vc),
     )
+
+
+def _shape_at(device: Device, vc: np.ndarray) -> dict[str, np.ndarray]:
+    """The dots' positions, radii, addition energies and the merged flag at carried voltages (..., gates)."""
+    lead = vc.shape[:-1]
+    pos = np.array([[d.x_nm, d.y_nm] for d in device.dots[:2]])
+    radii = np.array([d.radius_nm for d in device.dots[:2]])
+    merged = np.zeros(lead, dtype=bool)
+    if device.shape is not None:
+        g = device.shape
+        change = g.change(vc)
+        pos = pos + np.stack([g.quantity(change, "x_nm"), g.quantity(change, "y_nm")], axis=-1)
+        radii = radii + g.quantity(change, "radius_nm")
+        merged = g.merged(vc)
+    return {
+        "dot_positions_nm": np.broadcast_to(pos, lead + (2, 2)).copy(),
+        "dot_radii_nm": np.broadcast_to(radii, lead + (2,)).copy(),
+        "addition_energies_ev": device.runtime_ci().addition_energies_at_ev(vc),
+        "dots_merged": merged,
+    }
 
 
 def noise_realisation_seed(device_seed: int, noise_seed: int) -> int:

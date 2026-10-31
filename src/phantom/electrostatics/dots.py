@@ -121,6 +121,25 @@ def find_dots(
     return dots
 
 
+def refined_dot(basis: GateBasis, u: np.ndarray, d: DerivedDot) -> DerivedDot:
+    """`d` (a minimum `find_dots` placed on a grid point of `u`, the energy map at the same voltages)
+    with its position refined between grid points by a parabola through the minimum and its two
+    neighbours along each axis, and its lever arms taken there (bilinear). The curvature and radius
+    stay the grid point's. A grid minimum moves in steps of the grid; the refined one moves smoothly."""
+    ix = int(np.argmin(np.abs(basis.x_nm - d.x_nm)))
+    iy = int(np.argmin(np.abs(basis.y_nm - d.y_nm)))
+    dx = float(basis.x_nm[1] - basis.x_nm[0])
+    dy = float(basis.y_nm[1] - basis.y_nm[0])
+
+    def vertex(lo: float, mid: float, hi: float) -> float:
+        bend = lo - 2 * mid + hi
+        return float(np.clip(0.5 * (lo - hi) / bend, -0.5, 0.5)) if bend > 0 else 0.0
+
+    x = d.x_nm + dx * vertex(u[iy, ix - 1], u[iy, ix], u[iy, ix + 1])
+    y = d.y_nm + dy * vertex(u[iy - 1, ix], u[iy, ix], u[iy + 1, ix])
+    return DerivedDot(d.name, x, y, d.energy_ev, d.curvature_ev_per_nm2, d.radius_nm, basis.at(x, y))
+
+
 def barrier_between(basis: GateBasis, voltages_v: np.ndarray, a: DerivedDot, b: DerivedDot, samples: int = 201) -> DerivedBarrier:
     """Highest point of U on the straight line from dot `a` to dot `b`."""
     u = basis.energy_ev(voltages_v)

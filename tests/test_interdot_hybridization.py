@@ -124,8 +124,13 @@ def test_the_coupling_follows_the_gates_from_its_compiled_value(device: Device):
     j = device.gate_names.index(device.barrier_gate)
     along = v0 + np.linspace(-0.2, 1.0, 241)[:, None] * np.eye(len(v0))[j]
     t = c.tunnel_coupling_ev(along)
-    assert np.all(np.diff(t) >= 0) and np.all(np.diff(t[t < 0.99 * c.t_max_ev]) > 0), "opening the barrier gate raises t"
-    assert t[-1] == pytest.approx(c.t_max_ev, rel=1e-6) and np.all(t <= c.t_max_ev), "saturating at ħω₀/π"
+    assert np.all(np.diff(t) >= 0) and t[-1] > 1e8 * t[0], "opening the barrier gate raises t"
+    # along the barrier gate t follows half the interdot action's change on the shape grid (#59): once the
+    # barrier falls below the tunnelling level the action is zero and t holds at t_max·σ(logit(t₀/t_max) −
+    # ln(t₀/t_max)), about half the ceiling; the ceiling itself bounds every gate
+    assert np.all(t < c.t_max_ev) and t[-1] > 0.3 * c.t_max_ev, "below ħω₀/π, within a factor of a few"
+    other = v0 + np.linspace(0.0, 3.0, 31)[:, None] * np.eye(len(v0))[device.gate_names.index("P1")]
+    assert c.tunnel_coupling_ev(other)[-1] == pytest.approx(c.t_max_ev, rel=1e-6), "a linear gate takes it to the ceiling"
     mass = 0.19
     hbar_omega = math.sqrt(2 * 0.0380998212 * device.dots[0].curvature_ev_per_nm2 / mass)
     assert c.t_max_ev == pytest.approx(hbar_omega / math.pi, rel=1e-6)

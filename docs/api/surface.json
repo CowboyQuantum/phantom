@@ -114,6 +114,21 @@
      "default": true,
      "name": "spin",
      "type": "SpinParams"
+    },
+    {
+     "default": true,
+     "name": "shape_gates",
+     "type": "tuple[str, ...]"
+    },
+    {
+     "default": true,
+     "name": "shape_span_v",
+     "type": "float"
+    },
+    {
+     "default": true,
+     "name": "shape_points",
+     "type": "int"
     }
    ],
    "frozen": true,
@@ -229,7 +244,7 @@
   "DEVICE_FORMAT_VERSION": {
    "kind": "value",
    "type": "int",
-   "value": 3
+   "value": 4
   },
   "Device": {
    "fields": [
@@ -347,6 +362,11 @@
      "default": true,
      "name": "sensor_leads",
      "type": "SensorLeads | None"
+    },
+    {
+     "default": true,
+     "name": "shape",
+     "type": "ShapeGrid | None"
     }
    ],
    "frozen": true,
@@ -1103,6 +1123,26 @@
     {
      "default": true,
      "name": "sensor_gamma_hz",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "dot_positions_nm",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "dot_radii_nm",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "addition_energies_ev",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "dots_merged",
      "type": "np.ndarray | None"
     }
    ],

@@ -46,7 +46,7 @@ def test_round_trip_is_text_identical_and_reproduces_the_diagram(device: Device,
     assert again.dumps() == device.dumps()
     assert again.provenance["format_version"] == DEVICE_FORMAT_VERSION and "charge.ci" in again.provenance["model_versions"]
     np.testing.assert_array_equal(_coarse_map(again), _coarse_map(device))
-    assert path.stat().st_size < 50_000, "a device file stays small: the basis is not stored"
+    assert path.stat().st_size < 100_000, "a device file stays small: the basis is not stored (the shape grid, #59, is about 40 kB)"
     _lay, basis = again.basis()
     assert basis.basis.shape[0] == len(device.gate_names)
 
