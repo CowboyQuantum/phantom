@@ -213,8 +213,20 @@ class ConstantInteractionParams:
         return self.coupling.tunnel_coupling_ev(v)
 
     def eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None = None) -> WindowEigenstates:
-        """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`)."""
+        """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`). The last
+        result is kept, so the occupation, the ground state and the sensor at one batch of points
+        diagonalise it once."""
         v = np.asarray(v, dtype=float)
+        if level_shift_ev is None:
+            last = self.__dict__.get("_last_eigenstates")
+            if last is not None and last[0].shape == v.shape and np.array_equal(last[0], v):
+                return last[1]
+            eig = self._eigenstates(v, None)
+            object.__setattr__(self, "_last_eigenstates", (v.copy(), eig))
+            return eig
+        return self._eigenstates(v, level_shift_ev)
+
+    def _eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None) -> WindowEigenstates:
         c_inv = None if self.shape is None else self._c_inv(v)
         window = max(self.window, STATIC_WINDOW)
         return window_eigenstates(self.induced_charge(v), window, lambda states, n_g: self._grid_energies(states, n_g, c_inv), self.tunnel_coupling_ev(v), level_shift_ev)

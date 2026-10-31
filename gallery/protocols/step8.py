@@ -131,7 +131,7 @@ def session_closing_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
                 v[dev.gate_names.index(gate)] += dv
             # the same transition of dot 1 each time: the barriers shift it along P1 (cross-capacitance)
             n1 = None if not centres else int(np.floor(dev.at(centres["open"]).n_mean[0]))
-            centres[label] = _dot1_degeneracy(dev, half_v=0.06, n=12001, v0=v, n1_from=n1)
+            centres[label] = _dot1_degeneracy(dev, half_v=0.06, n=4001, v0=v, n1_from=n1)
     n_p1, n_trace = int(p1_sweep["points"]), int(trace["points"])
     out: dict[str, np.ndarray] = {"v_b_l_v": v0[jb] + db, "dp1_v": np.linspace(-float(p1_sweep["half_span_v"]), float(p1_sweep["half_span_v"]), n_p1), "sample": np.arange(n_trace, dtype=float)}
     with ctx.run(len(db) + 6 * n_p1 + 2 * n_trace):
