@@ -1,0 +1,685 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>0024 — The consumer contract: one import surface above compile, a session with a forward clock, truth apart from what a user may see, a contract test consumers run, a checked surface snapshot, and 0.x releases - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#0024-the-consumer-contract-one-import-surface-above-compile-a-session-with-a-forward-clock-truth-apart-from-what-a-user-may-see-a-contract-test-consumers-run-a-checked-surface-snapshot-and-0x-releases" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0024 — The consumer contract: one import surface above compile, a session with a forward clock, truth apart from what a user may see, a contract test consumers run, a checked surface snapshot, and 0.x releases
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="0024-the-consumer-contract-one-import-surface-above-compile-a-session-with-a-forward-clock-truth-apart-from-what-a-user-may-see-a-contract-test-consumers-run-a-checked-surface-snapshot-and-0x-releases">0024 — The consumer contract: one import surface above <code>compile</code>, a session with a forward clock, truth apart from what a user may see, a contract test consumers run, a checked surface snapshot, and 0.x releases</h1>
+<p><strong>Status:</strong> Accepted (release tagging amended by 0025)
+<strong>Date:</strong> 2026-10-27
+<strong>Step:</strong> 8</p>
+<h2 id="context">Context</h2>
+<p>ADR 0003 promised consumers plan §4 (<code>compile</code>, <code>Device.at</code>, <code>Device.measure</code>, <code>Device.truth</code>,
+<code>optimum</code>), a contract test the qdt adapter also runs, and a changelog. Step 7 built the compiled
+<code>Device</code> and <code>optimum</code> but no runtime surface with time: <code>runtime_sensed()</code> hands out the migrated
+qdt-sim core, which a consumer would have to drive, seed and clock itself. qdt's Analysis 0007
+(issue #40) found six gaps between the planned surface and what its adapter needs: the sensor bias in
+<code>sense</code>, a noise seed apart from the device seed, holding voltages without reading, a statement of
+what one sample is, truth under the names a tune-up recovers, and the line between knowable fields and
+truth. Rule 2 said nothing imports <code>compile</code>, yet a consumer's one import has to reach <code>compile_device</code>.</p>
+<h2 id="decision">Decision</h2>
+<ul>
+<li><strong>One import surface.</strong> <code>phantom.api</code> re-exports every name a consumer uses (<code>compile_device</code>,
+  <code>CompileParams</code>, <code>Device</code>, <code>State</code>, <code>Session</code>, <code>Measurement</code>, <code>SpinOutcome</code>, <code>Truth</code>, <code>SensorTruth</code>,
+  <code>Knowable</code>, <code>optimum</code> and its parts, the layout types, <code>ValleyParams</code>, <code>SpinParams</code>,
+  <code>DEVICE_FORMAT_VERSION</code>, <code>__version__</code>) and adds <code>model_versions()</code>. <code>phantom.api</code> and
+  <code>phantom.contract</code> sit above <code>compile</code>: they may import every layer, <code>contract</code> imports <code>api</code>, and no
+  layer or root module imports either (rule 2 amended; <code>scripts/check_imports.py</code>).</li>
+<li><strong>The runtime surface lives in <code>device</code></strong> (<code>device.session</code>, <code>device.truth</code>), so it reads the record
+  and the layers below and never <code>compile</code>. <code>Device.at(v, v_sd)</code> is the noise-free <code>State</code>, vectorised.
+  <code>Device.session(noise, dynamics, charge, noise_seed)</code> is a <code>Session</code> with a clock that only moves
+  forward: <code>sense(v, dwell_s, samples, v_sd)</code> reads each point at the end of each dwell, sample k at
+  t₀ + (k+1)·dwell; <code>hold(v, duration_s)</code> keeps the gates at <code>v</code> and evolves the charge there;
+  <code>wait(duration_s)</code> holds at the last point; <code>spin_readout</code> samples the PSB readout of a prepared
+  pair as a protocol step (voltage-driven spin is #41). <code>Device.measure</code> is a fresh session's <code>sense</code>.</li>
+<li><strong>What one sample is</strong>, fixed per session: <code>charge="sampled"</code> (default) puts one charge state in the
+  sensor per sample, the state of a Markov jump trajectory of the rate equation (from the present
+  state, the next is drawn from the column of exp(W·dwell)) with <code>dynamics=True</code>, an independent
+  Boltzmann draw (qdt-sim's behaviour) without; <code>charge="mean"</code> puts ⟨N⟩ in, propagated or thermal.
+  The noise processes are sampled at each sample's time; the white floor keeps the draw's density at
+  1 ms (σ ∝ √(1 ms / dwell)). A hold samples the gate noise once at its start.</li>
+<li><strong>Seeds.</strong> The device seed is the device's identity. <code>noise_seed=None</code> replays the device's own noise
+  realisation, so identical calls on two fresh sessions are identical; an integer replaces only the
+  noise draw's realisation seed (a hash of both seeds) and keys the session's charge and spin streams,
+  keeping every noise parameter.</li>
+<li><strong>Knowable and truth.</strong> <code>Device.knowable()</code> is what a user may be shown: material, gate names, layout,
+  temperature, programmed point, sensor, barrier and reservoir gates. Everything else on a <code>Device</code> is
+  truth, including the seed and <code>operating_point_v</code> (it holds the compiled sensor set point).
+  <code>Device.truth()</code> gathers it under the quantities a tune-up recovers: the charge lattice in electrons
+  per programmed volt (through the wiring matrix) and the sensor peak in programmed sensor-gate volts
+  (peak, period, charging energy, lever arm, width, the wing at atanh(1/√3) widths and the linear-
+  response sensitivity there at a given bias), so qdt's adapter only renames.</li>
+<li><strong>Contract test.</strong> <code>phantom.contract.run(device)</code> checks every promise above on a device;
+  <code>python -m phantom.contract [device.json ...]</code> runs it on the reference device and on each file, exit
+  status 0 or 1. phantom's CI runs it (<code>tests/test_contract.py</code>); qdt's CI runs it on the pinned tag
+  and its committed device files.</li>
+<li><strong>Surface snapshot.</strong> <code>scripts/api_surface.py</code> writes <code>docs/api/surface.json</code> (every public name, its
+  signature, dataclass fields, public methods); <code>check_all.sh</code> fails when the surface differs from it,
+  so an API change is a reviewed diff with a <code>CHANGELOG.md</code> entry.</li>
+<li><strong>Releases.</strong> Semantic versioning in 0.x: the minor version rises for any breaking change to the
+  surface or to <code>DEVICE_FORMAT_VERSION</code>, the patch version otherwise; a change of output for the same
+  parameters, seed and calls bumps the module's <code>MODEL_VERSION</code> and is listed in the changelog. The
+  owner tags releases (<code>v0.2.0</code> first); how often phantom releases and qdt moves its pin is the owner's
+  open decision (Step 8).</li>
+</ul>
+<h2 id="consequences">Consequences</h2>
+<ul>
+<li>Easier: qdt's adapter becomes renaming and plumbing over <code>Session</code> (its <code>hold</code>/<code>sense</code> protocol maps
+  one to one); a consumer gets a new noise realisation on the same committed device; truth and the
+  knowable fields are stated by phantom, not re-derived by a consumer; an API change cannot slip in
+  unreviewed.</li>
+<li>Harder: every name in <code>phantom.api</code> is a promise; a session with dynamics costs about 1 ms per
+  sample (one matrix exponential), so long maps belong in <code>dynamics=False</code> or <code>charge="mean"</code>; a point
+  evaluated alone and inside a batch agree within 1e-12 relative, not bit for bit (numpy's kernels).</li>
+<li>Must now: the owner tags v0.2.0 after this merges; the qdt side (#140, #141, #142) pins it; the
+  compiled rates are constant at runtime (<code>State</code> says so) until a later step makes them voltage-
+  dependent; the wiring draw's sensor-coupling asymmetry is not yet applied by <code>runtime_sensor</code>.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered</h2>
+<ul>
+<li><code>Device</code> methods only, no <code>phantom.api</code> — rejected: <code>compile_device</code> lives above <code>device</code>, so a
+  consumer would import from three layers and the surface would have no single place to snapshot.</li>
+<li><code>sense</code> returns the equilibrium average only — rejected: qdt samples a charge state per shot, and a
+  trace at a degeneracy must switch; the average stays available as <code>charge="mean"</code>.</li>
+<li>A noise seed that redraws the noise parameters — rejected: the amplitudes and switchers are the
+  device's draw (ADR 0019); only the realisation belongs to a run.</li>
+<li>Sampling the charge per sample from the propagated distribution — rejected: it loses the correlation
+  between consecutive samples that a slow lead produces; the trajectory keeps it.</li>
+<li><code>wait(duration_s, v)</code> instead of <code>hold(v, duration_s)</code> — <code>hold</code> names the gate point first like
+  <code>sense</code>, and <code>wait</code> stays the hold at the last point.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
