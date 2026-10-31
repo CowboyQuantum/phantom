@@ -1,0 +1,16 @@
+id: diamonds-single-dot
+name: Coulomb diamonds of a single dot
+step: 1
+description: Current through a single dot (the SET sensor) against its plunger and the source-drain bias. Diamond edges have slope plus or minus twice the lever arm; the apex sits at the charging energy. Noise-free.
+layers: [readout, charge]
+runner: step1:diamonds_single_dot
+instance: {model: sensed-double-dot, seed: 0, noise: none}
+sweep:
+  - {gate: SG, from: -0.45, to: 0.35, points: 321, unit: V}
+  - {gate: V_sd, from: -1.5e-3, to: 1.5e-3, points: 201, unit: V}
+readout: {channel: current, unit: A}
+render: {kind: map, x: v_sg_v, y: v_sd_v, z: current_a, xlabel: "sensor plunger (V)", ylabel: "source-drain bias (V)", zlabel: "current (A)", cmap: RdBu_r}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 64521, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
