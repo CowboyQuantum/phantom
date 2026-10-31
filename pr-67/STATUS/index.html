@@ -677,8 +677,13 @@ it closes. Decisions taken that day:
 <li>Reference entries <code>golden1996-peak-splitting</code>, <code>waugh1995-tunable-coupling</code> and
     <code>kemble1935-wkb-barrier</code> (<code>proposed</code>), plus the item <code>honeycomb-vs-interdot-coupling</code> of
     <code>vanderwiel2003-double-dot-transport</code>.</li>
+<li><strong>Cross-platform (ADR 0033, this branch).</strong> <code>session-closing-barrier</code> failed the Windows comparison at
+  1.1–2.2e-9. The Windows arrays (CI now keeps them on failure) showed compile's own numbers differing by
+  about 1e-12 between platforms, amplified about a thousand-fold by a latched transition read on the
+  sensor's flank. The runtime protocols now run on a device compiled once and stored under
+  <code>docs/gallery/devices/</code> (<code>--record-devices</code>); a P0 test checks it against a fresh compile within 1e-9.</li>
 <li><strong>Release <code>v0.3.0</code>:</strong> tagged and released as for <code>v0.2.0</code> (PR #57).</li>
-<li><strong>Totals:</strong> 208 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
+<li><strong>Totals:</strong> 210 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
