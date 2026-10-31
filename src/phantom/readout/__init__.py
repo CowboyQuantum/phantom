@@ -6,7 +6,7 @@ dot's charge as a process in time and the electrons it passes in a dwell), `nois
 axis), `measure` (a CI double dot read by the sensor with noise), `lockin` (the `sensor_lockin`
 hardware-derivative channel), `transport` (phenomenological turn-on and pinch-off shapes, Step 1 only), `loading` (Step 1 placeholder for
 rate-limited loading; superseded for dynamics by `master_equation`), `rates` (WKB tunnel rates from barrier height
-and width), `master_equation` (rate equation over the CI charge states with detailed balance; latching from the lag), `rf`
+and width), `master_equation` (rate equation over the CI charge states, or their hybridized eigenstates with an interdot coupling, with detailed balance; latching from the lag), `rf`
 (lumped tank circuit with the sensor as load: reflection and resonance), `single_shot` (integrated shots,
 histograms, signal-to-noise against integration time).
 """

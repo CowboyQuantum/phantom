@@ -17,6 +17,10 @@ Derived quantities (all exact for this model, used by the P0 tests):
 - transition period along gate j for dot i: `E_UNIT / C_gate[i, j]` volts per electron;
 - the two triple points of the (0,0)/(1,0)/(0,1)/(1,1) honeycomb vertex, in n_g, and their separation,
   which vanishes when the mutual capacitance vanishes.
+
+With an interdot tunnel `coupling` (#58, ADR 0029) the window's charge states of one total charge
+hybridize (`charge.hybrid`). The occupation, the ground state and the draws then come from the
+eigenstates, and the energies and the derived quantities above stay those of the charge states.
 """
 
 from __future__ import annotations
@@ -26,11 +30,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from phantom.charge.hybrid import InterdotCoupling, WindowEigenstates, boltzmann, window_eigenstates
+from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
+
 MODEL_VERSION = 2
 """Bumped whenever any output of this module changes for the same parameters (ADR 0003). 2: duplicated
-clipped states near the empty corner carry no weight (qdt-sim over-counted them)."""
-
-from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
+clipped states near the empty corner carry no weight (qdt-sim over-counted them). Without a `coupling`
+the output is that of version 2."""
 
 
 @dataclass(frozen=True)
@@ -54,6 +60,8 @@ class ConstantInteractionParams:
     """Electron temperature of the dots in K."""
     window: int = 2
     """Integer occupations considered: round(n_g) ± window per dot."""
+    coupling: InterdotCoupling | None = None
+    """The interdot tunnel coupling at the gate voltages; None keeps the charge states classical."""
 
     def __post_init__(self) -> None:
         n_g = len(self.gate_names)
@@ -104,7 +112,12 @@ class ConstantInteractionParams:
         self, v: np.ndarray, kt_ev: float | np.ndarray | None = None
     ) -> tuple[np.ndarray, np.ndarray]:
         """States (..., k, 2) and Boltzmann probabilities (..., k) at the model temperature, or at the
-        energy width `kt_ev` (scalar or one per gate point) when given, e.g. a lifetime-broadened width."""
+        energy width `kt_ev` (scalar or one per gate point) when given, e.g. a lifetime-broadened width.
+        With a `coupling` the probabilities are those of the charge states in the thermal state of the
+        eigenstates (the density matrix's diagonal), so their mean is the thermal ⟨N⟩."""
+        if self.coupling is not None:
+            eig = self.eigenstates(v)
+            return eig.states, eig.populations(boltzmann(eig.energies_ev, self._kt(kt_ev)))
         states, u = self.energies(self.induced_charge(v))
         if kt_ev is None:
             kt = K_B_EV_PER_K * max(self.temperature_k, 1e-6)
@@ -115,19 +128,57 @@ class ConstantInteractionParams:
 
     def mean_occupation(self, v: np.ndarray, kt_ev: float | np.ndarray | None = None) -> np.ndarray:
         """Thermal-average occupation ⟨N⟩ (..., 2) in electrons for gate voltages `v`."""
+        if self.coupling is not None:
+            eig = self.eigenstates(v)
+            return eig.mean_charge(boltzmann(eig.energies_ev, self._kt(kt_ev)))
         states, p = self.occupation_probabilities(v, kt_ev)
         return np.einsum("...k,...ki->...i", p, states)
 
     def ground_state_occupation(self, v: np.ndarray) -> np.ndarray:
-        """The lowest-energy integer occupation (..., 2) for gate voltages `v` (the T → 0 charge state)."""
+        """The lowest-energy integer occupation (..., 2) for gate voltages `v` (the T → 0 charge state);
+        with a `coupling`, the charge state with the largest weight in the ground eigenstate."""
+        if self.coupling is not None:
+            eig = self.eigenstates(v)
+            return eig.dominant_state(np.argmin(eig.energies_ev, axis=-1))
         states, u = self.energies(self.induced_charge(v))
         idx = np.argmin(u, axis=-1)
         return np.take_along_axis(states, idx[..., None, None], axis=-2)[..., 0, :]
 
     def sample_occupation(self, v: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-        """One occupation (2,) drawn from the Boltzmann distribution at gate voltages `v` (1-D)."""
+        """One occupation (2,) drawn from the Boltzmann distribution at gate voltages `v` (1-D); with a
+        `coupling`, one eigenstate drawn and its charge expectation (electrons, not an integer)."""
+        if self.coupling is not None:
+            eig = self.eigenstates(np.asarray(v, dtype=float))
+            p = boltzmann(eig.energies_ev, self._kt(None))
+            return eig.charge()[rng.choice(len(p), p=p)]
         states, p = self.occupation_probabilities(np.asarray(v, dtype=float))
         return states[rng.choice(len(p), p=p)]
+
+    # --- interdot tunnelling (#58) ------------------------------------------------------------------
+
+    def tunnel_coupling_ev(self, v: np.ndarray) -> np.ndarray:
+        """Interdot t (...) in eV at gate voltages `v` (..., gates); zero without a `coupling`."""
+        v = np.asarray(v, dtype=float)
+        if self.coupling is None:
+            return np.zeros(v.shape[:-1])
+        return self.coupling.tunnel_coupling_ev(v)
+
+    def eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None = None) -> WindowEigenstates:
+        """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`)."""
+        v = np.asarray(v, dtype=float)
+        return window_eigenstates(self.induced_charge(v), self.window, self._grid_energies, self.tunnel_coupling_ev(v), level_shift_ev)
+
+    def _grid_energies(self, states: np.ndarray, n_g: np.ndarray) -> np.ndarray:
+        """U(N) (..., K) of the states (..., K, 2) around `n_g` (..., 2), +inf for a negative occupation."""
+        d = states - n_g[..., None, :]
+        c_inv = np.linalg.inv(self.c_dot_af)
+        u = 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
+        return np.where((states >= 0).all(axis=-1), u, np.inf)
+
+    def _kt(self, kt_ev: float | np.ndarray | None) -> float | np.ndarray:
+        if kt_ev is None:
+            return K_B_EV_PER_K * max(self.temperature_k, 1e-6)
+        return np.maximum(np.asarray(kt_ev, dtype=float), 1e-12)[..., None]
 
     # --- exact derived quantities --------------------------------------------------------------
 

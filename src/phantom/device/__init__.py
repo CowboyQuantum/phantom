@@ -20,22 +20,24 @@ import numpy as np
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
-from phantom.constants import K_B_EV_PER_K
+from phantom.charge.hybrid import InterdotCoupling
+from phantom.constants import HBAR2_OVER_2ME_EV_NM2, K_B_EV_PER_K
 from phantom.device.session import ChargeMode, Measurement, Session, SpinOutcome, State, state_at
 from phantom.device.truth import Knowable, Truth, knowable, truth
 from phantom.disorder.scenario import ScenarioDraw, apply_scenario
 from phantom.electrostatics.closed_form import GateBasis
-from phantom.layout.geometry import Gate, Layer, Layout, Stack
+from phantom.layout.geometry import Gate, Layer, Layout, MaterialClass, Stack
 from phantom.readout.master_equation import RateEquation
 from phantom.readout.measure import SensedDoubleDot
 from phantom.readout.rates import GateRates
 from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 4
+MODEL_VERSION = 5
 """2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
 3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026).
-4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027)."""
+4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027).
+5: the runtime CI model carries the interdot coupling at the gates (`runtime_coupling`, #58, ADR 0029)."""
 DEVICE_FORMAT_VERSION = 3
 """Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
 energy, per-electron coupling and leads (ADR 0026). 3: each barrier's attempt rate, tunnelling level
@@ -234,7 +236,27 @@ class Device:
         return draw.wiring.apply(v_programmed) if draw.wiring is not None else np.asarray(v_programmed, dtype=float)
 
     def runtime_ci(self) -> ConstantInteractionParams:
-        return ConstantInteractionParams(gate_names=self.gate_names, c_dot_af=np.array(self.c_dot_af), c_gate_af=np.array(self.c_gate_af), temperature_k=self.temperature_k)
+        """The dots' CI model with the interdot coupling at the gates (#58): its charge states hybridize."""
+        return ConstantInteractionParams(
+            gate_names=self.gate_names, c_dot_af=np.array(self.c_dot_af), c_gate_af=np.array(self.c_gate_af), temperature_k=self.temperature_k, coupling=self.runtime_coupling()
+        )
+
+    def runtime_coupling(self) -> InterdotCoupling | None:
+        """Interdot t at the carried voltages (#58, ADR 0029): the compiled t at the operating point, its
+        exponent moving with half the slopes of ln Γ_m (Γ_m ∝ T, t ∝ √T), saturating at ħω₀/π, compile's
+        t at a transmission of one, with ω₀ from dot 1's curvature as compile takes it. None when the
+        compiled t is zero."""
+        if not self.tunnel_coupling_ev > 0:
+            return None
+        inter = next(b for b in self.barriers if b.between == ("dot1", "dot2"))
+        mass = MaterialClass.by_name(self.material).effective_mass_me
+        hbar_omega = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(self.dots[0].curvature_ev_per_nm2, 1e-12) / mass)
+        return InterdotCoupling(
+            v_ref_v=tuple(self.operating_point_v),
+            t_ref_ev=float(self.tunnel_coupling_ev),
+            t_max_ev=float(hbar_omega / np.pi),
+            log_slopes_per_v=tuple(0.5 * s for s in inter.log_rate_slopes_per_v),
+        )
 
     def sensor_beta_factors(self) -> tuple[float, float]:
         """The wiring draw's sensor-coupling factors per dot ((1, 1) without a wiring draw)."""

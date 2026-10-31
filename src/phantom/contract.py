@@ -224,10 +224,13 @@ def check_sample_semantics(device: Device) -> str:
     v = _sweep(device)
     for dynamics in (True, False):
         n = device.session(dynamics=dynamics).sense(v, 1e-3, samples=3).n_present
-        _require(n.shape == (len(v), 3, 2) and bool(np.all(n == np.rint(n))), f"sampled charge is not integer (dynamics={dynamics})")
+        total = n.sum(axis=-1)
+        # one eigenstate per sample: its total charge is an integer, its split between the dots is the
+        # eigenstate's ⟨N⟩, an integer up to the interdot admixture away from interdot lines (#58)
+        _require(n.shape == (len(v), 3, 2) and bool(np.all(np.abs(total - np.rint(total)) < 1e-9)), f"sampled total charge is not integer (dynamics={dynamics})")
     n = device.session(noise=False, dynamics=False, charge="mean").sense(v, 1e-3).n_present
     _require(np.array_equal(n, device.at(v).n_mean), "mean charge is not ⟨N⟩")
-    return "sampled: integer states; mean: ⟨N⟩"
+    return "sampled: one eigenstate (integer total charge); mean: ⟨N⟩"
 
 
 def _pair_with_different_charge(device: Device) -> tuple[np.ndarray, np.ndarray] | None:
@@ -266,11 +269,13 @@ def check_hold_moves_the_charge(device: Device) -> str:
     run = device.session(noise=False, dynamics=True, charge="mean")
     run.hold(a, settle)
     n = run.sense(b, quick).n_present
-    _require(np.allclose(n, device.at(a).n_ground, atol=1e-3), f"a fast read after holding at A shows {n}, not A's charge")
+    # the leads have not acted, so the total charge is A's; its split between the dots is that of A's
+    # charge in B's eigenstates (a dwell long against ħ/t, #58), so only the total is A's
+    _require(abs(float(n.sum()) - float(device.at(a).n_ground.sum())) < 1e-3, f"a fast read after holding at A shows {n}, not A's total charge")
     run.hold(b, settle)
     n = run.sense(b, quick).n_present
     _require(np.allclose(n, device.at(b).n_ground, atol=1e-3), f"after holding at B the charge is {n}, not B's")
-    return f"held {settle:.3g} s at each point; fast reads of {quick:.3g} s show the held charge"
+    return f"held {settle:.3g} s at each point; fast reads of {quick:.3g} s show the held total charge"
 
 
 def check_knowable(device: Device) -> str:

@@ -62,7 +62,10 @@ noise added to the current. The white floor keeps its density: σ is the draw's 
 | `charge="sampled"` (default) | one state of a Markov jump trajectory of the rate equation: from the state present, the next is drawn from exp(W·dwell); consecutive samples are correlated when the rates are slow against the dwell | an independent Boltzmann draw at each sample (qdt-sim's behaviour) |
 | `charge="mean"` | ⟨N⟩ of the distribution propagated by exp(W·dwell): latching and lag | the thermal ⟨N⟩; without noise this is `State.sensor_current_a` exactly |
 
-`Measurement.n_present` is the integer state in `sampled` mode and ⟨N⟩ in `mean` mode. A hold
+`Measurement.n_present` is the charge that entered the sensor. In `sampled` mode it is one eigenstate of
+the dots' charge (ADR 0029): its total charge is an integer, and its split between the dots is the
+eigenstate's ⟨N⟩, an integer up to the interdot admixture (t/Δ)² away from interdot lines and near half an
+electron each way at the middle of one when t > kT. In `mean` mode it is ⟨N⟩. A hold
 samples the gate noise once at its start and keeps it through the hold. With dynamics a sample costs
 one matrix exponential, about 1 ms; without, about 0.05 ms.
 
@@ -115,6 +118,14 @@ The dots' own rates follow the gates too (ADR 0027): `State.gamma_left_hz`, `gam
 against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
 voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
 `Truth` states the rates at the operating point.
+
+The interdot tunnel coupling follows every gate as well (ADR 0029): `State.tunnel_coupling_ev` is the
+compiled t moved by half the slopes of ln Γ_m and capped at ħω₀/π, and the charge states of one total
+charge hybridize through it. An interdot line is then the two-level polarization ½(1 − ε/Ω·tanh(Ω/2kT)),
+Ω = √(ε² + 4t²), so opening the barrier gate widens it; `State.n_mean` and the sensor read the
+eigenstates, and a session's dynamics run over them. A dot is isolated only when its own barrier and the
+interdot barrier are both closed: with B_M open, dot 2's lead loads dot 1 in second order in t.
+`optimum(device).coupling` inverts this t along the barrier gate.
 
 With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its

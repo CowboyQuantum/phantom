@@ -6,6 +6,46 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
+## 0.4.0 — the barrier gates set the interdot coupling (#58; untagged)
+
+The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge
+hybridize through it (ADR 0029): opening B_M widens an interdot line from the thermal step to the
+two-level polarization, and closing it is what isolates a dot. #59 (the barrier gates reshape the dots)
+and #60 (the exchange follows them) are planned for the same release.
+
+### Breaking
+- `State.tunnel_coupling_ev` follows every gate, not the barrier gate alone: the compiled t moved by half
+  the slopes of ln Γ_m (Γ_m ∝ t²) and capped at ħω₀/π, compile's t at a transmission of one. On the
+  reference device's interdot lines it is 0.05 µeV with B_M 50 mV below the programmed point and 30 µeV
+  with B_M 16 mV above it.
+- `State.n_mean`, `State.n_ground`, `State.sensor_current_a` and every session read the hybridized
+  eigenstates of the CI window: near an interdot line the charge is no longer a thermal step, and away
+  from one it carries an admixture (t/Δ)² of the neighbouring charge state.
+- `Measurement.n_present` in `sampled` mode is the charge of one eigenstate: its total is an integer, its
+  split between the dots is not. The contract checks the total (`sample_semantics`); a consumer that
+  labels charge states rounds it.
+- With dynamics, dot 1 loads through dot 2's lead in second order in t, Γ_R t²(1/Δ + 1/Δ')²: closing B_L
+  alone no longer latches dot 1 on the reference device (about 10⁶ Hz through dot 2 against 10⁴ Hz
+  through B_L). Closing B_L and B_M together does. The contract's hold check compares the total charge.
+- `optimum(device).coupling.v_barrier_v` inverts the runtime coupling along the barrier gate (NaN at or
+  above its ceiling).
+
+### Added
+- `charge.hybrid`: `InterdotCoupling` (t at the gates) and the CI window's eigenstates, batched per total
+  charge (`window_eigenstates`, `eigenbasis`); `ConstantInteractionParams.coupling`, `tunnel_coupling_ev`,
+  `eigenstates`; `phantom.charge.InterdotCoupling`.
+- `Device.runtime_coupling()`; `RateEquation.eigen_rate_matrix`, and `readout.master_equation.project`
+  and `carried_states` for a distribution over eigenstates.
+- Gallery protocol `interdot-line-vs-barrier` (unsigned): t and Γ_m along B_M, detuning cuts at three B_M
+  beside the two-level formula, and the interdot line over B_M.
+
+### Changed
+- `session-closing-barrier` sweeps three ways: barriers open, B_L closed alone (loaded through dot 2),
+  and B_L and B_M closed (latching, telegraph); its budget rises from 1,665 to 2,067 points.
+- Model versions: `charge.hybrid` 1 (new), `readout.master_equation` 2, `device` 5, `device.session` 5,
+  `optimum.targets` 2. Without a coupling, `ConstantInteractionParams` and `RateEquation` give their 0.3.0
+  output bit for bit.
+
 ## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53, #54; `v0.3.0` at `6920f19`)
 
 The charge sensor becomes a dot like the qubit dots, with its own tunnel barriers and a bath behind each

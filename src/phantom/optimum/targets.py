@@ -36,7 +36,8 @@ from phantom.spin.exchange import detuning_noise_sigma_ev, symmetric_point_v
 from phantom.spin.gates import swap_gate_fidelity
 from phantom.spin.psb import best_read_point
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: the coupling optimum inverts the runtime interdot coupling (#58), not the barrier's exponential."""
 
 
 @dataclass(frozen=True)
@@ -168,9 +169,16 @@ def lattice_optimum(device: Device, plungers: tuple[str, str] = ("P1", "P2")) ->
 
 
 def coupling_optimum(device: Device, t_target_ev: float) -> CouplingOptimum:
-    b = device.runtime_barrier()
-    v = b.v_ref_v + b.v_scale_v * np.log(t_target_ev / b.t0_ev)
-    return CouplingOptimum(float(t_target_ev), float(v))
+    """The barrier gate's carried voltage that gives interdot t = `t_target_ev` with every other gate at
+    the operating point: the runtime coupling (#58) inverted along that gate. NaN when the target is
+    at or above the coupling's ceiling, or when the device has none."""
+    c = device.runtime_coupling()
+    j = device.gate_names.index(device.barrier_gate)
+    if c is None or not 0 < t_target_ev < c.t_max_ev or c.log_slopes_per_v[j] == 0:
+        return CouplingOptimum(float(t_target_ev), float("nan"))
+    anchor = np.log(c.t_ref_ev) - np.log(max(c.t_max_ev - c.t_ref_ev, 1e-12 * c.t_max_ev))
+    target = np.log(t_target_ev) - np.log(c.t_max_ev - t_target_ev)
+    return CouplingOptimum(float(t_target_ev), float(c.v_ref_v[j] + (target - anchor) / c.log_slopes_per_v[j]))
 
 
 # --- readout --------------------------------------------------------------------------------------

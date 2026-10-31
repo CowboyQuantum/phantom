@@ -29,7 +29,7 @@ def _dot1_degeneracy(dev: Device) -> np.ndarray:
     grid = v0 + np.linspace(-0.03, 0.03, 4001)[:, None] * np.eye(len(v0))[j]
     n = dev.at(grid).n_mean
     frac = n[:, 0] - np.floor(n[:, 0])
-    flat2 = np.abs(n[:, 1] - np.rint(n[:, 1])) < 1e-6
+    flat2 = np.abs(n[:, 1] - np.rint(n[:, 1])) < 1e-2  # dot 2 settled, up to its interdot admixture (#58)
     k = int(np.argmin(np.where(flat2, np.abs(frac - 0.5), np.inf)))
     assert abs(frac[k] - 0.5) < 0.05
     return grid[k]
@@ -38,7 +38,7 @@ def _dot1_degeneracy(dev: Device) -> np.ndarray:
 def test_sampled_charge_without_dynamics_is_a_boltzmann_draw(device: Device):
     v = _dot1_degeneracy(device)
     p = device.at(v).n_mean[0] - np.floor(device.at(v).n_mean[0])
-    n = device.session(noise=False, dynamics=False).sense(v, 1e-3, samples=4000).n_present[:, 0]
+    n = np.rint(device.session(noise=False, dynamics=False).sense(v, 1e-3, samples=4000).n_present[:, 0])
     upper = np.mean(n > np.floor(device.at(v).n_mean[0]))
     assert abs(upper - p) < 5 * math.sqrt(p * (1 - p) / 4000)
 
@@ -50,7 +50,7 @@ def test_the_trajectory_switches_as_the_two_state_propagator(device: Device, gam
     v = _dot1_degeneracy(device)
     gamma = device.at(v).gamma_left_hz
     dwell = gamma_dwell / gamma
-    n = device.session(noise=False).sense(v, dwell, samples=6000).n_present[:, 0]
+    n = np.rint(device.session(noise=False).sense(v, dwell, samples=6000).n_present[:, 0])  # each eigenstate's charge state
     p = float(np.mean(n > n.min()))
     changes = float(np.mean(n[1:] != n[:-1]))
     expected = 2 * p * (1 - p) * (1 - math.exp(-gamma_dwell))
