@@ -6,14 +6,14 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.4.0 — the barrier gates set the interdot coupling and the dots' shape (#58, #59; untagged)
+## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape and the exchange (#58, #59, #60; untagged)
 
 The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge
 hybridize through it (ADR 0029): opening B_M widens an interdot line from the thermal step to the
 two-level polarization, and closing it is what isolates a dot. The barrier gates move and reshape the
 dots through a grid compiled along each of them (ADR 0030): positions, sizes, lever arms, capacitances,
-t and the rates follow, until the dots merge. #60 (the exchange follows them) is planned for the same
-release.
+t and the rates follow, until the dots merge. The exchange of the dots' valence electrons follows them
+(ADR 0031): J comes from the CI window's local sector at the gated t and the shaped dots.
 
 ### Breaking
 - `State.tunnel_coupling_ev` follows every gate, not the barrier gate alone: the compiled t moved by half
@@ -40,6 +40,14 @@ release.
 - Along a barrier gate a rate levels off at f_a/(2 − T₀) once the barrier falls below its tunnelling
   level (its action vanishes), not at the attempt rate; the barrier gates' changes add.
 
+- `State.exchange_ev` is J of the dots' valence electrons (#60): the singlet secular equation on the CI
+  window's local sector, (N₁, N₂) with (N₁±1, N₂∓1), at the gated t and the shaped dots. It is a qubit
+  pair's exchange where both dots hold an odd number of electrons, and it jumps where the ground charge
+  state changes. Before, J came from a 0–2 electron Hubbard model and read about 13 meV at the reference
+  device's programmed point, whatever t was.
+- `Session.spin_readout` reads at the interdot coupling of the last point the session was given, not at
+  the compiled t.
+
 ### Added
 - `charge.hybrid`: `InterdotCoupling` (t at the gates) and the CI window's eigenstates, batched per total
   charge (`window_eigenstates`, `eigenbasis`); `ConstantInteractionParams.coupling`, `tunnel_coupling_ev`,
@@ -52,6 +60,10 @@ release.
   `InterdotCoupling.shape`, `GateRates.shape`; `charge.derived.capacitance_matrix_af`;
   `electrostatics.dots.refined_dot`; `CompileParams.shape_gates`, `shape_span_v`, `shape_points`.
 - `State.dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and `dots_merged`.
+- `State.exchange_frequency_hz` (J/h); `spin.exchange.local_exchange_ev` and `singlet_exchange_ev` (the
+  secular solver, now returning J = −min(0, Δ_R, Δ_L) where t = 0 without dividing zero by zero).
+- Gallery protocol `exchange-frequency-vs-barrier` (unsigned): t and J/h along B_M, and J/h across the
+  nearest odd–odd cell at three B_M beside its second-order form.
 - Gallery protocol `dot-shape-vs-barrier` (unsigned): positions, radii, addition energies, C_m, t and the
   merged flag along each barrier gate, and charge maps over P1 and P2 at three B_M.
 
@@ -64,7 +76,7 @@ release.
   every entry relative to itself (non-negative Taylor steps and squarings), not with `expm`: a slow
   transition beside rates 10⁵ times faster keeps its digits on every platform (ADR 0030).
 - Model versions: `charge.hybrid` 2 (new), `charge.shape` 1 (new), `readout.master_equation` 3,
-  `compile.device` 5, `device` 6, `device.session` 6, `optimum.targets` 3. Without a coupling and a
+  `compile.device` 5, `device` 6, `device.session` 7, `optimum.targets` 3, `spin.exchange` 3. Without a coupling and a
   shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.
 - The device file grows from about 14 kB to 62 kB (the shape grid); compile takes about 0.2 s more.
 

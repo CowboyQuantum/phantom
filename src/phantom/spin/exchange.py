@@ -30,10 +30,14 @@ from __future__ import annotations
 
 import numpy as np
 
+from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.hubbard import N1, N2, HubbardParams
+from phantom.constants import E_UNIT_V_PER_E_AF
 
-MODEL_VERSION = 2
-"""2: J from the singlet secular equation (full relative precision), not an eigenvalue difference."""
+MODEL_VERSION = 3
+"""2: J from the singlet secular equation (full relative precision), not an eigenvalue difference.
+3: `local_exchange_ev`, J of the valence electrons in the CI window at the gated t and shape (#60); the
+secular equation no longer divides zero by zero where t = 0 (same J)."""
 
 _TWO = np.flatnonzero(N1 + N2 == 2)  # the six two-electron Fock states
 _UPUP = 0b0101  # dot 1 up, dot 2 up: a pure triplet, diagonal in H
@@ -50,23 +54,60 @@ def _sector_energies(hub: HubbardParams, v: np.ndarray) -> tuple[np.ndarray, np.
     return np.broadcast_to(t, d_r.shape), d_r, d_l
 
 
-def exchange_j_ev(hub: HubbardParams, v: np.ndarray, iterations: int = 200) -> np.ndarray:
-    """J (..., ) in eV for gate voltages `v` (..., gates): E(1,1 triplet) − E(lowest singlet), from the
-    singlet sector's secular equation solved by bisection relative to E(1,1)."""
-    t, d_r, d_l = _sector_energies(hub, v)
+def singlet_exchange_ev(t: np.ndarray, d_r: np.ndarray, d_l: np.ndarray, iterations: int = 200) -> np.ndarray:
+    """J = −x for the root x of x = 2t²/(x − Δ_R) + 2t²/(x − Δ_L) below min(0, Δ_R, Δ_L), by bisection
+    relative to E(1,1) (eV, broadcast). Δ = +inf leaves a partner out. Where t = 0 the root is the bracket's
+    top, J = −min(0, Δ_R, Δ_L): returned without dividing zero by zero."""
+    t, d_r, d_l = np.broadcast_arrays(*(np.asarray(x, dtype=float) for x in (t, d_r, d_l)))
     c = 2.0 * t * t
     top = np.minimum(np.minimum(d_r, d_l), 0.0)
     lo = top - 3.0 * np.abs(t) - 1e-300
     hi = top.copy()
-    for _ in range(iterations):
-        mid = 0.5 * (lo + hi)
-        f = mid - c / (mid - d_r) - c / (mid - d_l)
-        neg = f < 0
-        lo = np.where(neg, mid, lo)
-        hi = np.where(neg, hi, mid)
-        if np.all(hi - lo <= 0.0):
-            break
-    return -0.5 * (lo + hi)
+    coupled = c > 0
+    with np.errstate(divide="ignore", invalid="ignore"):
+        for _ in range(iterations):
+            mid = 0.5 * (lo + hi)
+            f = mid - c / (mid - d_r) - c / (mid - d_l)
+            neg = (f < 0) & coupled
+            lo = np.where(neg, mid, lo)
+            hi = np.where(neg, hi, mid)
+            if np.all(hi - lo <= 0.0):
+                break
+    return np.where(coupled, -0.5 * (lo + hi), -top)
+
+
+def exchange_j_ev(hub: HubbardParams, v: np.ndarray, iterations: int = 200) -> np.ndarray:
+    """J (..., ) in eV for gate voltages `v` (..., gates): E(1,1 triplet) − E(lowest singlet), from the
+    singlet sector's secular equation solved by bisection relative to E(1,1)."""
+    t, d_r, d_l = _sector_energies(hub, v)
+    return singlet_exchange_ev(t, d_r, d_l, iterations)
+
+
+def local_exchange_ev(ci: ConstantInteractionParams, v: np.ndarray, iterations: int = 200) -> np.ndarray:
+    """J (...) in eV of the dots' valence electrons at gate voltages `v` (..., gates) (#60, ADR 0031):
+    the singlet secular equation of the two-electron sector, applied to the last electron on each dot
+    in the ground charge state (N₁, N₂) of the CI window. Its partners are (N₁+1, N₂−1), Δ_L above, and
+    (N₁−1, N₂+1), Δ_R above, with the CI energies at `v` (the dots' shape included, ADR 0030) and the
+    interdot coupling t there (ADR 0029). Each Δ is formed from N − n_g directly, not as a difference
+    of energies, so J keeps its relative digits. A partner with a negative occupation is left out.
+    This is the exchange of a qubit pair where both dots hold an odd number of electrons; elsewhere the
+    valence spins are paired and J describes no qubit. Spinless orbitals and one valley, as the
+    Hubbard model."""
+    v = np.asarray(v, dtype=float)
+    n = ci.ground_state_occupation(v).astype(float)  # (..., 2)
+    c, n_g = ci.local(v)
+    c_inv = np.linalg.inv(c)
+    d = n - n_g  # (..., 2)
+
+    def gap(step: np.ndarray) -> np.ndarray:
+        # U(N + δ) − U(N) = E (δᵀ C⁻¹ d + ½ δᵀ C⁻¹ δ)
+        lin = np.einsum("i,...ij,...j->...", step, c_inv, d)
+        quad = 0.5 * np.einsum("i,...ij,j->...", step, c_inv, step)
+        return E_UNIT_V_PER_E_AF * (lin + quad)
+
+    d_l = np.where(n[..., 1] >= 1, gap(np.array([1.0, -1.0])), np.inf)
+    d_r = np.where(n[..., 0] >= 1, gap(np.array([-1.0, 1.0])), np.inf)
+    return singlet_exchange_ev(ci.tunnel_coupling_ev(v), d_r, d_l, iterations)
 
 
 def exchange_j_eigen_ev(hub: HubbardParams, v: np.ndarray) -> np.ndarray:

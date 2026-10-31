@@ -322,3 +322,61 @@ def dot_shape_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
             out[f"charge_map{k}"] = nm[..., 0] + 0.5 * nm[..., 1]  # [P1, P2]: every charge state its own shade
         ctx.count(model_evals=3 * len(dv) + len(at) * n * n)
     return out
+
+
+def _cell_centre(dev: Device, v0: np.ndarray, n: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(the programmed point whose induced charge is the integer occupation `n`, the centre of that
+    honeycomb cell, reached with P1 and P2; the direction in programmed volts along which n_g moves by
+    (½, −½) per volt-unit, one electron from dot 2 to dot 1 at a fixed total)."""
+    ci = dev.runtime_ci()
+    j = [dev.gate_names.index(g) for g in ("P1", "P2")]
+
+    def ng(v: np.ndarray) -> np.ndarray:
+        return ci.induced_charge(dev.effective_voltages(v))
+
+    v = v0.copy()
+    for _ in range(4):  # the shape grid makes n_g slightly nonlinear in the plungers' reach: iterate
+        jac = np.stack([(ng(v + 1e-3 * np.eye(len(v))[k]) - ng(v - 1e-3 * np.eye(len(v))[k])) / 2e-3 for k in j], axis=1)
+        v[j] += np.linalg.solve(jac, np.asarray(n, dtype=float) - ng(v))
+    d = np.zeros(len(v0))
+    d[j] = np.linalg.solve(jac, np.array([0.5, -0.5]))
+    return v, d
+
+
+def exchange_frequency_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The exchange of the dots' valence electrons follows the barrier gates (#60, ADR 0031). Along B_M
+    around the tuned point, `Device.at` gives t and J/h. Through the centre of the nearest odd–odd
+    honeycomb cell (an effective (1,1)), detuning cuts at three B_M give J/h from one anticrossing to the
+    other, beside its second-order form 2t²(1/Δ_R + 1/Δ_L)."""
+    bm_sweep, cut = p.sweep
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        jb = dev.gate_names.index("B_M")
+        ci = dev.runtime_ci()
+        dbm = np.linspace(float(bm_sweep["from"]), float(bm_sweep["to"]), int(bm_sweep["points"]))
+        x = np.linspace(-float(cut["half_span_e"]), float(cut["half_span_e"]), int(cut["points"]))
+        at = [float(b) for b in cut["at"]]
+        n0 = np.rint(ci.induced_charge(dev.effective_voltages(v0))).astype(int)
+        n_cell = n0 + (n0 % 2 == 0)  # the nearest odd–odd occupation above
+        centres = []
+        for b in at:
+            v = v0.copy()
+            v[jb] += b
+            centres.append(_cell_centre(dev, v, n_cell))
+    h = 2 * np.pi * 6.582119569e-16
+    out: dict[str, np.ndarray] = {"v_b_m_v": v0[jb] + dbm, "x_e": x, "cell_n": n_cell.astype(float)}
+    with ctx.run(len(dbm) + len(at) * len(x)):
+        line = np.broadcast_to(v0, dbm.shape + v0.shape).copy()
+        line[:, jb] += dbm
+        s = dev.at(line)
+        out["tunnel_coupling_ev"], out["exchange_hz"] = s.tunnel_coupling_ev, s.exchange_frequency_hz
+        for k, (c, d) in enumerate(centres):
+            s = dev.at(c + x[:, None] * d)
+            u = np.stack([ci.state_energies_ev(vc, np.array([n_cell, n_cell + [-1, 1], n_cell + [1, -1]])) for vc in s.v_carried_v])
+            d_r, d_l = u[:, 1] - u[:, 0], u[:, 2] - u[:, 0]
+            out[f"exchange_cut{k}_hz"] = s.exchange_frequency_hz
+            out[f"second_order_cut{k}_hz"] = 2 * s.tunnel_coupling_ev**2 * (1 / d_r + 1 / d_l) / h
+            out[f"tunnel_coupling_cut{k}_ev"] = np.asarray(s.tunnel_coupling_ev[len(x) // 2])
+        ctx.count(model_evals=len(dbm) + len(at) * len(x))
+    return out

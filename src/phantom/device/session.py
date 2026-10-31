@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from phantom.charge.hybrid import boltzmann
-from phantom.constants import E_CHARGE_C, K_B_EV_PER_K
+from phantom.constants import E_CHARGE_C, HBAR_EV_S, K_B_EV_PER_K
 from phantom.readout import sensor_dynamics
 from phantom.readout.master_equation import (
     PROBABILITY_FLOOR,
@@ -66,13 +66,13 @@ from phantom.readout.master_equation import (
     propagator,
 )
 from phantom.readout.measure import SensedDoubleDot
-from phantom.spin.exchange import exchange_j_ev
+from phantom.spin.exchange import local_exchange_ev
 from phantom.spin.psb import psb_occupation
 
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 6
+MODEL_VERSION = 7
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
 sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
@@ -80,7 +80,8 @@ sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` a
 5: the interdot coupling follows every gate and hybridizes the charge states; the charge and its
 dynamics live on the eigenstates (#58, ADR 0029). 6: the dots' capacitances, lever arms, offsets, t and
 rates follow their shape along the barrier gates; `State` reports their positions, radii, addition
-energies and whether they merged (#59, ADR 0030)."""
+energies and whether they merged (#59, ADR 0030). 7: J of the valence electrons at the gated t and
+shape, `State.exchange_frequency_hz`, and the Pauli readout at the last point's t (#60, ADR 0031)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -113,7 +114,11 @@ class State:
     tunnel_coupling_ev: np.ndarray
     """(...) interdot tunnel coupling t at the carried barrier-gate voltage, eV."""
     exchange_ev: np.ndarray
-    """(...) J of the two-electron sector at the carried voltages, eV; meaningful in the (1,1) cell."""
+    """(...) J of the dots' valence electrons at the carried voltages, eV: the singlet–triplet splitting of
+    the last electron on each dot in the ground charge state, at the gated t and the shaped dots (#60).
+    A qubit pair's exchange where both dots hold an odd number of electrons."""
+    exchange_frequency_hz: np.ndarray
+    """(...) J/h, Hz."""
     gamma_left_hz: np.ndarray
     """(...) dot 1 to the left lead at the carried voltages, Hz: the compiled rate moved by its gate
     slopes, capped at the attempt rate (#53)."""
@@ -177,7 +182,6 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
     ci, sensor = sensed.charge, sensed.sensor
     n_mean = ci.mean_occupation(vc)
     bias = sensor.bias_v if v_sd is None else v_sd
-    hub = device.runtime_hubbard()
     gammas = device.runtime_rates().rates_hz(vc)
     return State(
         v_programmed_v=v,
@@ -188,7 +192,8 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
         sensor_current_a=sensed.current_a(vc, bias),
         v_sd_v=bias,
         tunnel_coupling_ev=ci.tunnel_coupling_ev(vc),
-        exchange_ev=exchange_j_ev(hub, vc),
+        exchange_ev=(j := local_exchange_ev(ci, vc)),
+        exchange_frequency_hz=j / (2 * np.pi * HBAR_EV_S),
         gamma_left_hz=gammas[..., 0],
         gamma_right_hz=gammas[..., 1],
         gamma_interdot_hz=gammas[..., 2],
@@ -488,7 +493,8 @@ class Session:
         `p_triplet` and read at detuning ε (eV, from the (1,1)–(0,2) anticrossing) for
         `t_integration_s`: a triplet that relaxes (T₁ = `t1_read_s`) during the integration reads as
         a singlet; the (0,2) probability of each spin state follows `spin.psb.psb_occupation` with the
-        receiving dot's valley splitting, the compiled coupling and the electron temperature."""
+        receiving dot's valley splitting, the interdot coupling at the last point the session was given
+        (#60) and the electron temperature."""
         if not 0.0 <= p_triplet <= 1.0:
             raise ValueError("p_triplet must be a probability")
         if shots < 0 or t_integration_s < 0 or not t1_read_s > 0:
@@ -496,7 +502,8 @@ class Session:
         dev = self.device
         kt = K_B_EV_PER_K * dev.temperature_k
         e_v = dev.dots[1].valley_splitting_uev * 1e-6
-        p_s, p_t = psb_occupation(np.array([float(detuning_ev)]), e_v, dev.tunnel_coupling_ev, kt)
+        t = float(self._sensed.charge.tunnel_coupling_ev(dev.effective_voltages(self.last_point_v)))
+        p_s, p_t = psb_occupation(np.array([float(detuning_ev)]), e_v, t, kt)
         prepared = self._spin_rng.random(shots) < p_triplet
         relaxed = self._spin_rng.random(shots) < -np.expm1(-t_integration_s / t1_read_s)
         p02 = np.where(prepared & ~relaxed, p_t[0], p_s[0])

@@ -1107,6 +1107,11 @@
     },
     {
      "default": false,
+     "name": "exchange_frequency_hz",
+     "type": "np.ndarray"
+    },
+    {
+     "default": false,
      "name": "gamma_left_hz",
      "type": "np.ndarray"
     },
