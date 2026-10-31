@@ -1,0 +1,32 @@
+id: interdot-line-vs-barrier
+name: The barrier gate sets the interdot coupling, and the interdot line widens with it
+step: 8
+description: The interdot tunnel coupling t follows every gate from its compiled value and saturates at ħω₀/π (#58, ADR 0029); the charge states of one total charge hybridize, so an interdot line is the two-level polarization ½(1 − ε/Ω·tanh(Ω/2kT)), Ω = √(ε² + 4t²), not the CI model's thermal step. With the sensor gate tuned onto the optimum's flank, the first panel lowers and raises B_M around the tuned point and shows t and the interdot rate Γ_m of `Device.at` (log scale; Γ_m ∝ t²). Detuning cuts through the middle of the interdot segment of the honeycomb cell, at B_M 50 mV lower, at the tuned point and 12 mV higher, give dot 1's charge beside the pair's formula and the sensor current; the map shows dot 1's charge over detuning and B_M, each row centred on its own cell's segment. Placeholder potential without screening, so t moves with the plungers as much as with B_M (#48).
+layers: [charge, readout, device]
+runner: step8:interdot_line_vs_barrier
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: B_M, from: -0.06, to: 0.02, points: 81, unit: V, relative_to: tuned point}
+  - {gate: P1 and P2, half_span_v: 0.0015, points: 401, unit: V along the detuning direction, relative_to: interdot segment centre, at: [-0.05, 0.0, 0.012]}
+  - {gate: B_M, from: -0.06, to: 0.012, points: 37, half_span_v: 0.0015, columns: 161, unit: V, relative_to: tuned point, axis_role: map rows}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: line, x: v_b_m_v, y: [tunnel_coupling_ev], log_y: true, xlabel: "B_M (V)", ylabel: "t (eV)", title: "interdot coupling t along B_M"}
+    - {kind: line, x: v_b_m_v, y: [gamma_interdot_hz], log_y: true, xlabel: "B_M (V)", ylabel: "rate (Hz)", title: "interdot rate Γ_m along B_M"}
+    - {kind: line, x: x_v, y: [n1_cut0, two_level_cut0], xlabel: "detuning (V)", ylabel: "dot 1 charge above the pair (e)", title: "B_M 50 mV lower: t ≪ kT, the thermal step"}
+    - {kind: line, x: x_v, y: [n1_cut1, two_level_cut1], xlabel: "detuning (V)", ylabel: "dot 1 charge above the pair (e)", title: "tuned point"}
+    - {kind: line, x: x_v, y: [n1_cut2, two_level_cut2], xlabel: "detuning (V)", ylabel: "dot 1 charge above the pair (e)", title: "B_M 12 mV higher: t > kT, wider"}
+    - {kind: line, x: x_v, y: [current_cut0_a, current_cut1_a, current_cut2_a], xlabel: "detuning (V)", ylabel: "sensor current (A)", title: "the sensor's view of the three cuts"}
+    - {kind: map, x: xm_v, y: row_b_m_v, z: n1_map, xlabel: "detuning (V)", ylabel: "B_M (V)", zlabel: "dot 1 charge (e)", title: "the interdot line over B_M", cmap: magma}
+budget:
+  compile: {wall_s: 3.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.2, points: 7241, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

@@ -1,0 +1,16 @@
+id: yoneda2018-coherence-charge-noise
+title: A quantum-dot spin qubit with coherence limited by charge noise and fidelity higher than 99.9%
+authors: [J. Yoneda, K. Takeda, T. Otsuka, T. Nakajima, M. R. Delbecq, G. Allison, T. Honda, T. Kodera, S. Oda, Y. Hoshi, N. Usami, K. M. Itoh, S. Tarucha]
+year: 2018
+venue: Nature Nanotechnology 13, 102
+doi: 10.1038/s41565-017-0014-x
+layers: [spin, disorder]
+provides:
+  - label: t2-star-vs-charge-noise
+    kind: formula  # becomes a digitised figure when confirmed
+    quantity: ramsey_t2_star_and_charge_noise_spectrum
+    conditions: isotopically enriched Si/SiGe single-spin qubit with a micromagnet; Ramsey T2*, CPMG, and the 1/f charge-noise spectrum inferred from the qubit frequency through the micromagnet gradient
+    notes: The standard for the Ramsey T2* versus charge-noise relation (Step 6 P1) and later for charge-noise spectroscopy by CPMG.
+status: proposed
+notes: >
+  Written by a session from memory on 2026-10-26 (ADR 0021). Not confirmed; the owner checks the DOI, authors and figures.

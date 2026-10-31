@@ -1,0 +1,18 @@
+id: elzerman-trace
+name: Elzerman single-shot readout traces and the read window
+step: 6
+description: Charge traces after pulsing the dot level to the read position, where an upper-spin electron tunnels out at 20 kHz and a lower-spin electron tunnels back in at 10 kHz, for eight shots prepared in the upper state (offset for display) with spin relaxation at 10 ms competing; and the probability that the dot is empty against time, sampled over 2000 shots beside the analytic curve, whose peak and width set the read window a consumer thresholds. Rates are parameters here; the layout's lead rates (readout.rates) supply them in the compiled device (ADR 0022).
+layers: [readout, spin]
+runner: step6b:elzerman_trace
+instance: {gamma_out_hz: 2.0e+4, gamma_in_hz: 1.0e+4, t1_s: 1.0e-2, p_upper: 1.0, n_shots: 2000, n_show: 8, seed: 0}
+sweep:
+  - {axis: time, from: 0.0, to: 800.0, points: 401, unit: us}
+readout: {channel: charge_state, unit: electrons}
+render:
+  panels:
+    - {kind: line, x: t_us, y: [shot0, shot1, shot2, shot3, shot4, shot5, shot6, shot7], xlabel: "time after pulse (us)", ylabel: "charge (offset per shot)", title: "eight shots, upper spin state"}
+    - {kind: line, x: t_us, y: [empty_sampled, empty_analytic], xlabel: "time after pulse (us)", ylabel: "P(empty)", title: "read window: 2000 shots and analytic"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.001, points: 802000, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

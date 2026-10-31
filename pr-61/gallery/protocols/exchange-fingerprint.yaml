@@ -1,0 +1,16 @@
+id: exchange-fingerprint
+name: Exchange fingerprint, singlet return against detuning and evolution time
+step: 6
+description: A singlet separated into (1,1) evolves under J(ε) for a time τ and is projected back on the singlet, with the detuning swept from the (2,0) side through the symmetric point to the (0,2) side. The oscillation frequency J/h is lowest at the symmetric point and rises toward either anticrossing, and the visibility decays with the quasi-static detuning noise of the device's charge-noise draw (Gauss-Hermite average over a Gaussian detuning offset whose rms is the gate-referred 1/f amplitude projected through the lever arms), fastest where dJ/dε is largest. The model evaluations per point are the Hubbard evaluations of each detuning column at the 31 quadrature nodes (ADR 0021).
+layers: [charge, disorder, spin]
+runner: step6:exchange_fingerprint
+instance: {t0_uev: 20.0, v_scale_v: 0.05, seed: 0, material: SiGe, quadrature_nodes: 31}
+sweep:
+  - {axis: eps_over_anticrossing, from: -0.9, to: 0.9, points: 301, unit: ""}
+  - {axis: tau, from: 0.0, to: 40.0, points: 201, unit: ns}
+readout: {channel: spin_outcome, unit: singlet probability}
+render: {kind: map, x: eps_mev, y: tau_ns, z: singlet_probability, xlabel: "detuning (meV)", ylabel: "evolution time (ns)", zlabel: "singlet probability", cmap: RdBu}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 60501, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
