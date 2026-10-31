@@ -41,6 +41,7 @@ import numpy as np
 import phantom
 from phantom.charge import ci as charge_ci
 from phantom.charge import derived as charge_derived
+from phantom.charge import shape as charge_shape
 from phantom.charge.derived import capacitance_matrix_af, derive_double_dot
 from phantom.charge.shape import ShapeGrid, quantity_layout
 from phantom.compile.backends import Backend, basis_for
@@ -389,6 +390,27 @@ def _shape_grid(layout: Layout, basis: GateBasis, v: np.ndarray, params: Compile
     return ShapeGrid(tuple(idx), len(v), tuple(nodes), tuple(changes), tuple(below), tuple(above))
 
 
+def compile_provenance() -> dict[str, Any]:
+    """What a device compiled now records about the code that compiled it: the phantom version, the
+    device format and the model versions of every module compile draws on."""
+    return {
+        "phantom_version": phantom.__version__,
+        "format_version": DEVICE_FORMAT_VERSION,
+        "compile_model_version": MODEL_VERSION,
+        "model_versions": {
+            "electrostatics.closed_form": electrostatics_closed_form.MODEL_VERSION,
+            "disorder.scenario": disorder_scenario.MODEL_VERSION,
+            "charge.ci": charge_ci.MODEL_VERSION,
+            "charge.derived": charge_derived.MODEL_VERSION,
+            "charge.shape": charge_shape.MODEL_VERSION,
+            "readout.rates": readout_rates.MODEL_VERSION,
+            "valley.splitting": valley_splitting.MODEL_VERSION,
+            "spin.dynamics": spin_dynamics.MODEL_VERSION,
+            "device": device_model_version,
+        },
+    }
+
+
 def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     """Run every draw and derivation once; return the `Device` (ADR 0023)."""
     material = layout.material
@@ -442,21 +464,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         return CompiledDot(d.name, float(d.x_nm), float(d.y_nm), float(d.energy_ev), float(d.curvature_ev_per_nm2), float(d.radius_nm), tuple(float(a) for a in d.lever_arms), float(ev))
 
     params_dict = {**asdict(params), "valley": asdict(valley_params), "spin": asdict(params.spin)}
-    provenance = {
-        "phantom_version": phantom.__version__,
-        "format_version": DEVICE_FORMAT_VERSION,
-        "compile_model_version": MODEL_VERSION,
-        "model_versions": {
-            "electrostatics.closed_form": electrostatics_closed_form.MODEL_VERSION,
-            "disorder.scenario": disorder_scenario.MODEL_VERSION,
-            "charge.ci": charge_ci.MODEL_VERSION,
-            "charge.derived": charge_derived.MODEL_VERSION,
-            "readout.rates": readout_rates.MODEL_VERSION,
-            "valley.splitting": valley_splitting.MODEL_VERSION,
-            "spin.dynamics": spin_dynamics.MODEL_VERSION,
-            "device": device_model_version,
-        },
-    }
+    provenance = compile_provenance()
     return Device(
         seed=seed,
         material=material,
