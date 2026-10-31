@@ -29,7 +29,7 @@ release.
 - With dynamics, dot 1 loads through dot 2's lead in second order in t, Γ_R t²(1/Δ + 1/Δ')²: closing B_L
   alone no longer latches dot 1 on the reference device (about 10⁶ Hz through dot 2 against 10⁴ Hz
   through B_L). Closing B_L and B_M together does. The contract's hold check compares the total charge.
-- `optimum(device).coupling.v_barrier_v` inverts the runtime coupling along the barrier gate by bisection
+- `optimum(device).coupling.v_barrier_v` inverts the runtime coupling along the barrier gate (Brent's method on ln t)
   (NaN outside the range t takes within ±1 V).
 - `DEVICE_FORMAT_VERSION` 4: `Device.shape`, the double dot's changes on a grid along B_L, B_M and B_R.
   Files from 0.3.0 do not load; recompile them from their seed.

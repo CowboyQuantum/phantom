@@ -54,7 +54,7 @@ operating point. The runtime interpolates each gate's changes and adds them. Spe
   - `InterdotCoupling.shape` and `GateRates.shape` take the exponents along the barrier gates from the
     grid (t from half the interdot change). The compiled slopes still serve every other gate.
 - **The consumer surface.** `State` gains `dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and
-  `dots_merged`. `optimum(device).coupling` inverts t by bisection along the barrier gate.
+  `dots_merged`. `optimum(device).coupling` inverts t along the barrier gate by Brent's method.
 - **Release.** 0.4.0. Model versions: `charge.shape` 1, `compile.device` 5, `device` 6,
   `device.session` 6, `optimum.targets` 3.
 

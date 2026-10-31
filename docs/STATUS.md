@@ -28,7 +28,7 @@ dots' positions and shape, and later the exchange. Decisions taken that day:
     `GateRates` take their exponents along the barrier gates from the grid. Without a shape, everything
     is 0.3.0's.
   - **State** gains `dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and `dots_merged`.
-    `optimum.coupling` bisects t along B_M.
+    `optimum.coupling` inverts t along B_M by Brent's method.
   - **On the reference device,** B_M +0.15 V draws the dots 18 nm together, C_m grows by 40 % and dot 1's
     addition energy falls by 1 meV. The dots merge at about +0.13 V from the tuned point.
   - **Tests** now follow one transition by its electron count, because barrier gates move the plunger

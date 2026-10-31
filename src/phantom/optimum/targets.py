@@ -27,6 +27,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
+from scipy.optimize import brentq
 
 from phantom.constants import K_B_EV_PER_K
 from phantom.device import Device
@@ -38,7 +39,7 @@ from phantom.spin.psb import best_read_point
 
 MODEL_VERSION = 3
 """2: the coupling optimum inverts the runtime interdot coupling (#58), not the barrier's exponential;
-3: by bisection along the barrier gate, through the shape grid (#59)."""
+3: by Brent's method along the barrier gate, through the shape grid (#59)."""
 
 
 @dataclass(frozen=True)
@@ -171,9 +172,9 @@ def lattice_optimum(device: Device, plungers: tuple[str, str] = ("P1", "P2")) ->
 
 def coupling_optimum(device: Device, t_target_ev: float) -> CouplingOptimum:
     """The barrier gate's carried voltage that gives interdot t = `t_target_ev` with every other gate at
-    the operating point: the runtime coupling (#58, along the shape grid #59) inverted along that gate by
-    bisection within ±1 V, where t does not decrease. NaN when the target lies outside the range t
-    takes there, or when the device has no coupling."""
+    the operating point: the runtime coupling (#58, along the shape grid #59) inverted along that gate
+    within ±1 V, where t does not decrease, by Brent's method on ln t. NaN when the target lies outside
+    the range t takes there, or when the device has no coupling."""
     c = device.runtime_coupling()
     j = device.gate_names.index(device.barrier_gate)
     if c is None:
@@ -187,10 +188,8 @@ def coupling_optimum(device: Device, t_target_ev: float) -> CouplingOptimum:
     lo, hi = c.v_ref_v[j] - 1.0, c.v_ref_v[j] + 1.0
     if not t_at(lo) < t_target_ev < t_at(hi):
         return CouplingOptimum(float(t_target_ev), float("nan"))
-    for _ in range(100):
-        mid = 0.5 * (lo + hi)
-        lo, hi = (mid, hi) if t_at(mid) < t_target_ev else (lo, mid)
-    return CouplingOptimum(float(t_target_ev), float(0.5 * (lo + hi)))
+    root = brentq(lambda x: np.log(t_at(x)) - np.log(t_target_ev), lo, hi, xtol=1e-15, rtol=4 * np.finfo(float).eps, maxiter=200)
+    return CouplingOptimum(float(t_target_ev), float(root))
 
 
 # --- readout --------------------------------------------------------------------------------------
