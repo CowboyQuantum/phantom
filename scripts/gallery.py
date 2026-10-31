@@ -16,6 +16,7 @@ reference, or a budget is exceeded.
 from __future__ import annotations
 
 import argparse
+import os
 import pathlib
 import platform
 import sys
@@ -42,8 +43,11 @@ def main() -> int:
     ap.add_argument("--reference-platform", action="store_true", help="this run is the reference (exact hash)")
     ap.add_argument("--rtol", type=float, default=CROSS_PLATFORM_RTOL)
     ap.add_argument("--allow-mismatch", action="store_true", help="report but do not fail on a sign-off mismatch")
+    ap.add_argument("--record-devices", action="store_true", help="compile the runtime protocols' devices afresh and store them under docs/gallery/devices (ADR 0033)")
     ap.add_argument("--record", action="store_true", help="write docs/gallery/measured.json (protocol costs + model benchmarks) for docs/MODELS.md")
     args = ap.parse_args()
+    if args.record_devices:
+        os.environ["PHANTOM_GALLERY_RECORD_DEVICES"] = "1"
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 

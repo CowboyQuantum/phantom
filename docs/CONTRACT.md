@@ -141,6 +141,12 @@ last electron on each dot in the ground charge state, at the gated t and the sha
 electrons (read the parity from `n_ground`), and it jumps where the ground charge state changes.
 `Session.spin_readout` reads at the interdot coupling of the last point the session was given.
 
+The interdot conductance sets the honeycomb's triple-point splitting (ADR 0032).
+`State.interdot_conductance` is Kemble's transmission of the interdot barrier per channel, and
+`State.interdot_splitting` is the fractional splitting f, the interdot segment's length as a fraction of
+the cell along anti-detuning. Opening the barrier gate between the dots takes f from its geometric value
+(small hexagons) towards one (the diagonal lines of a superdot); closing it shrinks the segments back.
+
 With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
 stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths

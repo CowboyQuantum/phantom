@@ -22,6 +22,7 @@ from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
 from phantom.charge.hybrid import InterdotCoupling
 from phantom.charge.shape import ShapeGrid
+from phantom.charge.splitting import InterdotSplitting
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2, K_B_EV_PER_K
 from phantom.device.session import ChargeMode, Measurement, Session, SpinOutcome, State, state_at
 from phantom.device.truth import Knowable, Truth, knowable, truth
@@ -34,16 +35,18 @@ from phantom.readout.rates import GateRates
 from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 6
+MODEL_VERSION = 7
 """2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
 3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026).
 4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027).
 5: the runtime CI model carries the interdot coupling at the gates (`runtime_coupling`, #58, ADR 0029).
-6: the runtime CI model, coupling and rates follow the dots' shape along the barrier gates (#59, ADR 0030)."""
-DEVICE_FORMAT_VERSION = 4
+6: the runtime CI model, coupling and rates follow the dots' shape along the barrier gates (#59, ADR 0030).
+7: the runtime CI model carries the interdot splitting (`runtime_splitting`, #66, ADR 0032)."""
+DEVICE_FORMAT_VERSION = 5
 """Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
 energy, per-electron coupling and leads (ADR 0026). 3: each barrier's attempt rate, tunnelling level
-and gate slopes (#53). 4: the double dot's shape along the barrier gates (`shape`, #59)."""
+and gate slopes (#53). 4: the double dot's shape along the barrier gates (`shape`, #59). 5: the interdot barrier's top, slopes
+and curvature, and the top on the shape grid (#66)."""
 
 
 def compiled_sensor(
@@ -157,6 +160,12 @@ class Device:
     shape: ShapeGrid | None = None
     """The double dot's shape along the barrier gates (#59, ADR 0030): changes from the operating point
     on a grid per gate; None keeps the dots as compiled at the operating point."""
+    interdot_barrier_top_ev: float | None = None
+    """The interdot barrier's top above its tunnelling level at the operating point, eV (#66)."""
+    interdot_barrier_top_slopes_ev_per_v: tuple[float, ...] | None = None
+    """Its slopes against every gate, the dots held where they are, eV/V."""
+    interdot_barrier_hbar_omega_ev: float | None = None
+    """ħω_b of its curvature at the top, eV; None when the potential has no barrier between the dots."""
 
     # --- files -----------------------------------------------------------------------------------
 
@@ -196,6 +205,9 @@ class Device:
             sensor_beta_v_per_e=None if d["sensor_beta_v_per_e"] is None else tuple(float(x) for x in d["sensor_beta_v_per_e"]),
             sensor_leads=None if d["sensor_leads"] is None else SensorLeads.from_dict(d["sensor_leads"]),
             shape=None if d.get("shape") is None else ShapeGrid.from_dict(d["shape"]),
+            interdot_barrier_top_ev=d.get("interdot_barrier_top_ev"),
+            interdot_barrier_top_slopes_ev_per_v=None if d.get("interdot_barrier_top_slopes_ev_per_v") is None else tuple(d["interdot_barrier_top_slopes_ev_per_v"]),
+            interdot_barrier_hbar_omega_ev=d.get("interdot_barrier_hbar_omega_ev"),
         )
 
     def to_json(self, path: str | pathlib.Path) -> None:
@@ -249,6 +261,20 @@ class Device:
             c_gate_af=np.array(self.c_gate_af),
             temperature_k=self.temperature_k,
             coupling=self.runtime_coupling(),
+            shape=self.shape,
+            splitting=self.runtime_splitting(),
+        )
+
+    def runtime_splitting(self) -> InterdotSplitting | None:
+        """The interdot conductance and the triple-point splitting it sets (#66, ADR 0032); None when the
+        device has no barrier between its dots at the operating point."""
+        if self.interdot_barrier_top_ev is None or self.interdot_barrier_hbar_omega_ev is None:
+            return None
+        return InterdotSplitting(
+            v_ref_v=tuple(self.operating_point_v),
+            top_ev=float(self.interdot_barrier_top_ev),
+            top_slopes_ev_per_v=tuple(self.interdot_barrier_top_slopes_ev_per_v),
+            hbar_omega_b_ev=float(self.interdot_barrier_hbar_omega_ev),
             shape=self.shape,
         )
 

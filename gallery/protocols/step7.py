@@ -2,15 +2,61 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
+import pathlib
+
 import numpy as np
 
 from gallery.protocols.step2 import _layout
 from gallery.runner import Context, Protocol
-from phantom.compile import CompileParams, Device, compile_device
+from phantom.compile import CompileParams, Device, compile_device, compile_provenance
 from phantom.optimum import sensor_optimum, virtual_gate_matrix
+
+DEVICES_DIR = pathlib.Path(__file__).resolve().parents[2] / "docs/gallery/devices"
+"""Where the runtime protocols' devices are stored (ADR 0033)."""
+RECORD_DEVICES_ENV = "PHANTOM_GALLERY_RECORD_DEVICES"
+"""Set (by `scripts/gallery.py --record-devices`) to compile the devices afresh and store them."""
+INSTANCE_FIELDS = ("layout", "material", "pitch_nm", "operating_point_v", "temperature_k", "severity", "wiring_faults", "seed")
+
+
+def device_key(p: Protocol) -> str:
+    """The stored device's name: a hash of the instance fields that set the compiled device."""
+    fields = {f: p.instance.get(f) for f in INSTANCE_FIELDS}
+    return hashlib.sha256(json.dumps(fields, sort_keys=True).encode()).hexdigest()[:12]
+
+
+def stale(dev: Device) -> list[str]:
+    """How a stored device's provenance differs from what compile records now (the phantom version
+    aside): empty when the code that compiled it is the code that runs."""
+    now, then = compile_provenance(), dev.provenance
+    out = [k for k in ("format_version", "compile_model_version") if now[k] != then.get(k)]
+    keys = sorted(set(now["model_versions"]) | set(then.get("model_versions", {})))
+    return out + [f"model_versions[{k}]" for k in keys if now["model_versions"].get(k) != then.get("model_versions", {}).get(k)]
 
 
 def _compiled(p: Protocol) -> Device:
+    """The device a runtime protocol runs on: the one compiled once and stored under `DEVICES_DIR`, so
+    every platform runs the same compiled numbers (ADR 0033). Compile's own last digits differ between
+    platforms by about 1e-12, which a latched transition read on the sensor's flank amplifies past the
+    1e-9 cross-platform tolerance. With `RECORD_DEVICES_ENV` set the device is compiled and stored."""
+    path = DEVICES_DIR / f"{device_key(p)}.json"
+    if os.environ.get(RECORD_DEVICES_ENV):
+        dev = _compile_fresh(p)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dev.to_json(path)
+        return dev
+    if not path.exists():
+        raise RuntimeError(f"{p.id}: no stored device {path.name}; run `uv run python scripts/gallery.py --record-devices`")
+    dev = Device.from_json(path)
+    if why := stale(dev):
+        raise RuntimeError(f"{p.id}: stored device {path.name} is stale ({', '.join(why)}); run `uv run python scripts/gallery.py --record-devices`")
+    return dev
+
+
+def _compile_fresh(p: Protocol) -> Device:
+    """Compile the protocol's device from its layout and seed now."""
     inst = p.instance
     lay = _layout(p)
     params = CompileParams(
@@ -38,7 +84,7 @@ def compiled_device_roundtrip(ctx: Context, p: Protocol) -> dict[str, np.ndarray
     The compiled parameters that set the picture are recorded (not the file's byte count, whose last
     digits differ between platforms' float printing)."""
     with ctx.compile():
-        dev = _compiled(p)
+        dev = _compile_fresh(p)  # this protocol tests compile itself
         text = dev.dumps()
         again = Device.loads(text)
         v0 = dev.operating_point()

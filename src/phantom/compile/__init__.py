@@ -8,6 +8,7 @@ from phantom.compile.backends import Backend, basis_for, closed_form_basis, fem_
 from phantom.compile.device import (
     CompileParams,
     compile_device,
+    compile_provenance,
     interdot_tunnel_coupling_ev,
     replace_params,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "basis_for",
     "closed_form_basis",
     "compile_device",
+    "compile_provenance",
     "fem_basis",
     "interdot_tunnel_coupling_ev",
     "replace_params",
