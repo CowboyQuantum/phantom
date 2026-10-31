@@ -1,0 +1,18 @@
+id: kemble1935-wkb-barrier
+title: A contribution to the theory of the B.W.K. method
+authors: [E. C. Kemble]
+year: 1935
+venue: Physical Review 48, 549
+doi: 10.1103/PhysRev.48.549
+layers: [charge, readout]
+provides:
+  - label: parabolic-barrier-transmission
+    kind: formula
+    quantity: transmission_through_a_parabolic_barrier
+    conditions: one-dimensional barrier with a parabolic top, energy near the top
+    notes: T = 1/(1 + exp(2πΔU/ħω_b)), ΔU the barrier top above the energy (negative below it), ħω_b from the top's curvature. Used in charge.splitting.kemble_transmission for the interdot conductance.
+status: proposed
+notes: >
+  Written by a session on 2026-10-31 from memory for #66 (ADR 0032). The human must confirm the venue,
+  the DOI and the formula (it is often quoted with the barrier's curvature frequency; check the
+  convention for ħω_b).

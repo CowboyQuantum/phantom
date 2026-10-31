@@ -1,0 +1,717 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>0029 — The interdot coupling follows the gates and hybridizes the charge states: t from half the slopes of ln Γ_m, capped at ħω₀/π; eigenstates of the CI window in the statics and a Pauli master equation over them in the dynamics - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#0029-the-interdot-coupling-follows-the-gates-and-hybridizes-the-charge-states-t-from-half-the-slopes-of-ln-_m-capped-at-0-eigenstates-of-the-ci-window-in-the-statics-and-a-pauli-master-equation-over-them-in-the-dynamics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0029 — The interdot coupling follows the gates and hybridizes the charge states: t from half the slopes of ln Γ_m, capped at ħω₀/π; eigenstates of the CI window in the statics and a Pauli master equation over them in the dynamics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="0029-the-interdot-coupling-follows-the-gates-and-hybridizes-the-charge-states-t-from-half-the-slopes-of-ln-_m-capped-at-0-eigenstates-of-the-ci-window-in-the-statics-and-a-pauli-master-equation-over-them-in-the-dynamics">0029 — The interdot coupling follows the gates and hybridizes the charge states: t from half the slopes of ln Γ_m, capped at ħω₀/π; eigenstates of the CI window in the statics and a Pauli master equation over them in the dynamics</h1>
+<p><strong>Status:</strong> Accepted
+<strong>Date:</strong> 2026-10-31
+<strong>Step:</strong> 8 follow-up (issue #58, the first of #58–#60; after ADR 0027)</p>
+<h2 id="context">Context</h2>
+<p>In a simulated tune-up the owner found that "the barrier gates do not actually modulate the interdot
+coupling AT ALL" (2026-10-31). On 0.3.0:</p>
+<ul>
+<li><strong>t on paper only.</strong> <code>State.tunnel_coupling_ev</code> was t₀·exp((V_BM − V₀)/v_scale): it followed the barrier
+  gate alone, had no ceiling (15 meV at B_M + 50 mV on the reference device) and entered nothing a sensor
+  reads. It reached only the exchange and the transport placeholders.</li>
+<li><strong>A classical charge.</strong> The sensor read the classical CI model and its rate equation. Opening B_M did
+  not change an interdot line, apart from the interdot <em>rate</em> of ADR 0027 and a fixed cross-capacitance.</li>
+<li><strong>The owner's decisions (2026-10-31).</strong> Hybridize the charge states in the statics and the dynamics.
+  Reshape the dots with a compiled grid in #59. Follow with the exchange in #60. Release all three as
+  0.4.0.</li>
+</ul>
+<p>Four forces shaped the design:</p>
+<ul>
+<li><strong>Cost.</strong> <code>State</code> is evaluated on grids of 10⁴–10⁵ points, and a session pays one matrix exponential
+  per sample. A per-point diagonalisation must stay at microseconds.</li>
+<li><strong>Consistency.</strong> ADR 0027 already compiles the slopes of ln Γ_m against every gate at a fixed tunnelling
+  level. Γ_m ∝ T and t ∝ √T come from the same cut.</li>
+<li><strong>Limits.</strong> At t → 0 the result must be the CI model, which the P0 tests and every earlier protocol
+  rely on.</li>
+<li><strong>Reproducibility (ADR 0014).</strong> Eigenvalues near 0.05 eV with kT = 13 µeV lose digits in a Boltzmann
+  weight unless the matrix is conditioned.</li>
+</ul>
+<h2 id="decision">Decision</h2>
+<p>The interdot coupling follows every gate, and the CI window's charge states of one total charge
+hybridize through it. The statics use the window's eigenstates, and the dynamics are a Pauli master
+equation over them. Specifically:</p>
+<ul>
+<li><strong>t at the gates.</strong> t(V) = t_max·σ(ln(t_ref/(t_max − t_ref)) + ½ s_m·ΔV):</li>
+<li>t_ref is the compiled t at the operating point.</li>
+<li>s_m are the slopes of ln Γ_m of ADR 0027.</li>
+<li>t_max = ħω₀/π is compile's t = ħω₀√T/π at a transmission of one.</li>
+<li>The form is <code>saturating_rates_hz</code>'s. <code>charge.hybrid.InterdotCoupling</code> carries it, and
+    <code>Device.runtime_coupling()</code> builds it from fields the device file already has, so the device format
+    is unchanged.</li>
+<li><strong>Hybridization.</strong></li>
+<li>H_N = Σ U(N)|N⟩⟨N| − t Σ(|N₁+1, N₂−1⟩⟨N₁, N₂| + h.c.) on the window's states of each total charge,
+    spinless with one level per dot.</li>
+<li>The window is the CI window's (2w+1)² grid with its centre held at or above zero, and a negative
+    occupation left out.</li>
+<li>Each block is a chain of at most 2w+1 states, diagonalised in batches with its lowest level taken out
+    first, so the eigenvalues keep their digits.</li>
+<li>Charges are summed relative to the window's centre.</li>
+<li><strong>Statics.</strong> With a <code>coupling</code>, <code>ConstantInteractionParams</code> gives the occupation as the diagonal of the
+  thermal density matrix of the eigenstates. ⟨N⟩, the sensor's potential and current, and the lock-in
+  follow from it. The ground state is the dominant charge state of the lowest eigenstate. Without a
+  coupling the model is unchanged, bit for bit.</li>
+<li><strong>Dynamics.</strong> <code>RateEquation.eigen_rate_matrix</code> gives the rates between eigenstates:</li>
+<li>Lead i adds an electron from k to l at Γ_i·|⟨l|c†_i|k⟩|²·f((E_l − E_k)/kT) and removes it at the
+    complement.</li>
+<li>Within a total charge, k relaxes to l at Γ_m·g_kl·f(·), with g_kl = Σ_b w_bk·w_bl the product of the
+    two eigenstates' weights on each bond b between charge states one moved electron apart. That is the
+    sum of |⟨l|X_b|k⟩|² + |⟨l|Z_b|k⟩|², the bond's transfer and its dipole.</li>
+<li>g is exactly Γ_m's classical rule at t = 0, and Γ_m for an isolated pair at every detuning.</li>
+<li>Detailed balance holds in the eigenenergies.</li>
+<li>When the gates move, the distribution is projected onto the new eigenstates, q_l = Σ_k p_k|⟨l|k⟩|²,
+    with coherences dropped. <code>sweep</code> and <code>Session</code> share this.</li>
+<li><strong>What a sample reads.</strong> A <code>sampled</code> session draws an eigenstate, and the sensor reads its ⟨N⟩. Its total
+  charge is an integer and its split need not be. <code>Measurement.n_present</code> is that charge, and the
+  contract checks the total. <code>State.tunnel_coupling_ev</code> is the gated t.</li>
+<li><strong>Release.</strong> 0.4.0 (breaking). Model versions: <code>charge.hybrid</code> 1, <code>readout.master_equation</code> 2,
+  <code>device</code> 5, <code>device.session</code> 5, <code>optimum.targets</code> 2.</li>
+</ul>
+<h2 id="consequences">Consequences</h2>
+<ul>
+<li>Easier:</li>
+<li>Opening B_M widens an interdot line from the thermal step to ½(1 − ε/Ω·tanh(Ω/2kT)). On the reference
+    device the 10–90 % width goes from 0.22 mV to 0.65 mV as t goes from 0.05 to 30 µeV
+    (<code>interdot-line-vs-barrier</code>).</li>
+<li>Closing B_M is what isolates a dot. With B_L closed alone, dot 2's lead loads dot 1 at
+    Γ_R·t²(1/Δ + 1/Δ')². The electron-like and hole-like paths add, as in elastic cotunnelling, at about
+    10⁶ Hz against Γ_L ≈ 10⁴ Hz. With both closed, a sweep latches and a parked point telegraphs
+    (<code>session-closing-barrier</code>).</li>
+<li><code>optimum(device).coupling</code> inverts the same t a session uses.</li>
+<li>Harder:</li>
+<li><strong>Validity of the projection.</strong> The projection assumes a dwell long against ħ/Ω and dephasing in the
+    eigenbasis. At |ε| ≲ t it shares the electron between the dots even when t is so small that the
+    coherent transfer would take longer than the dwell (t ≲ ħ/dwell, sub-neV at microsecond dwells). On the
+    reference device t stays above 0.05 µeV, and a sweep lands that close to a degeneracy rarely. There is
+    no charge-dephasing rate and no Landau–Zener step.</li>
+<li><strong>Plunger sensitivity.</strong> t inherits the unscreened sensitivity of #48. The plungers move it as much as
+    B_M, and two cells 18 mV apart on B_M differ by a factor of 30 in t at their interdot lines.</li>
+<li><strong>Fixed shape and spin.</strong> The dots' capacitances, lever arms and positions stay those of the
+    operating point until #59. The model is spinless, so there is no √2 on singlet tunnelling (that is
+    #60's sector) and no valley structure.</li>
+<li><strong>Cost.</strong> A grid point costs about 7 µs instead of 1.3 µs in the statics, and a sample a few small
+    diagonalisations more.</li>
+<li><strong>Exchange.</strong> J still comes from the Hubbard model with the barrier-only exponential, so
+    <code>State.exchange_ev</code> and <code>State.tunnel_coupling_ev</code> disagree until #60.</li>
+<li>Must now:</li>
+<li>A consumer that labels charge states from <code>n_present</code> rounds it. An interdot line is no longer a step.</li>
+<li>A test that isolates a dot closes its own barrier and B_M.</li>
+<li>The contract's <code>sample_semantics</code> and <code>hold_moves_the_charge</code> checks compare the total charge.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered</h2>
+<ul>
+<li><strong>Hybridizing statics only.</strong> Rejected by the owner. A session's charge would disagree with <code>State</code>
+  near every interdot line.</li>
+<li><strong>A separate slope compile for t (central differences of <code>interdot_tunnel_coupling_ev</code> per gate).</strong>
+  Rejected. It costs 24 more barrier actions per compile, its level moves with the gates (the rule ADR
+  0027 rejected), and ADR 0027 already shows the two agree on B_M.</li>
+<li><strong>Full density-matrix (Bloch–Redfield) dynamics.</strong> Rejected for cost: 25² states per sample. A
+  charge-dephasing rate and a Landau–Zener step would lift the projection's limit, and are left for when
+  a protocol needs them.</li>
+<li><strong>Incoherent resonant tunnelling between localized states (a Lorentzian Γ(ε)).</strong> Rejected. It cannot
+  give the polarization width √(ε² + 4t²) at t ≫ kT, which is what a tune-up reads.</li>
+<li><strong>One 25×25 diagonalisation per point.</strong> Rejected. Different total charges are degenerate across
+  blocks, so the eigenvectors could mix them, and it costs more.</li>
+<li><strong>An integer <code>n_present</code> (the eigenstate's dominant charge state) beside a non-integer sensor input.</strong>
+  Rejected: <code>n_present</code> would no longer be what entered the sensor.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

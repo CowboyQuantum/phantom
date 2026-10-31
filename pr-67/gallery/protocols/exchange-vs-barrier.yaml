@@ -1,0 +1,18 @@
+id: exchange-vs-barrier
+name: Exchange J against the interdot barrier at the symmetric point
+step: 6
+description: J at the centre of the (1,1) cell against the interdot barrier voltage. The tunnel coupling falls exponentially as the barrier closes and J goes as its square, so J follows exp(2 V_B / v_scale), the overlaid law, until the coupling becomes comparable to the charging energy near the open end (ADR 0021).
+layers: [charge, spin]
+runner: step6:exchange_vs_barrier
+instance: {t0_uev: 20.0, v_scale_v: 0.05, seed: 0}
+sweep:
+  - {gate: B, from: -0.1, to: 0.15, points: 251, unit: V}
+readout: {channel: exchange, unit: GHz}
+render:
+  panels:
+    - {kind: line, x: v_barrier_v, y: [j_ghz, exponential_law_ghz], log_y: true, xlabel: "interdot barrier (V)", ylabel: "J/h (GHz)", title: "J and exp(2 V_B / v_scale)"}
+    - {kind: line, x: v_barrier_v, y: t_uev, log_y: true, xlabel: "interdot barrier (V)", ylabel: "tunnel coupling (ueV)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.2, points: 251, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

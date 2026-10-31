@@ -1,0 +1,33 @@
+id: dot-shape-vs-barrier
+name: The barrier gates move and reshape the dots until they merge
+step: 8
+description: The double dot is re-derived on a grid along each barrier gate at compile and interpolated at runtime (#59, ADR 0030), so the barrier gates move the dots, change their size, lever arms and capacitances, and the actions of the barriers around them. With the sensor gate tuned onto the optimum's flank, each of B_L, B_M and B_R is swept ±0.2 V around the tuned point and `Device.at` gives the dots' x positions, harmonic radii and addition energies, the mutual capacitance C_m of the runtime CI model, the interdot coupling t and whether the dots have merged (opening B_M draws the dots together and C_m and t up until the potential forms one dot; beyond that the shape is held). The maps show the charge (N₁ + ½N₂, every state its own shade) over P1 and P2 with B_M 0.1 V lower, at the tuned point and 0.12 V higher. Placeholder potential without screening, sphere-formula C_m and the disk capacitance from the harmonic radius (ADR 0013); the absolute charge count makes a growing dot take electrons at a fixed potential.
+layers: [electrostatics, charge, readout, device]
+runner: step8:dot_shape_vs_barrier
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+sweep:
+  - {gate: B_L or B_M or B_R, from: -0.2, to: 0.2, points: 81, unit: V, relative_to: tuned point}
+  - {gate: P1 and P2, half_span_v: 0.06, points: 61, unit: V, relative_to: tuned point, at: [-0.1, 0.0, 0.12], axis_role: map at B_M offsets}
+readout: {channel: dot_charge, unit: e}
+render:
+  panels:
+    - {kind: line, x: dv_v, y: [x1_b_l_nm, x2_b_l_nm, x1_b_m_nm, x2_b_m_nm, x1_b_r_nm, x2_b_r_nm], xlabel: "barrier gate from the tuned point (V)", ylabel: "x (nm)", title: "dot positions along B_L, B_M, B_R"}
+    - {kind: line, x: dv_v, y: [r1_b_l_nm, r2_b_l_nm, r1_b_m_nm, r2_b_m_nm, r1_b_r_nm, r2_b_r_nm], xlabel: "barrier gate from the tuned point (V)", ylabel: "radius (nm)", title: "harmonic radii"}
+    - {kind: line, x: dv_v, y: [e1_b_l_mev, e2_b_l_mev, e1_b_m_mev, e2_b_m_mev, e1_b_r_mev, e2_b_r_mev], xlabel: "barrier gate from the tuned point (V)", ylabel: "addition energy (meV)", title: "addition energies"}
+    - {kind: line, x: dv_v, y: [cm_b_l_af, cm_b_m_af, cm_b_r_af], xlabel: "barrier gate from the tuned point (V)", ylabel: "C_m (aF)", title: "mutual capacitance"}
+    - {kind: line, x: dv_v, y: [t_b_l_ev, t_b_m_ev, t_b_r_ev], log_y: true, xlabel: "barrier gate from the tuned point (V)", ylabel: "t (eV)", title: "interdot coupling"}
+    - {kind: line, x: dv_v, y: [merged_b_l, merged_b_m, merged_b_r], xlabel: "barrier gate from the tuned point (V)", ylabel: "merged", title: "beyond two dots"}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map0, xlabel: "P1 from the tuned point (V)", ylabel: "P2 from the tuned point (V)", zlabel: "N₁ + ½N₂ (e)", title: "B_M 0.1 V lower", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map1, xlabel: "P1 from the tuned point (V)", ylabel: "P2 from the tuned point (V)", zlabel: "N₁ + ½N₂ (e)", title: "tuned point", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map2, xlabel: "P1 from the tuned point (V)", ylabel: "P2 from the tuned point (V)", zlabel: "N₁ + ½N₂ (e)", title: "B_M 0.12 V higher", cmap: magma}
+budget:
+  compile: {wall_s: 3.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.3, points: 11406, model_evals_per_point: 1, solver_calls: 0}
+must_show: []
