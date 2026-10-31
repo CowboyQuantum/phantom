@@ -89,6 +89,41 @@ def _move_pairs(states: np.ndarray, move: tuple[int, int]) -> tuple[np.ndarray, 
     return src, dst
 
 
+TAYLOR_TERMS = 18
+"""Terms of the Taylor series in `propagator`: with ‖B·h‖₁ ≤ ½ the remainder is below 10⁻²⁰."""
+
+
+def propagator(w: np.ndarray, dt_s: float) -> np.ndarray:
+    """exp(W·dt) for a generator W (k, k) (off-diagonal rates ≥ 0, columns summing to zero), with every
+    entry accurate relative to itself (ADR 0030). With a = max(−W_ii), B = W + aI has no negative entry;
+    over a step h = dt/2^s with a·h ≤ ½, exp(W h) = e^{−ah}·Σ_n (Bh)ⁿ/n! sums non-negative terms, and s
+    squarings of a non-negative matrix cancel nothing. A general exponential of W·dt (scipy's `expm`) keeps
+    its error near ε‖W·dt‖ in absolute terms, so the small entries that carry a slow transition, beside
+    rates 10⁵ times faster, lose their digits differently on different platforms (ADR 0014)."""
+    w = np.asarray(w, dtype=float)
+    k = len(w)
+    a = float(np.max(-np.diag(w))) if k else 0.0
+    if not a * dt_s > 0:
+        return np.eye(k)
+    s = max(0, int(np.ceil(np.log2(2.0 * a * dt_s))))
+    # each squaring doubles an error in a column's total, so every column is put back to one: the chain
+    # conserves probability, and dividing a column by its sum keeps each entry's relative accuracy
+    h = dt_s / 2.0**s
+    b = (w + a * np.eye(k)) * h
+    b[b < 0] = 0.0  # the diagonal of the fastest state, a rounding below zero
+    term = np.eye(k)
+    p = np.eye(k)
+    for n in range(1, TAYLOR_TERMS + 1):
+        term = term @ b / n
+        p = p + term
+    p = p * np.exp(-a * h)
+    p = p / p.sum(axis=0)
+    for _ in range(s):
+        p = p @ p
+        p = p / p.sum(axis=0)
+    return p
+
+
 def carried_states(states: np.ndarray, vectors: np.ndarray, p: np.ndarray) -> np.ndarray:
     """The charge states (k', 2) that still carry probability above `PROBABILITY_FLOOR`, given
     probabilities `p` (m,) of eigenstates `vectors` (k, m) over `states` (k, 2); eigenstates at or below

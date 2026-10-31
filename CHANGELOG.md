@@ -60,6 +60,9 @@ release.
   and B_L and B_M closed (latching, telegraph); its budget rises from 1,665 to 2,067 points.
 - The hybridized window is ±4 in the statics and follows t in the dynamics, so the window's truncation no
   longer leaves a seam at the middle of an interdot segment, where rint(n_g) changes (ADR 0030).
+- `Session` propagates the dots' charge with `readout.master_equation.propagator`, exp(W·dt) accurate in
+  every entry relative to itself (non-negative Taylor steps and squarings), not with `expm`: a slow
+  transition beside rates 10⁵ times faster keeps its digits on every platform (ADR 0030).
 - Model versions: `charge.hybrid` 2 (new), `charge.shape` 1 (new), `readout.master_equation` 3,
   `compile.device` 5, `device` 6, `device.session` 6, `optimum.targets` 3. Without a coupling and a
   shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.

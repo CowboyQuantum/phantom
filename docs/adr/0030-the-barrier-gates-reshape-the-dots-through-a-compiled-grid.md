@@ -65,6 +65,16 @@ operating point. The runtime interpolates each gate's changes and adds them. Spe
   - The dynamics use the smallest window whose truncation is below 10⁻¹³ at each sample's t
     (`dynamics_window`): ±2 below t/E_add = 10⁻³, ±3 below 1.5·10⁻², ±4 above.
   - `charge.hybrid` 2, `readout.master_equation` 3.
+- **The session's propagator (ADR 0014).**
+  - With the dots shaped, a latching sweep reads its slow transition through entries of exp(W·dt) that
+    sit beside rates 10⁵ times faster. A general exponential keeps its error near ε‖W·dt‖ in absolute
+    terms. Over a hundred latched steps and the sensor's flank, `session-closing-barrier` differed by
+    1.1·10⁻⁹ on Windows and 5·10⁻⁹ on macOS.
+  - `readout.master_equation.propagator` computes exp(W·dt) with every entry accurate relative to
+    itself. It takes the Taylor series of the non-negative W + aI over a step with a·h ≤ ½, then squares
+    a non-negative matrix, putting each column back to one. 10⁻¹⁶ relative noise in it now moves the
+    protocol by 7·10⁻¹³.
+  - `Session` uses it. The Step 4 sweeps and the sensor's chain keep `expm`.
 - **Release.** 0.4.0. Model versions: `charge.shape` 1, `compile.device` 5, `device` 6,
   `device.session` 6, `optimum.targets` 3.
 

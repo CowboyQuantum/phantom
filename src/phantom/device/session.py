@@ -54,12 +54,17 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-from scipy.linalg import expm
 
 from phantom.charge.hybrid import boltzmann
 from phantom.constants import E_CHARGE_C, K_B_EV_PER_K
 from phantom.readout import sensor_dynamics
-from phantom.readout.master_equation import PROBABILITY_FLOOR, RateEquation, carried_states, project
+from phantom.readout.master_equation import (
+    PROBABILITY_FLOOR,
+    RateEquation,
+    carried_states,
+    project,
+    propagator,
+)
 from phantom.readout.measure import SensedDoubleDot
 from phantom.spin.exchange import exchange_j_ev
 from phantom.spin.psb import psb_occupation
@@ -309,7 +314,7 @@ class Session:
         _, c, w = self._rates.eigen_rate_matrix(v_carried, active, level_shift_ev)
         q = project(states, vectors, p, active, c)
         if dt_s > 0:
-            q = np.maximum(expm(w * dt_s) @ q, 0.0)
+            q = np.maximum(propagator(w, dt_s) @ q, 0.0)
             q /= q.sum()
         charge = (c * c).T @ active  # each eigenstate's ⟨N⟩
         if self.charge == "sampled":
