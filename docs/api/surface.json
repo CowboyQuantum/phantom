@@ -244,7 +244,7 @@
   "DEVICE_FORMAT_VERSION": {
    "kind": "value",
    "type": "int",
-   "value": 4
+   "value": 5
   },
   "Device": {
    "fields": [
@@ -367,6 +367,21 @@
      "default": true,
      "name": "shape",
      "type": "ShapeGrid | None"
+    },
+    {
+     "default": true,
+     "name": "interdot_barrier_top_ev",
+     "type": "float | None"
+    },
+    {
+     "default": true,
+     "name": "interdot_barrier_top_slopes_ev_per_v",
+     "type": "tuple[float, ...] | None"
+    },
+    {
+     "default": true,
+     "name": "interdot_barrier_hbar_omega_ev",
+     "type": "float | None"
     }
    ],
    "frozen": true,
@@ -451,6 +466,10 @@
     "runtime_spin": {
      "kind": "method",
      "signature": "(self) -> 'SpinDraw'"
+    },
+    "runtime_splitting": {
+     "kind": "method",
+     "signature": "(self) -> 'InterdotSplitting | None'"
     },
     "scenario_draw": {
      "kind": "method",
@@ -1143,6 +1162,16 @@
     {
      "default": true,
      "name": "addition_energies_ev",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "interdot_conductance",
+     "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "interdot_splitting",
      "type": "np.ndarray | None"
     },
     {

@@ -72,7 +72,7 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 7
+MODEL_VERSION = 8
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
 sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
@@ -81,7 +81,9 @@ sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` a
 dynamics live on the eigenstates (#58, ADR 0029). 6: the dots' capacitances, lever arms, offsets, t and
 rates follow their shape along the barrier gates; `State` reports their positions, radii, addition
 energies and whether they merged (#59, ADR 0030). 7: J of the valence electrons at the gated t and
-shape, `State.exchange_frequency_hz`, and the Pauli readout at the last point's t (#60, ADR 0031)."""
+shape, `State.exchange_frequency_hz`, and the Pauli readout at the last point's t (#60, ADR 0031). 8: the
+interdot conductance sets the triple-point splitting through an effective interdot capacitance;
+`State.interdot_conductance`, `interdot_splitting` (#66, ADR 0032)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -136,6 +138,13 @@ class State:
     """(..., 2) each dot's harmonic radius at the carried voltages, nm."""
     addition_energies_ev: np.ndarray | None = None
     """(..., 2) each dot's addition energy E_UNIT·(C_dot⁻¹)_ii at the carried voltages, eV."""
+    interdot_conductance: np.ndarray | None = None
+    """(...) the interdot barrier's conductance per channel, in units of e²/h: Kemble's transmission at
+    the carried voltages (#66)."""
+    interdot_splitting: np.ndarray | None = None
+    """(...) the fractional triple-point splitting f, the interdot segment's length as a fraction of the
+    honeycomb cell along anti-detuning: from the geometric value (barrier closed, near a grid) towards
+    one (merged, a superdot) as the conductance rises (#66)."""
     dots_merged: np.ndarray | None = None
     """(...) True where a barrier gate is opened beyond the last point at which the potential forms two
     dots (a dot merged with its neighbour or its lead): the shape there is held at that point (#59)."""
@@ -219,6 +228,7 @@ def _shape_at(device: Device, vc: np.ndarray) -> dict[str, np.ndarray]:
         "dot_radii_nm": np.broadcast_to(radii, lead + (2,)).copy(),
         "addition_energies_ev": device.runtime_ci().addition_energies_at_ev(vc),
         "dots_merged": merged,
+        **dict(zip(("interdot_conductance", "interdot_splitting"), device.runtime_ci().interdot_splitting(vc), strict=True)),
     }
 
 

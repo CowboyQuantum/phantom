@@ -67,11 +67,12 @@ from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 5
+MODEL_VERSION = 6
 """2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
 3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026).
 4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027).
-5: the double dot's shape along the barrier gates, on a grid (`Device.shape`, #59, ADR 0030)."""
+5: the double dot's shape along the barrier gates, on a grid (`Device.shape`, #59, ADR 0030).
+6: the interdot barrier's top, its slopes and curvature, and its top on the shape grid (#66, ADR 0032)."""
 
 SENSOR_SLOPE_STEP_V = 0.01
 """Half-step of the central differences that give the rates' slopes against each gate (the sensor's
@@ -279,6 +280,39 @@ def interdot_tunnel_coupling_ev(basis: GateBasis, v: np.ndarray, d1, d2, mass: f
     return float(hbar_omega * np.sqrt(trans) / np.pi), h, w, f_attempt * trans
 
 
+TOP_SAMPLES = 401
+"""Points along the straight cut between the dots for the interdot barrier's top."""
+TOP_FIT_NM = 4.0
+"""Half-width of the parabola fitted at the barrier's top for its curvature, nm."""
+
+
+def _bilinear(u: np.ndarray, basis: GateBasis, xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
+    """The map `u` (ny, nx) at points (xs, ys) by bilinear interpolation."""
+    fx = np.clip((xs - basis.x_nm[0]) / (basis.x_nm[1] - basis.x_nm[0]), 0, len(basis.x_nm) - 1.000001)
+    fy = np.clip((ys - basis.y_nm[0]) / (basis.y_nm[1] - basis.y_nm[0]), 0, len(basis.y_nm) - 1.000001)
+    ix, iy = fx.astype(int), fy.astype(int)
+    tx, ty = fx - ix, fy - iy
+    return u[iy, ix] * (1 - tx) * (1 - ty) + u[iy, ix + 1] * tx * (1 - ty) + u[iy + 1, ix] * (1 - tx) * ty + u[iy + 1, ix + 1] * tx * ty
+
+
+def interdot_barrier_top(basis: GateBasis, v: np.ndarray, d1, d2, level_ev: float, mass: float) -> tuple[float, float]:
+    """(ΔU, ħω_b) of the barrier between the dots at carried `v` (#66): the highest U on the straight cut
+    between them (bilinear, `TOP_SAMPLES` points) above the fixed tunnelling level `level_ev`, negative
+    once the barrier falls below it; ħω_b = ħ√(|U''|/m*) from a parabola fitted ±`TOP_FIT_NM` around the
+    top, NaN when the top sits at an end of the cut (no barrier between the dots)."""
+    u = basis.energy_ev(v)
+    t = np.linspace(0.0, 1.0, TOP_SAMPLES)
+    xs, ys = d1.x_nm + t * (d2.x_nm - d1.x_nm), d1.y_nm + t * (d2.y_nm - d1.y_nm)
+    cut = _bilinear(u, basis, xs, ys)
+    s = t * float(np.hypot(d2.x_nm - d1.x_nm, d2.y_nm - d1.y_nm))
+    k = int(np.argmax(cut))
+    near = np.abs(s - s[k]) <= TOP_FIT_NM
+    if k in (0, len(cut) - 1) or near.sum() < 5:
+        return float(cut[k] - level_ev), float("nan")
+    a = np.polyfit(s[near] - s[k], cut[near], 2)[0]
+    return float(cut[k] - level_ev), float(np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * abs(2 * a) / mass))
+
+
 SHAPE_JUMP_NM = 12.0
 """A dot moving farther than this between neighbouring nodes is taken as another minimum: the grid ends."""
 
@@ -305,6 +339,7 @@ def _shape_row(layout: Layout, basis: GateBasis, v: np.ndarray, params: CompileP
             [d1.x_nm, d2.x_nm, d1.y_nm, d2.y_nm],
             [d1.radius_nm, d2.radius_nm],
             log_rate,
+            [interdot_barrier_top(basis, v, d1, d2, levels[2], mass)[0]],
         ]
     )
 
@@ -389,6 +424,15 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
     t_m = interdot_tunnel_coupling_ev(basis, vm, d1, d2, mat.effective_mass_me, params.lead_fermi_ev)[0]
     v_scale = float(2 * dv / np.log(max(t_p, 1e-300) / max(t_m, 1e-300))) if t_p > t_m > 0 else 0.05
     shape = _shape_grid(perturbed, basis, v, params, mass, (res[r_l], res[r_r]), tuple(b.tunnelling_level_ev for b in barriers))
+    # the interdot barrier's top and its slopes against every gate, the dots held where they are (#66)
+    level_m = barriers[2].tunnelling_level_ev
+    top, hbar_omega_b = interdot_barrier_top(basis, v, d1, d2, level_m, mass)
+    top_slopes = []
+    for g in range(len(v)):
+        vp, vm = v.copy(), v.copy()
+        vp[g] += SENSOR_SLOPE_STEP_V
+        vm[g] -= SENSOR_SLOPE_STEP_V
+        top_slopes.append((interdot_barrier_top(basis, vp, d1, d2, level_m, mass)[0] - interdot_barrier_top(basis, vm, d1, d2, level_m, mass)[0]) / (2 * SENSOR_SLOPE_STEP_V))
     valley_params = params.valley or ValleyParams.for_material(material)
     radii = np.array([d1.radius_nm, d2.radius_nm] + ([sensor.sensor_dot.radius_nm] if sensor.sensor_dot else []))
     valleys = draw_valley_splitting_uev(valley_params, radii, np.random.default_rng(seed + 1))
@@ -438,6 +482,9 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         sensor_beta_v_per_e=None if sensor.sensor_beta_v_per_e is None else (float(sensor.sensor_beta_v_per_e[0]), float(sensor.sensor_beta_v_per_e[1])),
         sensor_leads=sensor_leads,
         shape=shape,
+        interdot_barrier_top_ev=top,
+        interdot_barrier_top_slopes_ev_per_v=tuple(float(x) for x in top_slopes),
+        interdot_barrier_hbar_omega_ev=None if not np.isfinite(hbar_omega_b) else hbar_omega_b,
     )
 
 

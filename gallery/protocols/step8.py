@@ -380,3 +380,35 @@ def exchange_frequency_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.nda
             out[f"tunnel_coupling_cut{k}_ev"] = np.asarray(s.tunnel_coupling_ev[len(x) // 2])
         ctx.count(model_evals=len(dbm) + len(at) * len(x))
     return out
+
+
+def honeycomb_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The interdot conductance sets the triple-point splitting (#66, ADR 0032). Along B_M around the tuned
+    point, `Device.at` gives the interdot conductance per channel and the fractional splitting f. Charge
+    maps over P1 and P2 at six B_M, from closed to past the merge, show the honeycomb going from a
+    near-grid through hexagons to the diagonal lines of one superdot."""
+    line, maps = p.sweep
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        jb, i1, i2 = (dev.gate_names.index(g) for g in ("B_M", "P1", "P2"))
+        db = np.linspace(float(line["from"]), float(line["to"]), int(line["points"]))
+        half, n = float(maps["half_span_v"]), int(maps["points"])
+        x = np.linspace(-half, half, n)
+        at = [float(b) for b in maps["at"]]
+    out: dict[str, np.ndarray] = {"v_b_m_v": v0[jb] + db, "dp_v": x}
+    with ctx.run(len(db) + len(at) * n * n):
+        sweep = np.broadcast_to(v0, db.shape + v0.shape).copy()
+        sweep[:, jb] += db
+        s = dev.at(sweep)
+        out["conductance"], out["splitting"] = s.interdot_conductance, s.interdot_splitting
+        for k, b in enumerate(at):
+            grid = np.broadcast_to(v0, (n, n) + v0.shape).copy()
+            grid[..., jb] += b
+            grid[..., i1] += x[:, None]
+            grid[..., i2] += x[None, :]
+            st = dev.at(grid)
+            out[f"charge_map{k}"] = st.n_mean[..., 0] + 0.5 * st.n_mean[..., 1]  # [P1, P2]: every state its own shade
+            out[f"splitting_map{k}"] = np.asarray(st.interdot_splitting[n // 2, n // 2])
+        ctx.count(model_evals=len(db) + len(at) * n * n)
+    return out

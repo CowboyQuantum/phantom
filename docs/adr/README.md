@@ -35,3 +35,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0029 | The interdot coupling follows the gates and hybridizes the charge states: t from half the slopes of ln Γ_m, capped at ħω₀/π; eigenstates of the CI window in the statics and a Pauli master equation over them in the dynamics | Accepted |
 | 0030 | The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge | Accepted |
 | 0031 | The exchange of the dots' valence electrons follows the gates: the singlet secular equation on the CI window's local sector at the gated coupling and the shaped dots; the Pauli readout at the gated coupling | Accepted |
+| 0032 | The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden & Halperin's f(g), an effective interdot capacitance in the CI model | Accepted |

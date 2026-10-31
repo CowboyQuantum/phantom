@@ -6,14 +6,16 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape and the exchange (#58, #59, #60; untagged)
+## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape, the exchange and the honeycomb (#58, #59, #60, #66; untagged)
 
 The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge
 hybridize through it (ADR 0029): opening B_M widens an interdot line from the thermal step to the
 two-level polarization, and closing it is what isolates a dot. The barrier gates move and reshape the
 dots through a grid compiled along each of them (ADR 0030): positions, sizes, lever arms, capacitances,
 t and the rates follow, until the dots merge. The exchange of the dots' valence electrons follows them
-(ADR 0031): J comes from the CI window's local sector at the gated t and the shaped dots.
+(ADR 0031): J comes from the CI window's local sector at the gated t and the shaped dots. The interdot
+conductance sets the triple-point splitting (ADR 0032): opening B_M takes the honeycomb from small
+hexagons to the diagonal lines of one superdot.
 
 ### Breaking
 - `State.tunnel_coupling_ev` follows every gate, not the barrier gate alone: the compiled t moved by half
@@ -48,6 +50,12 @@ t and the rates follow, until the dots merge. The exchange of the dots' valence 
 - `Session.spin_readout` reads at the interdot coupling of the last point the session was given, not at
   the compiled t.
 
+- The interdot conductance sets the triple-point splitting (#66). The CI model's energies gain an
+  effective interdot capacitance from Kemble's transmission of the interdot barrier and Golden &
+  Halperin's f(g), so charge maps, the sensor and J change wherever the conductance is not small.
+  `DEVICE_FORMAT_VERSION` 5: the interdot barrier's top, slopes and curvature, and a `barrier_top_ev`
+  column on the shape grid.
+
 ### Added
 - `charge.hybrid`: `InterdotCoupling` (t at the gates) and the CI window's eigenstates, batched per total
   charge (`window_eigenstates`, `eigenbasis`); `ConstantInteractionParams.coupling`, `tunnel_coupling_ev`,
@@ -62,6 +70,14 @@ t and the rates follow, until the dots merge. The exchange of the dots' valence 
 - `State.dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and `dots_merged`.
 - `State.exchange_frequency_hz` (J/h); `spin.exchange.local_exchange_ev` and `singlet_exchange_ev` (the
   secular solver, now returning J = −min(0, Δ_R, Δ_L) where t = 0 without dividing zero by zero).
+- `charge.splitting` (`InterdotSplitting`, `golden_halperin_splitting`, `kemble_transmission`);
+  `ConstantInteractionParams.splitting`, `interdot_splitting`, `varies`; `Device.runtime_splitting()`,
+  `interdot_barrier_top_ev`, `interdot_barrier_top_slopes_ev_per_v`, `interdot_barrier_hbar_omega_ev`;
+  `compile.device.interdot_barrier_top`; `State.interdot_conductance`, `State.interdot_splitting`.
+- Reference entries `golden1996-peak-splitting`, `waugh1995-tunable-coupling`, `kemble1935-wkb-barrier`
+  (`proposed`), and the item `honeycomb-vs-interdot-coupling` of `vanderwiel2003-double-dot-transport`.
+- Gallery protocol `honeycomb-vs-barrier` (unsigned): the interdot conductance and f along B_M, and
+  charge maps over P1 and P2 at six B_M from closed to merged.
 - Gallery protocol `exchange-frequency-vs-barrier` (unsigned): t and J/h along B_M, and J/h across the
   nearest odd–odd cell at three B_M beside its second-order form.
 - Gallery protocol `dot-shape-vs-barrier` (unsigned): positions, radii, addition energies, C_m, t and the
@@ -76,7 +92,8 @@ t and the rates follow, until the dots merge. The exchange of the dots' valence 
   every entry relative to itself (non-negative Taylor steps and squarings), not with `expm`: a slow
   transition beside rates 10⁵ times faster keeps its digits on every platform (ADR 0030).
 - Model versions: `charge.hybrid` 2 (new), `charge.shape` 1 (new), `readout.master_equation` 3,
-  `compile.device` 5, `device` 6, `device.session` 7, `optimum.targets` 3, `spin.exchange` 3. Without a coupling and a
+  `charge.splitting` 1 (new), `compile.device` 6, `device` 7, `device.session` 8, `optimum.targets` 3,
+  `spin.exchange` 3; `charge.shape` 2. Without a coupling and a
   shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.
 - The device file grows from about 14 kB to 62 kB (the shape grid); compile takes about 0.2 s more.
 
