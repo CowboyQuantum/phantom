@@ -6,18 +6,20 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.4.0 — the barrier gates set the interdot coupling (#58; untagged)
+## 0.4.0 — the barrier gates set the interdot coupling and the dots' shape (#58, #59; untagged)
 
 The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge
 hybridize through it (ADR 0029): opening B_M widens an interdot line from the thermal step to the
-two-level polarization, and closing it is what isolates a dot. #59 (the barrier gates reshape the dots)
-and #60 (the exchange follows them) are planned for the same release.
+two-level polarization, and closing it is what isolates a dot. The barrier gates move and reshape the
+dots through a grid compiled along each of them (ADR 0030): positions, sizes, lever arms, capacitances,
+t and the rates follow, until the dots merge. #60 (the exchange follows them) is planned for the same
+release.
 
 ### Breaking
 - `State.tunnel_coupling_ev` follows every gate, not the barrier gate alone: the compiled t moved by half
-  the slopes of ln Γ_m (Γ_m ∝ t²) and capped at ħω₀/π, compile's t at a transmission of one. On the
-  reference device's interdot lines it is 0.05 µeV with B_M 50 mV below the programmed point and 30 µeV
-  with B_M 16 mV above it.
+  the slopes of ln Γ_m (Γ_m ∝ t²) and capped at ħω₀/π, compile's t at a transmission of one; along the
+  barrier gates, half the change of the interdot action on the shape grid. On the reference device it
+  runs from below 0.1 µeV to above 100 µeV as B_M moves by tens of mV around the programmed point.
 - `State.n_mean`, `State.n_ground`, `State.sensor_current_a` and every session read the hybridized
   eigenstates of the CI window: near an interdot line the charge is no longer a thermal step, and away
   from one it carries an admixture (t/Δ)² of the neighbouring charge state.
@@ -27,8 +29,16 @@ and #60 (the exchange follows them) are planned for the same release.
 - With dynamics, dot 1 loads through dot 2's lead in second order in t, Γ_R t²(1/Δ + 1/Δ')²: closing B_L
   alone no longer latches dot 1 on the reference device (about 10⁶ Hz through dot 2 against 10⁴ Hz
   through B_L). Closing B_L and B_M together does. The contract's hold check compares the total charge.
-- `optimum(device).coupling.v_barrier_v` inverts the runtime coupling along the barrier gate (NaN at or
-  above its ceiling).
+- `optimum(device).coupling.v_barrier_v` inverts the runtime coupling along the barrier gate by bisection
+  (NaN outside the range t takes within ±1 V).
+- `DEVICE_FORMAT_VERSION` 4: `Device.shape`, the double dot's changes on a grid along B_L, B_M and B_R.
+  Files from 0.3.0 do not load; recompile them from their seed.
+- The barrier gates move the dots (#59): the runtime CI model's capacitances and induced charge, t and
+  the lead and interdot rates follow them, so every map with a barrier gate off its operating value
+  changes. A growing dot takes electrons at a fixed potential (the charge is counted absolutely), so a
+  barrier gate moves the plunger lines by more than its cross-capacitance.
+- Along a barrier gate a rate levels off at f_a/(2 − T₀) once the barrier falls below its tunnelling
+  level (its action vanishes), not at the attempt rate; the barrier gates' changes add.
 
 ### Added
 - `charge.hybrid`: `InterdotCoupling` (t at the gates) and the CI window's eigenstates, batched per total
@@ -38,13 +48,20 @@ and #60 (the exchange follows them) are planned for the same release.
   and `carried_states` for a distribution over eigenstates.
 - Gallery protocol `interdot-line-vs-barrier` (unsigned): t and Γ_m along B_M, detuning cuts at three B_M
   beside the two-level formula, and the interdot line over B_M.
+- `charge.shape.ShapeGrid`; `ConstantInteractionParams.shape`, `local`, `addition_energies_at_ev`;
+  `InterdotCoupling.shape`, `GateRates.shape`; `charge.derived.capacitance_matrix_af`;
+  `electrostatics.dots.refined_dot`; `CompileParams.shape_gates`, `shape_span_v`, `shape_points`.
+- `State.dot_positions_nm`, `dot_radii_nm`, `addition_energies_ev` and `dots_merged`.
+- Gallery protocol `dot-shape-vs-barrier` (unsigned): positions, radii, addition energies, C_m, t and the
+  merged flag along each barrier gate, and charge maps over P1 and P2 at three B_M.
 
 ### Changed
 - `session-closing-barrier` sweeps three ways: barriers open, B_L closed alone (loaded through dot 2),
   and B_L and B_M closed (latching, telegraph); its budget rises from 1,665 to 2,067 points.
-- Model versions: `charge.hybrid` 1 (new), `readout.master_equation` 2, `device` 5, `device.session` 5,
-  `optimum.targets` 2. Without a coupling, `ConstantInteractionParams` and `RateEquation` give their 0.3.0
-  output bit for bit.
+- Model versions: `charge.hybrid` 1 (new), `charge.shape` 1 (new), `readout.master_equation` 2,
+  `compile.device` 5, `device` 6, `device.session` 6, `optimum.targets` 3. Without a coupling and a
+  shape, `ConstantInteractionParams`, `RateEquation` and `GateRates` give their 0.3.0 output bit for bit.
+- The device file grows from about 14 kB to 62 kB (the shape grid); compile takes about 0.2 s more.
 
 ## 0.3.0 — the sensor dot's barriers and bath, and gate-dependent charge dynamics (#47, #53, #54; `v0.3.0` at `6920f19`)
 
