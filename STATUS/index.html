@@ -259,6 +259,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -275,6 +293,69 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#done-this-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done this session
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In flight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next action
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open issues
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -489,6 +570,58 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#done-this-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done this session
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In flight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next action
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open issues
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -508,15 +641,16 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> none in flight. Step 8's phantom side was released as <code>v0.2.0</code> (on <code>f72daac</code>). Steps 1–7
-are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28,</p>
-<h1 id="32-34-and-37-030-is-untagged-and-now-carries-47-53-and-54-changelogmd">32, #34 and #37. 0.3.0 is untagged and now carries #47, #53 and #54 (<code>CHANGELOG.md</code>).</h1>
-<p><strong>Branch:</strong> <code>issue-54/sensor-charge-dynamics</code> (PR #56, against <code>main</code>). <code>main</code> is at <code>45e27a0</code>, the merge of</p>
-<h1 id="55-53">55 (#53).</h1>
-<p><strong>Last session:</strong> 2026-10-30. The owner asked for better charge dynamics for the sensor and for the
-gates to modulate them. Two decisions were taken that day:
+<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>, Step 8's phantom side) and <code>v0.3.0</code>
+(on <code>6920f19</code>, carrying #47, #53 and #54). Steps 1–7 are built; their open items (sign-offs, catalog
+entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
+<strong>Branch:</strong> <code>issue-54/release-v0.3.0</code> (docs only: the changelog heading and this file). <code>main</code> is at
+<code>6920f19</code>, the merge of #56 (#54).
+<strong>Last session:</strong> 2026-10-30 to 2026-10-31. The owner asked for better charge dynamics for the sensor and
+for the gates to modulate them. Three decisions were taken:
 - <strong>Back-action:</strong> on, always with dynamics.
-- <strong>Release:</strong> both changes fold into the untagged 0.3.0.</p>
+- <strong>Release:</strong> both changes fold into 0.3.0.
+- <strong>Tag:</strong> on 2026-10-31 the owner asked for <code>v0.3.0</code> and a GitHub Release made as for <code>v0.2.0</code>.</p>
 <h2 id="done-this-session">Done this session</h2>
 <ul>
 <li><strong>#53 (<a href="../adr/0027-the-qubit-dots-rates-follow-the-gates-at-runtime/">ADR 0027</a>): the qubit dots'
@@ -528,30 +662,28 @@ gates to modulate them. Two decisions were taken that day:
 <li><code>State</code>'s three rates are arrays. <code>DEVICE_FORMAT_VERSION</code> 3.</li>
 <li>New protocol <code>session-closing-barrier</code>. With B_L 0.1 V lower, Γ_L is about 10⁴ Hz, a sweep at
     3 µs per point opens a 3.5 mV loop, and a parked session telegraphs.</li>
-<li><code>session-hold-relaxation</code> now overlays the total rate out of the held state. The interdot path
-    had doubled the relaxation rate before as well.</li>
-<li>Tests: <code>tests/test_dot_rates.py</code>, 9 P0.</li>
+<li>Tests: <code>tests/test_dot_rates.py</code>, 9 P0. Merged as #55.</li>
 <li><strong>#54 (<a href="../adr/0028-the-sensor-dots-charge-is-a-process-in-time-with-back-action/">ADR 0028</a>): the
   sensor dot's charge is a process in time.</strong></li>
-<li>With dynamics, the sensor's charge is a birth–death chain over its levels with broadened
-    occupations, so its stationary current is exactly ADR 0026's.</li>
-<li>A sample reads the electrons that left to the drain during its dwell: from exact trajectories at
-    ≤ 200 jumps per dwell, otherwise a Gaussian with the full-counting-statistics variance.</li>
-<li>Back-action is −β_i·(M − M̄), against the sensor's stationary mean.</li>
-<li>New code: <code>readout.sensor_dynamics</code> and <code>Measurement.sensor_charge</code>.</li>
-<li>New protocol <code>session-slow-sensor</code>.</li>
-<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 10 P0.</li>
-<li><strong>Totals:</strong> 174 tests; 72 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
+<li>A birth–death chain over the sensor's levels with broadened occupations; a sample reads the
+    electrons counted to the drain (exact trajectories at ≤ 200 jumps, otherwise Gaussian with the
+    full-counting-statistics variance; the relaxed closed form beyond 50 relaxation times).</li>
+<li>Back-action −β_i·(M − M̄), against the sensor's stationary mean.</li>
+<li>New: <code>readout.sensor_dynamics</code>, <code>Measurement.sensor_charge</code>, protocol <code>session-slow-sensor</code>.</li>
+<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 10 P0. Merged as #56.</li>
+<li><strong>Release <code>v0.3.0</code>:</strong> annotated tag on <code>6920f19</code> after CI passed there (Windows gallery comparison
+  included); GitHub Release "phantom 0.3.0" with the changelog entry as its notes, as for <code>v0.2.0</code>.
+  Noted on #53 and #54.</li>
+<li><strong>Totals:</strong> 174 tests; 72 protocols within budget, all unsigned; contract OK.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>PR #56 (#54) waits for the owner's review of its preview at <code>/pr-56/</code>. Its first Windows gallery
-  comparison failed by 1.5·10⁻⁹, from an exponential at ΓT ≈ 10⁸. The fix in <code>9a58df2</code> replaces it with
-  the relaxed closed form beyond 50 relaxation times (ADR 0028).</li>
+<li>This branch's PR: the changelog heading names the tag, and this file.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>The owner reviews and merges #56. They also decide whether to tag <code>v0.3.0</code>
-(ADR 0025) and when qdt moves its pin (CowboyQuantum/qdt #140, #142, and #169 for the run option).</p>
+<p>qdt moves its pin to <code>v0.3.0</code> when the owner decides (CowboyQuantum/qdt #140, #142, and #169 for the run
+option). Its adapter must handle <code>State</code>'s rates as arrays, the 12-gate layout and device format 3
+(<code>CHANGELOG.md</code>, Breaking).</p>
 <h2 id="open-issues">Open issues</h2>
 <h1 id="48-rates-unscreened-sensitivity-now-also-the-dots-p1-moves-_l-more-than-b_l-49-per-device">48 rates' unscreened sensitivity (now also the dots': P1 moves Γ_L more than B_L); #49 per-device</h1>
 <p>sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin driven by voltages.
@@ -568,6 +700,8 @@ Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence again
 <li><strong>Cross-platform (ADR 0014):</strong> avoid digit-cancelling quantities; use closed forms, grid points and
   bisection.</li>
 <li><strong>Pages:</strong> the source is <code>gh-pages</code> (root); per-PR previews are under <code>/pr-&lt;n&gt;/</code>.</li>
+<li><strong>Tagging:</strong> this environment pushed <code>v0.3.0</code>; it refused <code>v0.2.0</code> (ADR 0025). Whether a session can
+  tag depends on its credentials.</li>
 </ul>
 
 
