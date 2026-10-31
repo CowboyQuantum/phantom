@@ -259,24 +259,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Status
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -293,69 +275,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -570,58 +489,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -641,67 +508,70 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>, Step 8's phantom side) and <code>v0.3.0</code>
-(on <code>6920f19</code>, carrying #47, #53 and #54). Steps 1–7 are built; their open items (sign-offs, catalog
-entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
-<strong>Branch:</strong> <code>issue-54/release-v0.3.0</code> (docs only: the changelog heading and this file). <code>main</code> is at
-<code>6920f19</code>, the merge of #56 (#54).
-<strong>Last session:</strong> 2026-10-30 to 2026-10-31. The owner asked for better charge dynamics for the sensor and
-for the gates to modulate them. Three decisions were taken:
-- <strong>Back-action:</strong> on, always with dynamics.
-- <strong>Release:</strong> both changes fold into 0.3.0.
-- <strong>Tag:</strong> on 2026-10-31 the owner asked for <code>v0.3.0</code> and a GitHub Release made as for <code>v0.2.0</code>.</p>
+<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>) and <code>v0.3.0</code> (on <code>6920f19</code>, #47, #53,</p>
+<h1 id="54-040-is-untagged-it-carries-58-and-59-and-60-are-planned-for-it-steps-17-are-built-their-open">54). 0.4.0 is untagged: it carries #58, and #59 and #60 are planned for it. Steps 1–7 are built; their open</h1>
+<p>items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
+<strong>Branch:</strong> <code>issue-58/interdot-hybridization</code> (PR against <code>main</code>). <code>main</code> is at <code>746ab04</code>, the merge of #57.
+<strong>Last session:</strong> 2026-10-31. The owner found in a simulated tune-up that the barrier gates did not
+change the interdot coupling at all, and asked for them to set the interdot coupling, the dots' positions
+and shape, and later the exchange. Decisions taken that day (via questions):
+- <strong>t in the signal:</strong> hybridize the charge states, in the statics and the dynamics.
+- <strong>Dot shape:</strong> compile a grid along the barrier gates and interpolate at runtime (#59).
+- <strong>Slicing:</strong> three issues in order, #58 → #59 → #60, released together as 0.4.0.</p>
 <h2 id="done-this-session">Done this session</h2>
 <ul>
-<li><strong>#53 (<a href="../adr/0027-the-qubit-dots-rates-follow-the-gates-at-runtime/">ADR 0027</a>): the qubit dots'
-  rates follow the gates.</strong></li>
-<li>Each <code>CompiledBarrier</code> carries its attempt rate, a tunnelling level held fixed, and the slopes of
-    ln Γ against every gate.</li>
-<li>At runtime, <code>readout.rates.GateRates</code> and <code>saturating_rates_hz</code> (shared with the sensor's leads)
-    give the rates, and <code>RateEquation.gate_rates</code> uses them.</li>
-<li><code>State</code>'s three rates are arrays. <code>DEVICE_FORMAT_VERSION</code> 3.</li>
-<li>New protocol <code>session-closing-barrier</code>. With B_L 0.1 V lower, Γ_L is about 10⁴ Hz, a sweep at
-    3 µs per point opens a 3.5 mV loop, and a parked session telegraphs.</li>
-<li>Tests: <code>tests/test_dot_rates.py</code>, 9 P0. Merged as #55.</li>
-<li><strong>#54 (<a href="../adr/0028-the-sensor-dots-charge-is-a-process-in-time-with-back-action/">ADR 0028</a>): the
-  sensor dot's charge is a process in time.</strong></li>
-<li>A birth–death chain over the sensor's levels with broadened occupations; a sample reads the
-    electrons counted to the drain (exact trajectories at ≤ 200 jumps, otherwise Gaussian with the
-    full-counting-statistics variance; the relaxed closed form beyond 50 relaxation times).</li>
-<li>Back-action −β_i·(M − M̄), against the sensor's stationary mean.</li>
-<li>New: <code>readout.sensor_dynamics</code>, <code>Measurement.sensor_charge</code>, protocol <code>session-slow-sensor</code>.</li>
-<li>Tests: <code>tests/test_sensor_dynamics.py</code>, 10 P0. Merged as #56.</li>
-<li><strong>Release <code>v0.3.0</code>:</strong> annotated tag on <code>6920f19</code> after CI passed there (Windows gallery comparison
-  included); GitHub Release "phantom 0.3.0" with the changelog entry as its notes, as for <code>v0.2.0</code>.
-  Noted on #53 and #54.</li>
-<li><strong>Totals:</strong> 174 tests; 72 protocols within budget, all unsigned; contract OK.</li>
+<li><strong>#58 (<a href="../adr/0029-the-interdot-coupling-follows-the-gates-and-hybridizes-the-charge-states/">ADR 0029</a>):
+  the interdot coupling follows the gates and hybridizes the charge states.</strong></li>
+<li><code>charge.hybrid</code>: <code>InterdotCoupling</code> (the compiled t moved by ½ the slopes of ln Γ_m, capped at
+    ħω₀/π) and the CI window's eigenstates, one chain per total charge, diagonalised in batches with each
+    block's lowest level taken out.</li>
+<li><code>ConstantInteractionParams.coupling</code>; <code>Device.runtime_coupling()</code>; <code>RateEquation.eigen_rate_matrix</code>,
+    <code>project</code> and <code>carried_states</code>: a Pauli master equation over the eigenstates, shared by <code>sweep</code> and
+    <code>Session</code>. Without a coupling, every output is 0.3.0's, bit for bit.</li>
+<li><code>Measurement.n_present</code> in <code>sampled</code> mode is an eigenstate's ⟨N⟩. The contract checks its integer
+    total, and the hold check compares the total charge.</li>
+<li>Closing B_L alone no longer isolates dot 1: dot 2's lead loads it at Γ_R t²(1/Δ + 1/Δ')². The tests
+    and <code>session-closing-barrier</code> now isolate it with B_L and B_M closed.</li>
+<li>New protocol <code>interdot-line-vs-barrier</code>. <code>optimum.coupling</code> inverts the gated t.</li>
+<li>Tests: <code>tests/test_interdot_hybridization.py</code>, 8 P0, plus the cotunnelling bypass in
+    <code>test_dot_rates.py</code>.</li>
+<li><strong>Release <code>v0.3.0</code>:</strong> tagged on <code>6920f19</code> after CI passed there; GitHub Release made as for <code>v0.2.0</code>;
+  noted on #53 and #54. PR #57 recorded it.</li>
+<li><strong>Totals:</strong> 183 tests; 73 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>This branch's PR: the changelog heading names the tag, and this file.</li>
+<li>The PR for #58 waits for the owner's review of its preview at <code>/pr-&lt;n&gt;/</code>. Start with
+  <code>interdot-line-vs-barrier</code> and <code>session-closing-barrier</code>.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>qdt moves its pin to <code>v0.3.0</code> when the owner decides (CowboyQuantum/qdt #140, #142, and #169 for the run
-option). Its adapter must handle <code>State</code>'s rates as arrays, the 12-gate layout and device format 3
-(<code>CHANGELOG.md</code>, Breaking).</p>
+<p>After #58 merges: #59. Compile re-solves the dots on a grid along B_L, B_M and B_R (positions, C_dot,
+C_gate, the actions behind t and the rates), the runtime interpolates them, and the dots merge as B_M
+opens. Device format 4. Then #60: J from the singlet secular equation on the local (1,1)-like sector of
+the CI window at the gated t, U and V₁₂, and PSB at the gated t. Whether to tag 0.4.0, and when qdt
+moves its pin, are the owner's decisions.</p>
 <h2 id="open-issues">Open issues</h2>
-<h1 id="48-rates-unscreened-sensitivity-now-also-the-dots-p1-moves-_l-more-than-b_l-49-per-device">48 rates' unscreened sensitivity (now also the dots': P1 moves Γ_L more than B_L); #49 per-device</h1>
-<p>sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin driven by voltages.
-Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.</p>
+<h1 id="58-59-60-this-line-of-work-48-rates-and-now-ts-unscreened-sensitivity-the-plungers-move-t-as">58, #59, #60 (this line of work); #48 rates' and now t's unscreened sensitivity (the plungers move t as</h1>
+<p>much as B_M); #49 per-device sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin
+driven by voltages. Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against
+qdt's pins.</p>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
-<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 72 protocols; catalog entries #1–#14;
+<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 73 protocols; catalog entries #1–#14;
   confirming the ten <code>proposed</code> reference entries.</li>
-<li><strong>Rates:</strong> linearised exponents within about 20 % of the compile tier over ±10 mV, drifting beyond
-  that. No screening until the FEM backend exists.</li>
-<li><strong>Sensor process:</strong> the split is first order within a dwell. The noise is sequential with broadened
-  occupations. There is no joint energy between the dots and the sensor (ADR 0028).</li>
-<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0028.</li>
-<li><strong>Cross-platform (ADR 0014):</strong> avoid digit-cancelling quantities; use closed forms, grid points and
-  bisection.</li>
+<li><strong>Hybridization (ADR 0029):</strong></li>
+<li>The projection between samples assumes a dwell long against ħ/Ω. At |ε| ≲ t it shares the electron
+    even when t is below ħ/dwell. There is no charge dephasing rate and no Landau–Zener step.</li>
+<li>The model is spinless, with one level per dot.</li>
+<li><code>State.exchange_ev</code> still uses the barrier-only exponential, until #60.</li>
+<li><strong>Rates and t:</strong> linearised exponents, within about 20 % of the compile tier over ±10 mV. No screening
+  until the FEM backend exists.</li>
+<li><strong>Sensor process:</strong> first-order split within a dwell; sequential noise; no joint dot–sensor energy
+  (ADR 0028).</li>
+<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0029.</li>
+<li><strong>Cross-platform (ADR 0014):</strong> avoid digit-cancelling quantities. Condition diagonalisations (take
+  each block's lowest level out first) and sum charges relative to a centre.</li>
 <li><strong>Pages:</strong> the source is <code>gh-pages</code> (root); per-PR previews are under <code>/pr-&lt;n&gt;/</code>.</li>
-<li><strong>Tagging:</strong> this environment pushed <code>v0.3.0</code>; it refused <code>v0.2.0</code> (ADR 0025). Whether a session can
-  tag depends on its credentials.</li>
 </ul>
 
 

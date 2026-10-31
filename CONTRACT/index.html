@@ -859,7 +859,10 @@ noise added to the current. The white floor keeps its density: σ is the draw's 
 </tr>
 </tbody>
 </table>
-<p><code>Measurement.n_present</code> is the integer state in <code>sampled</code> mode and ⟨N⟩ in <code>mean</code> mode. A hold
+<p><code>Measurement.n_present</code> is the charge that entered the sensor. In <code>sampled</code> mode it is one eigenstate of
+the dots' charge (ADR 0029): its total charge is an integer, and its split between the dots is the
+eigenstate's ⟨N⟩, an integer up to the interdot admixture (t/Δ)² away from interdot lines and near half an
+electron each way at the middle of one when t &gt; kT. In <code>mean</code> mode it is ⟨N⟩. A hold
 samples the gate noise once at its start and keeps it through the hold. With dynamics a sample costs
 one matrix exponential, about 1 ms; without, about 0.05 ms.</p>
 <h2 id="seeds-and-reproducibility">Seeds and reproducibility</h2>
@@ -908,6 +911,13 @@ side.</p>
 against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
 voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
 <code>Truth</code> states the rates at the operating point.</p>
+<p>The interdot tunnel coupling follows every gate as well (ADR 0029): <code>State.tunnel_coupling_ev</code> is the
+compiled t moved by half the slopes of ln Γ_m and capped at ħω₀/π, and the charge states of one total
+charge hybridize through it. An interdot line is then the two-level polarization ½(1 − ε/Ω·tanh(Ω/2kT)),
+Ω = √(ε² + 4t²), so opening the barrier gate widens it; <code>State.n_mean</code> and the sensor read the
+eigenstates, and a session's dynamics run over them. A dot is isolated only when its own barrier and the
+interdot barrier are both closed: with B_M open, dot 2's lead loads dot 1 in second order in t.
+<code>optimum(device).coupling</code> inverts this t along the barrier gate.</p>
 <p>With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
 stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths
