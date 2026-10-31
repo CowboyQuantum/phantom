@@ -3,11 +3,10 @@
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
 **Current step:** none in flight. Released: `v0.2.0` (on `f72daac`) and `v0.3.0` (on `6920f19`). 0.4.0 is
-untagged and complete once #63 (#60) and this branch (#66) merge. It carries #58 (merged as #61) and #59
-(merged as #62). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver)
+untagged and complete once this branch (#66) merges. It carries #58 (merged as #61), #59 (merged as #62)
+and #60 (merged as #63). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver)
 are on #16, #17, #25, #28, #32, #34 and #37.
-**Branch:** `issue-66/interdot-splitting`, based on `issue-60/exchange-follows-barriers` (PR #63, open);
-the PR is against that branch until #63 merges. `main` is at `204de96`, the merge of #62.
+**Branch:** `issue-66/interdot-splitting` (PR #67 against `main`). `main` is at `2f9f2d6`, the merge of #63.
 **Last session:** 2026-10-31. The owner asked for the barrier gates to set the interdot coupling, the dots'
 shape and the exchange (#58–#60). They then found the tune-up behaviour they wanted still missing: the
 interdot width (anti-detuning) should grow with B_M until the dots form a superdot, and shrink to a grid as
@@ -22,7 +21,7 @@ it closes. Decisions taken that day:
 - **#58 (ADR 0029, #61):** t follows every gate and hybridizes the charge states.
 - **#59 (ADR 0030, #62):** the barrier gates move and reshape the dots through a compiled grid. Also
   fixed: the hybridized window's seam, and a propagator that keeps every entry's relative digits.
-- **#60 (ADR 0031, #63, open):** J of the valence electrons at the gated t and the shaped dots;
+- **#60 (ADR 0031, #63):** J of the valence electrons at the gated t and the shaped dots;
   `State.exchange_frequency_hz`; the Pauli readout at the gated t.
 - **#66 ([ADR 0032](adr/0032-the-interdot-conductance-sets-the-triple-point-splitting.md), this
   branch):** the interdot conductance sets the triple-point splitting.
@@ -43,11 +42,10 @@ it closes. Decisions taken that day:
 - **Totals:** 208 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.
 
 ## In flight
-- PR #63 (#60): green; waits for the owner's merge.
-- This branch's PR (#66): waits for the owner's review of `honeycomb-vs-barrier`.
+- PR #67 (#66): waits for the owner's review of `honeycomb-vs-barrier`.
 
 ## Next action
-The owner reviews #63 and this PR. After both merge, 0.4.0 is complete. Its tag and qdt's pin are the
+The owner reviews #67. After it merges, 0.4.0 is complete. Its tag and qdt's pin are the
 owner's decisions. The owner should also confirm or correct the four `proposed` reference entries and
 items (the DOIs are from memory).
 
