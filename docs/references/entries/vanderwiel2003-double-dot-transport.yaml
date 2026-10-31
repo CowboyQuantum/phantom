@@ -20,6 +20,17 @@ provides:
     quantity: diamond_edge_slopes_from_lever_arm
     conditions: single dot, sequential tunnelling, |eV_sd| up to the addition energy
     notes: Diamond edges at V_sd = ±2 α (V_g − V_0)/e with α the gate lever arm; apex at the addition energy.
+  - label: honeycomb-vs-interdot-coupling
+    kind: range
+    value: [0.0, 1.0]
+    tolerance: qualitative until the figure is digitised (then kind figure with data)
+    quantity: charge_stability_diagram_against_interdot_coupling
+    conditions: double dot in series, interdot coupling from weak to strong
+    notes: >
+      The review's figure of the charge stability diagram for weak, intermediate and strong interdot
+      coupling: a grid of decoupled dots, hexagons as the triple points separate, and the parallel lines
+      of one large dot. `honeycomb-vs-barrier` (#66, ADR 0032) reproduces the evolution qualitatively;
+      a P1 row would compare the triple-point splitting once the human picks the figure and digitises it.
 status: proposed
 notes: >
   Written by a session from memory on 2026-10-25 as the standard reference for the constant-interaction
