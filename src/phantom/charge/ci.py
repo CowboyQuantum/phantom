@@ -21,6 +21,10 @@ Derived quantities (all exact for this model, used by the P0 tests):
 With an interdot tunnel `coupling` (#58, ADR 0029) the window's charge states of one total charge
 hybridize (`charge.hybrid`). The occupation, the ground state and the draws then come from the
 eigenstates, and the energies and the derived quantities above stay those of the charge states.
+
+With a `shape` (#59, ADR 0030) the capacitances, the lever arms and the offsets at the dots follow the
+barrier gates (`charge.shape`): at each gate point C_dot(V) and n_g = C_dot(V)·(α(V)·V − Δo(V))/E_UNIT. The
+fields `c_dot_af` and `c_gate_af` and the derived quantities above are those at the operating point.
 """
 
 from __future__ import annotations
@@ -30,7 +34,14 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from phantom.charge.hybrid import InterdotCoupling, WindowEigenstates, boltzmann, window_eigenstates
+from phantom.charge.hybrid import (
+    STATIC_WINDOW,
+    InterdotCoupling,
+    WindowEigenstates,
+    boltzmann,
+    window_eigenstates,
+)
+from phantom.charge.shape import ShapeGrid
 from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
 MODEL_VERSION = 2
@@ -62,6 +73,8 @@ class ConstantInteractionParams:
     """Integer occupations considered: round(n_g) ± window per dot."""
     coupling: InterdotCoupling | None = None
     """The interdot tunnel coupling at the gate voltages; None keeps the charge states classical."""
+    shape: ShapeGrid | None = None
+    """The capacitances, lever arms and offsets along the barrier gates; None keeps them fixed."""
 
     def __post_init__(self) -> None:
         n_g = len(self.gate_names)
@@ -76,10 +89,46 @@ class ConstantInteractionParams:
 
     def induced_charge(self, v: np.ndarray) -> np.ndarray:
         """Gate-induced charge on (dot 1, dot 2) in electrons for gate voltages `v` (last axis = gates)."""
-        return np.asarray(v, dtype=float) @ self.c_gate_af.T / E_UNIT_V_PER_E_AF
+        if self.shape is None:
+            return np.asarray(v, dtype=float) @ self.c_gate_af.T / E_UNIT_V_PER_E_AF
+        return self.local(v)[1]
 
-    def energies(self, n_g: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """Occupations `N` (..., k, 2) in the window around `n_g` (..., 2) and their energies (..., k) in eV."""
+    def local(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """(C_dot (..., 2, 2) in aF, n_g (..., 2) in electrons) at gate voltages `v` (..., gates): with a
+        `shape`, the capacitances and the induced charge of the dots as the barrier gates have shaped them."""
+        v = np.asarray(v, dtype=float)
+        if self.shape is None:
+            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), self.induced_charge(v)
+        g = self.shape
+        change = g.change(v)
+        c11, c22, cm = (g.quantity(change, k)[..., 0] for k in ("c11_af", "c22_af", "cm_af"))
+        c = self.c_dot_af + np.stack([np.stack([c11, -cm], axis=-1), np.stack([-cm, c22], axis=-1)], axis=-2)
+        alpha = np.linalg.solve(self.c_dot_af, self.c_gate_af) + g.quantity(change, "alpha")
+        phi = np.einsum("...ig,...g->...i", alpha, v) - g.quantity(change, "offset_ev")
+        return c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF
+
+    def _c_inv(self, v: np.ndarray) -> np.ndarray:
+        """C_dot⁻¹: (2, 2) without a `shape`, (..., 2, 2) at gate voltages `v` with one."""
+        if self.shape is None:
+            return np.linalg.inv(self.c_dot_af)
+        return np.linalg.inv(self.local(v)[0])
+
+    def addition_energies_at_ev(self, v: np.ndarray) -> np.ndarray:
+        """(..., 2) each dot's addition energy E_UNIT·(C_dot⁻¹)_ii at gate voltages `v`, eV."""
+        v = np.asarray(v, dtype=float)
+        c_inv = np.broadcast_to(self._c_inv(v), v.shape[:-1] + (2, 2))
+        return E_UNIT_V_PER_E_AF * np.stack([c_inv[..., 0, 0], c_inv[..., 1, 1]], axis=-1)
+
+    def _quadratic(self, d: np.ndarray, c_inv: np.ndarray | None) -> np.ndarray:
+        """½ E_UNIT dᵀ C⁻¹ d over the last axis of `d` (..., k, 2), C⁻¹ (2, 2) or one per point (..., 2, 2)."""
+        if c_inv is None or c_inv.ndim == 2:
+            c_inv = np.linalg.inv(self.c_dot_af) if c_inv is None else c_inv
+            return 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
+        return 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,...ij,...kj->...k", d, c_inv, d)
+
+    def energies(self, n_g: np.ndarray, c_inv: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+        """Occupations `N` (..., k, 2) in the window around `n_g` (..., 2) and their energies (..., k) in eV;
+        `c_inv` (..., 2, 2) is C_dot⁻¹ at each point when the capacitances vary (the operating point's when None)."""
         n_g = np.asarray(n_g, dtype=float)
         center = np.rint(n_g).astype(int)
         offsets = np.array(
@@ -87,8 +136,7 @@ class ConstantInteractionParams:
         )
         states = np.maximum(center[..., None, :] + offsets, 0)
         d = states - n_g[..., None, :]
-        c_inv = np.linalg.inv(self.c_dot_af)
-        u = 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
+        u = self._quadratic(d, c_inv)
         # Clipping at zero electrons makes some window entries identical near the empty corner. Only the
         # first occurrence of a state keeps its energy; duplicates get +inf so they carry no weight
         # (MODEL_VERSION 2: qdt-sim counted them several times).
@@ -103,9 +151,10 @@ class ConstantInteractionParams:
     def state_energies_ev(self, v: np.ndarray, states: np.ndarray) -> np.ndarray:
         """Energies (k,) of the given integer occupations `states` (k, 2) at gate voltages `v` (gates,),
         for any states, not only the window: U(N) = ½ E_UNIT (N − n_g)ᵀ C_dot⁻¹ (N − n_g)."""
-        n_g = self.induced_charge(np.asarray(v, dtype=float))
+        v = np.asarray(v, dtype=float)
+        n_g = self.induced_charge(v)
         d = np.asarray(states, dtype=float) - n_g
-        c_inv = np.linalg.inv(self.c_dot_af)
+        c_inv = self._c_inv(v)
         return 0.5 * E_UNIT_V_PER_E_AF * np.einsum("ki,ij,kj->k", d, c_inv, d)
 
     def occupation_probabilities(
@@ -118,7 +167,7 @@ class ConstantInteractionParams:
         if self.coupling is not None:
             eig = self.eigenstates(v)
             return eig.states, eig.populations(boltzmann(eig.energies_ev, self._kt(kt_ev)))
-        states, u = self.energies(self.induced_charge(v))
+        states, u = self.energies(self.induced_charge(v), None if self.shape is None else self._c_inv(v))
         if kt_ev is None:
             kt = K_B_EV_PER_K * max(self.temperature_k, 1e-6)
         else:
@@ -140,7 +189,7 @@ class ConstantInteractionParams:
         if self.coupling is not None:
             eig = self.eigenstates(v)
             return eig.dominant_state(np.argmin(eig.energies_ev, axis=-1))
-        states, u = self.energies(self.induced_charge(v))
+        states, u = self.energies(self.induced_charge(v), None if self.shape is None else self._c_inv(v))
         idx = np.argmin(u, axis=-1)
         return np.take_along_axis(states, idx[..., None, None], axis=-2)[..., 0, :]
 
@@ -164,15 +213,28 @@ class ConstantInteractionParams:
         return self.coupling.tunnel_coupling_ev(v)
 
     def eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None = None) -> WindowEigenstates:
-        """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`)."""
+        """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`). The last
+        result is kept, so the occupation, the ground state and the sensor at one batch of points
+        diagonalise it once."""
         v = np.asarray(v, dtype=float)
-        return window_eigenstates(self.induced_charge(v), self.window, self._grid_energies, self.tunnel_coupling_ev(v), level_shift_ev)
+        if level_shift_ev is None:
+            last = self.__dict__.get("_last_eigenstates")
+            if last is not None and last[0].shape == v.shape and np.array_equal(last[0], v):
+                return last[1]
+            eig = self._eigenstates(v, None)
+            object.__setattr__(self, "_last_eigenstates", (v.copy(), eig))
+            return eig
+        return self._eigenstates(v, level_shift_ev)
 
-    def _grid_energies(self, states: np.ndarray, n_g: np.ndarray) -> np.ndarray:
+    def _eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None) -> WindowEigenstates:
+        c_inv = None if self.shape is None else self._c_inv(v)
+        window = max(self.window, STATIC_WINDOW)
+        return window_eigenstates(self.induced_charge(v), window, lambda states, n_g: self._grid_energies(states, n_g, c_inv), self.tunnel_coupling_ev(v), level_shift_ev)
+
+    def _grid_energies(self, states: np.ndarray, n_g: np.ndarray, c_inv: np.ndarray | None = None) -> np.ndarray:
         """U(N) (..., K) of the states (..., K, 2) around `n_g` (..., 2), +inf for a negative occupation."""
         d = states - n_g[..., None, :]
-        c_inv = np.linalg.inv(self.c_dot_af)
-        u = 0.5 * E_UNIT_V_PER_E_AF * np.einsum("...ki,ij,...kj->...k", d, c_inv, d)
+        u = self._quadratic(d, c_inv)
         return np.where((states >= 0).all(axis=-1), u, np.inf)
 
     def _kt(self, kt_ev: float | np.ndarray | None) -> float | np.ndarray:

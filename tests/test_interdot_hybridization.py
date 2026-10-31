@@ -124,8 +124,13 @@ def test_the_coupling_follows_the_gates_from_its_compiled_value(device: Device):
     j = device.gate_names.index(device.barrier_gate)
     along = v0 + np.linspace(-0.2, 1.0, 241)[:, None] * np.eye(len(v0))[j]
     t = c.tunnel_coupling_ev(along)
-    assert np.all(np.diff(t) >= 0) and np.all(np.diff(t[t < 0.99 * c.t_max_ev]) > 0), "opening the barrier gate raises t"
-    assert t[-1] == pytest.approx(c.t_max_ev, rel=1e-6) and np.all(t <= c.t_max_ev), "saturating at ħω₀/π"
+    assert np.all(np.diff(t) >= 0) and t[-1] > 1e8 * t[0], "opening the barrier gate raises t"
+    # along the barrier gate t follows half the interdot action's change on the shape grid (#59): once the
+    # barrier falls below the tunnelling level the action is zero and t holds at t_max·σ(logit(t₀/t_max) −
+    # ln(t₀/t_max)), about half the ceiling; the ceiling itself bounds every gate
+    assert np.all(t < c.t_max_ev) and t[-1] > 0.3 * c.t_max_ev, "below ħω₀/π, within a factor of a few"
+    other = v0 + np.linspace(0.0, 3.0, 31)[:, None] * np.eye(len(v0))[device.gate_names.index("P1")]
+    assert c.tunnel_coupling_ev(other)[-1] == pytest.approx(c.t_max_ev, rel=1e-6), "a linear gate takes it to the ceiling"
     mass = 0.19
     hbar_omega = math.sqrt(2 * 0.0380998212 * device.dots[0].curvature_ev_per_nm2 / mass)
     assert c.t_max_ev == pytest.approx(hbar_omega / math.pi, rel=1e-6)
@@ -195,3 +200,22 @@ def test_a_session_reads_the_eigenstates(device: Device):
     assert np.all(np.abs(frac - 0.5) < 0.2), "each sample reads an eigenstate's split, not 0 or 1"
     m = device.session(noise=False, charge="mean").sense(centre, 1.0).n_present
     np.testing.assert_allclose(m, s.n_mean, atol=1e-9)
+
+
+def test_the_middle_of_an_interdot_segment_has_no_seam(device: Device):
+    """The window is centred on rint(n_g), which changes at the middle of every interdot segment
+    (n_g = N + ½). With t near a meV a chain truncated at ±2 states would leave a seam of 2·10⁻⁵ e there;
+    the statics' ±4 window and the dynamics' window chosen by t keep it below 10⁻¹² (ADR 0014, 0029)."""
+    jb = device.gate_names.index("B_M")
+    v0 = np.array(device.programmed_point_v)
+    v0[jb] += 0.012
+    centre, d = _interdot_point(device, v0)
+    vc = device.effective_voltages(centre)
+    ci = device.runtime_ci()
+    assert np.allclose(ci.induced_charge(vc) % 1.0, 0.5, atol=1e-9), "on the tie"
+    assert float(ci.tunnel_coupling_ev(vc)) > 5e-4
+    step = 1e-12 * d
+    below, above = ci.mean_occupation(device.effective_voltages(centre - step)), ci.mean_occupation(device.effective_voltages(centre + step))
+    np.testing.assert_allclose(above, below, atol=1e-10)
+    m = device.session(noise=False, charge="mean").sense(centre, 1.0).n_present
+    np.testing.assert_allclose(m, device.at(centre).n_mean, atol=1e-9), "the dynamics' window agrees with the statics'"

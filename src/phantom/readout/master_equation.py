@@ -49,18 +49,20 @@ a coupling, a few small diagonalisations more.
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass
 
 import numpy as np
 from scipy.linalg import expm
 
 from phantom.charge.ci import ConstantInteractionParams
-from phantom.charge.hybrid import eigenbasis
+from phantom.charge.hybrid import dynamics_window, eigenbasis
 from phantom.constants import K_B_EV_PER_K
 from phantom.readout.rates import GateRates
 
-MODEL_VERSION = 2
-"""2: with an interdot coupling, the rate equation runs over the hybridized eigenstates (#58)."""
+MODEL_VERSION = 3
+"""2: with an interdot coupling, the rate equation runs over the hybridized eigenstates (#58). 3: its
+window follows t (`dynamics_window`), and with a shape its energies use C(V) (#59)."""
 
 PROBABILITY_FLOOR = 1e-12
 """States below this probability are dropped from the active set between samples."""
@@ -85,6 +87,41 @@ def _move_pairs(states: np.ndarray, move: tuple[int, int]) -> tuple[np.ndarray, 
         return np.zeros(0, dtype=int), np.zeros(0, dtype=int)
     src, dst = np.array(pairs, dtype=int).T
     return src, dst
+
+
+TAYLOR_TERMS = 18
+"""Terms of the Taylor series in `propagator`: with ‖B·h‖₁ ≤ ½ the remainder is below 10⁻²⁰."""
+
+
+def propagator(w: np.ndarray, dt_s: float) -> np.ndarray:
+    """exp(W·dt) for a generator W (k, k) (off-diagonal rates ≥ 0, columns summing to zero), with every
+    entry accurate relative to itself (ADR 0030). With a = max(−W_ii), B = W + aI has no negative entry;
+    over a step h = dt/2^s with a·h ≤ ½, exp(W h) = e^{−ah}·Σ_n (Bh)ⁿ/n! sums non-negative terms, and s
+    squarings of a non-negative matrix cancel nothing. A general exponential of W·dt (scipy's `expm`) keeps
+    its error near ε‖W·dt‖ in absolute terms, so the small entries that carry a slow transition, beside
+    rates 10⁵ times faster, lose their digits differently on different platforms (ADR 0014)."""
+    w = np.asarray(w, dtype=float)
+    k = len(w)
+    a = float(np.max(-np.diag(w))) if k else 0.0
+    if not a * dt_s > 0:
+        return np.eye(k)
+    s = max(0, int(np.ceil(np.log2(2.0 * a * dt_s))))
+    # each squaring doubles an error in a column's total, so every column is put back to one: the chain
+    # conserves probability, and dividing a column by its sum keeps each entry's relative accuracy
+    h = dt_s / 2.0**s
+    b = (w + a * np.eye(k)) * h
+    b[b < 0] = 0.0  # the diagonal of the fastest state, a rounding below zero
+    term = np.eye(k)
+    p = np.eye(k)
+    for n in range(1, TAYLOR_TERMS + 1):
+        term = term @ b / n
+        p = p + term
+    p = p * np.exp(-a * h)
+    p = p / p.sum(axis=0)
+    for _ in range(s):
+        p = p @ p
+        p = p / p.sum(axis=0)
+    return p
 
 
 def carried_states(states: np.ndarray, vectors: np.ndarray, p: np.ndarray) -> np.ndarray:
@@ -137,8 +174,14 @@ class RateEquation:
         return K_B_EV_PER_K * max(self.charge.temperature_k, 1e-6)
 
     def window_states(self, v: np.ndarray) -> np.ndarray:
-        """The CI occupation window at `v`, without duplicates."""
-        states, _ = self.charge.energies(self.charge.induced_charge(np.asarray(v, dtype=float)))
+        """The CI occupation window at `v`, without duplicates; with a coupling, as wide as t there needs
+        (`charge.hybrid.dynamics_window`) for the truncated chains to stay exact (ADR 0029)."""
+        v = np.asarray(v, dtype=float)
+        ci = self.charge
+        if ci.coupling is not None:
+            ratio = float(ci.tunnel_coupling_ev(v)) / float(np.min(ci.addition_energies_ev()))
+            ci = dataclasses.replace(ci, window=max(ci.window, dynamics_window(ratio)))
+        states, _ = ci.energies(ci.induced_charge(v), None if ci.shape is None else ci._c_inv(v))
         return _unique_states(states)
 
     def rate_matrix(self, v: np.ndarray, states: np.ndarray, level_shift_ev: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:

@@ -97,3 +97,24 @@ def test_without_an_interdot_rate_a_cold_double_dot_can_stay_metastable():
     equilibrium = ci.mean_occupation(v)
     assert np.abs(released - equilibrium).max() < 0.02
     assert np.abs(stuck - equilibrium).max() > 0.5
+
+
+def test_the_propagator_keeps_a_slow_transition_s_digits():
+    """`propagator` is exp(W·dt) with every entry accurate relative to itself (ADR 0030): for a two-state
+    chain with a slow rate beside one 10⁹ times faster, the small transition probability
+    k_s/(k_s + k_f)·(1 − e^{−(k_s + k_f)t}) and the large one agree with the closed form within 10⁻¹³
+    relative, columns sum to one, and the result agrees with scipy's expm where expm keeps its digits."""
+    from scipy.linalg import expm
+
+    from phantom.readout.master_equation import propagator
+
+    slow, fast = 1e-3, 1e6
+    w = np.array([[-slow, fast], [slow, -fast]])  # w[j, i]: rate from i to j
+    for dt in (1e-9, 1e-6, 1e-3, 1.0, 1e3):
+        p = propagator(w, dt)
+        k = slow + fast
+        settled = -np.expm1(-k * dt)
+        np.testing.assert_allclose(p[1, 0], slow / k * settled, rtol=1e-13)
+        np.testing.assert_allclose(p[0, 1], fast / k * settled, rtol=1e-13)
+        np.testing.assert_allclose(p.sum(axis=0), 1.0, rtol=1e-15)
+        np.testing.assert_allclose(p, expm(w * dt), atol=1e-14)

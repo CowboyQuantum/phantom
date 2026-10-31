@@ -27,6 +27,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
+from scipy.optimize import brentq
 
 from phantom.constants import K_B_EV_PER_K
 from phantom.device import Device
@@ -36,8 +37,9 @@ from phantom.spin.exchange import detuning_noise_sigma_ev, symmetric_point_v
 from phantom.spin.gates import swap_gate_fidelity
 from phantom.spin.psb import best_read_point
 
-MODEL_VERSION = 2
-"""2: the coupling optimum inverts the runtime interdot coupling (#58), not the barrier's exponential."""
+MODEL_VERSION = 3
+"""2: the coupling optimum inverts the runtime interdot coupling (#58), not the barrier's exponential;
+3: by Brent's method along the barrier gate, through the shape grid (#59)."""
 
 
 @dataclass(frozen=True)
@@ -170,15 +172,24 @@ def lattice_optimum(device: Device, plungers: tuple[str, str] = ("P1", "P2")) ->
 
 def coupling_optimum(device: Device, t_target_ev: float) -> CouplingOptimum:
     """The barrier gate's carried voltage that gives interdot t = `t_target_ev` with every other gate at
-    the operating point: the runtime coupling (#58) inverted along that gate. NaN when the target is
-    at or above the coupling's ceiling, or when the device has none."""
+    the operating point: the runtime coupling (#58, along the shape grid #59) inverted along that gate
+    within ±1 V, where t does not decrease, by Brent's method on ln t. NaN when the target lies outside
+    the range t takes there, or when the device has no coupling."""
     c = device.runtime_coupling()
     j = device.gate_names.index(device.barrier_gate)
-    if c is None or not 0 < t_target_ev < c.t_max_ev or c.log_slopes_per_v[j] == 0:
+    if c is None:
         return CouplingOptimum(float(t_target_ev), float("nan"))
-    anchor = np.log(c.t_ref_ev) - np.log(max(c.t_max_ev - c.t_ref_ev, 1e-12 * c.t_max_ev))
-    target = np.log(t_target_ev) - np.log(c.t_max_ev - t_target_ev)
-    return CouplingOptimum(float(t_target_ev), float(c.v_ref_v[j] + (target - anchor) / c.log_slopes_per_v[j]))
+    v = np.array(c.v_ref_v)
+
+    def t_at(x: float) -> float:
+        v[j] = x
+        return float(c.tunnel_coupling_ev(v))
+
+    lo, hi = c.v_ref_v[j] - 1.0, c.v_ref_v[j] + 1.0
+    if not t_at(lo) < t_target_ev < t_at(hi):
+        return CouplingOptimum(float(t_target_ev), float("nan"))
+    root = brentq(lambda x: np.log(t_at(x)) - np.log(t_target_ev), lo, hi, xtol=1e-15, rtol=4 * np.finfo(float).eps, maxiter=200)
+    return CouplingOptimum(float(t_target_ev), float(root))
 
 
 # --- readout --------------------------------------------------------------------------------------

@@ -33,3 +33,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0027 | The qubit dots' rates follow the gates at runtime: compiled slopes of the WKB action at a fixed tunnelling level, capped at the attempt rate | Accepted |
 | 0028 | The sensor dot's charge is a process in time: a birth–death chain over its levels on the session clock, counted electrons per dwell, back-action on the dots against its mean | Accepted |
 | 0029 | The interdot coupling follows the gates and hybridizes the charge states: t from half the slopes of ln Γ_m, capped at ħω₀/π; eigenstates of the CI window in the statics and a Pauli master equation over them in the dynamics | Accepted |
+| 0030 | The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge | Accepted |
