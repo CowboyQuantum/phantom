@@ -128,10 +128,12 @@ def test_virtual_gates_decouple_the_dots(device: Device):
     np.testing.assert_allclose(lever @ m_raw_sensor[:, ip], np.diag(np.diag(lever[:, ip])), atol=1e-12)
 
 
-def test_coupling_optimum_inverts_the_compiled_barrier(device: Device):
-    b = device.runtime_barrier()
+def test_coupling_optimum_inverts_the_runtime_coupling(device: Device):
     c = coupling_optimum(device, 20e-6)
-    assert b.tunnel_coupling_ev(c.v_barrier_v) == pytest.approx(20e-6, rel=1e-9)
+    v = device.operating_point()
+    v[device.gate_names.index(device.barrier_gate)] = c.v_barrier_v
+    assert device.runtime_coupling().tunnel_coupling_ev(v) == pytest.approx(20e-6, rel=1e-9)
+    assert np.isnan(coupling_optimum(device, 2 * device.runtime_coupling().t_max_ev).v_barrier_v), "beyond the ceiling"
 
 
 def test_readout_optimum_matches_brute_force_over_detuning(device: Device):

@@ -20,15 +20,18 @@ def _tuned_point(dev: Device) -> np.ndarray:
     return v
 
 
-def _dot1_degeneracy(dev: Device, half_v: float = 0.03, n: int = 4001, v0: np.ndarray | None = None) -> np.ndarray:
+def _dot1_degeneracy(dev: Device, half_v: float = 0.03, n: int = 4001, v0: np.ndarray | None = None, n1_from: int | None = None) -> np.ndarray:
     """The programmed point along P1 nearest `v0` (the tuned point when None) where dot 1 is half-way
-    through a transition to its lead."""
+    through a transition to its lead; with `n1_from`, the transition from that many electrons to one
+    more, so a shifted point keeps following the same line."""
     v0 = _tuned_point(dev) if v0 is None else v0
     j = dev.gate_names.index("P1")
     grid = v0 + np.linspace(-half_v, half_v, n)[:, None] * np.eye(len(v0))[j]
     occ = dev.at(grid).n_mean
     frac = occ[:, 0] - np.floor(occ[:, 0])
-    flat2 = np.abs(occ[:, 1] - np.rint(occ[:, 1])) < 1e-6
+    flat2 = np.abs(occ[:, 1] - np.rint(occ[:, 1])) < 1e-2  # dot 2 settled, up to its interdot admixture (#58)
+    if n1_from is not None:
+        flat2 &= np.floor(occ[:, 0]) == n1_from
     return grid[int(np.argmin(np.where(flat2, np.abs(frac - 0.5), np.inf)))]
 
 
@@ -105,27 +108,33 @@ def session_hold_relaxation(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
 
 def session_closing_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
     """The dots' rates follow the gates (#53). Along B_L below the tuned point, `Device.at` gives Γ_L,
-    Γ_R and Γ_m. At dot 1's transition with B_L open and closed, P1 is swept up and then down at
-    `dwell_s` per point in `mean` mode (noise off): open, the two directions agree; closed, the charge
-    lags the gate both ways and the transition opens into a loop. Parked at the closed transition, a
-    `sampled` session telegraphs at the same dwell's scale, noise-free and with the device's noise."""
+    Γ_R and Γ_m. At dot 1's transition, P1 is swept up and then down at `dwell_s` per point in `mean`
+    mode (noise off) three ways: barriers open, the two directions agree; B_L closed alone, they agree
+    too, because dot 2's lead loads dot 1 through the interdot coupling at Γ_R(t/Δ)² (#58); B_L and B_M
+    closed, dot 1 is isolated, the charge lags the gate both ways and the transition opens into a loop.
+    Parked at the isolated transition, a `sampled` session telegraphs at the same dwell's scale,
+    noise-free and with the device's noise."""
     rates_sweep, p1_sweep, trace = p.sweep
     dwell = float(p.instance["dwell_s"])
-    closed_dv = float(p.instance["closed_b_l_v"])
+    alone = {"B_L": float(p.instance["closed_b_l_v"])}
+    isolated = {g: float(x) for g, x in p.instance["isolated_v"].items()}
     trace_dwell = float(p.instance["trace_dwell_s"])
     with ctx.compile():
         dev = _compiled(p)
         v0 = _tuned_point(dev)
         jb, jp = dev.gate_names.index("B_L"), dev.gate_names.index("P1")
         db = np.linspace(float(rates_sweep["from"]), float(rates_sweep["to"]), int(rates_sweep["points"]))
-        centres = {}
-        for label, dv in (("open", 0.0), ("closed", closed_dv)):
+        centres: dict[str, np.ndarray] = {}
+        for label, shift in (("open", {}), ("closed", alone), ("isolated", isolated)):
             v = v0.copy()
-            v[jb] += dv
-            centres[label] = _dot1_degeneracy(dev, v0=v)
+            for gate, dv in shift.items():
+                v[dev.gate_names.index(gate)] += dv
+            # the same transition of dot 1 each time: the barriers shift it along P1 (cross-capacitance)
+            n1 = None if not centres else int(np.floor(dev.at(centres["open"]).n_mean[0]))
+            centres[label] = _dot1_degeneracy(dev, half_v=0.06, n=12001, v0=v, n1_from=n1)
     n_p1, n_trace = int(p1_sweep["points"]), int(trace["points"])
     out: dict[str, np.ndarray] = {"v_b_l_v": v0[jb] + db, "dp1_v": np.linspace(-float(p1_sweep["half_span_v"]), float(p1_sweep["half_span_v"]), n_p1), "sample": np.arange(n_trace, dtype=float)}
-    with ctx.run(len(db) + 4 * n_p1 + 2 * n_trace):
+    with ctx.run(len(db) + 6 * n_p1 + 2 * n_trace):
         line = np.broadcast_to(v0, db.shape + v0.shape).copy()
         line[:, jb] += db
         s = dev.at(line)
@@ -139,12 +148,84 @@ def session_closing_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
             m_down = run.sense(up[::-1], dwell)
             out[f"n1_up_{label}"], out[f"n1_down_{label}"] = m_up.n_present[:, 0], m_down.n_present[::-1, 0]
             out[f"current_up_{label}_a"], out[f"current_down_{label}_a"] = m_up.current_a, m_down.current_a[::-1]
-        c = centres["closed"]
+        c = centres["isolated"]
         out["current_trace_a"] = dev.session(noise=False).sense(c, trace_dwell, samples=n_trace).current_a
         out["current_trace_noisy_a"] = dev.session().sense(c, trace_dwell, samples=n_trace).current_a
-        ctx.count(model_evals=len(db) + 4 * n_p1 + 2 * n_trace)
-    out["gamma_left_closed_hz"] = np.asarray(dev.at(centres["closed"]).gamma_left_hz)
-    out["gamma_left_open_hz"] = np.asarray(dev.at(centres["open"]).gamma_left_hz)
+        ctx.count(model_evals=len(db) + 6 * n_p1 + 2 * n_trace)
+    for label, c in centres.items():
+        s = dev.at(c)
+        out[f"gamma_left_{label}_hz"] = np.asarray(s.gamma_left_hz)
+        out[f"tunnel_coupling_{label}_ev"] = np.asarray(s.tunnel_coupling_ev)
+    return out
+
+
+def _interdot_centre(dev: Device, v0: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(the middle of the interdot segment of the honeycomb cell around `v0`, the detuning direction as
+    a unit vector in programmed volts): the CI energies depend on N − n_g alone, so the segment's middle
+    is floor(n_g) + ½(tp₁ + tp₂) in induced charge, reached with P1 and P2; along the direction n_g moves
+    by (½, −½), one electron from dot 2 to dot 1 at a fixed total."""
+    ci = dev.runtime_ci()
+    j = [dev.gate_names.index(g) for g in ("P1", "P2")]
+
+    def ng(v: np.ndarray) -> np.ndarray:
+        return ci.induced_charge(dev.effective_voltages(v))
+
+    jac = np.stack([ng(v0 + np.eye(len(v0))[k]) - ng(v0) for k in j], axis=1)  # electrons per volt, linear
+    tp1, tp2 = ci.triple_points_ng()
+    v = v0.copy()
+    v[j] += np.linalg.solve(jac, np.floor(ng(v0)) + 0.5 * (tp1 + tp2) - ng(v0))
+    d = np.zeros(len(v0))
+    d[j] = np.linalg.solve(jac, np.array([0.5, -0.5]))
+    return v, d / np.linalg.norm(d)
+
+
+def interdot_line_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The interdot coupling follows the gates and hybridizes the charge states (#58, ADR 0029). Along
+    B_M around the tuned point, `Device.at` gives t and Γ_m. Detuning cuts through the middle of the
+    interdot segment of the honeycomb cell at three B_M give dot 1's charge beside the pair's two-level
+    polarization ½(1 − ε/Ω·tanh(Ω/2kT)), Ω = √(ε² + 4t²), and the sensor current. A map gives dot 1's
+    charge over detuning and B_M, each row centred on its cell's segment."""
+    bm_sweep, cut, rows = p.sweep
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        jb = dev.gate_names.index("B_M")
+        ci = dev.runtime_ci()
+        kt = 8.617333262e-5 * dev.temperature_k
+        dbm = np.linspace(float(bm_sweep["from"]), float(bm_sweep["to"]), int(bm_sweep["points"]))
+        x = np.linspace(-float(cut["half_span_v"]), float(cut["half_span_v"]), int(cut["points"]))
+        cuts = [float(b) for b in cut["at"]]
+        rows_v = np.linspace(float(rows["from"]), float(rows["to"]), int(rows["points"]))
+        xm = np.linspace(-float(rows["half_span_v"]), float(rows["half_span_v"]), int(rows["columns"]))
+
+        def centred(db: float) -> tuple[np.ndarray, np.ndarray]:
+            v = v0.copy()
+            v[jb] += db
+            return _interdot_centre(dev, v)
+
+        cut_centres = [centred(b) for b in cuts]
+        row_centres = [centred(b) for b in rows_v]
+    n_points = len(dbm) + len(cuts) * len(x) + len(rows_v) * len(xm)
+    out: dict[str, np.ndarray] = {"v_b_m_v": v0[jb] + dbm, "x_v": x, "row_b_m_v": v0[jb] + rows_v, "xm_v": xm}
+    with ctx.run(n_points):
+        line = np.broadcast_to(v0, dbm.shape + v0.shape).copy()
+        line[:, jb] += dbm
+        s = dev.at(line)
+        out["tunnel_coupling_ev"], out["gamma_interdot_hz"] = s.tunnel_coupling_ev, s.gamma_interdot_hz
+        for k, (c, d) in enumerate(cut_centres):
+            s = dev.at(c + x[:, None] * d)
+            base = np.floor(s.n_mean[len(x) // 2]).astype(int)  # the pair shares one electron above it
+            a, b = np.array([base[0] + 1, base[1]]), np.array([base[0], base[1] + 1])
+            eps = np.array([float(np.diff(ci.state_energies_ev(v, np.stack([b, a])))[0]) for v in s.v_carried_v])
+            omega = np.sqrt(eps**2 + 4 * s.tunnel_coupling_ev**2)
+            out[f"n1_cut{k}"] = s.n_mean[:, 0] - base[0]
+            out[f"two_level_cut{k}"] = 0.5 * (1 - eps / omega * np.tanh(omega / (2 * kt)))
+            out[f"current_cut{k}_a"] = s.sensor_current_a
+            out[f"tunnel_coupling_cut{k}_ev"] = np.asarray(s.tunnel_coupling_ev[len(x) // 2])
+        grid = np.stack([c + xm[:, None] * d for c, d in row_centres])
+        n = dev.at(grid).n_mean
+        out["n1_map"] = (n[..., 0] - np.floor(n[:, len(xm) // 2, 0])[:, None]).T  # [detuning, B_M]
+        ctx.count(model_evals=n_points)
     return out
 
 

@@ -56,9 +56,10 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 from scipy.linalg import expm
 
+from phantom.charge.hybrid import boltzmann
 from phantom.constants import E_CHARGE_C, K_B_EV_PER_K
 from phantom.readout import sensor_dynamics
-from phantom.readout.master_equation import PROBABILITY_FLOOR, RateEquation
+from phantom.readout.master_equation import PROBABILITY_FLOOR, RateEquation, carried_states, project
 from phantom.readout.measure import SensedDoubleDot
 from phantom.spin.exchange import exchange_j_ev
 from phantom.spin.psb import psb_occupation
@@ -66,11 +67,13 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 4
+MODEL_VERSION = 5
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
 sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
-4: with dynamics, the sensor dot's charge is a process on the clock that acts back on the dots (#54)."""
+4: with dynamics, the sensor dot's charge is a process on the clock that acts back on the dots (#54).
+5: the interdot coupling follows every gate and hybridizes the charge states; the charge and its
+dynamics live on the eigenstates (#58, ADR 0029)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -167,7 +170,7 @@ def state_at(device: Device, v_programmed: np.ndarray, v_sd: float | np.ndarray 
         sensor_potential_v=sensor.potential(vc, n_mean),
         sensor_current_a=sensed.current_a(vc, bias),
         v_sd_v=bias,
-        tunnel_coupling_ev=hub.barrier.tunnel_coupling_ev(vc[..., hub.gate_names.index(hub.barrier_gate)]),
+        tunnel_coupling_ev=ci.tunnel_coupling_ev(vc),
         exchange_ev=exchange_j_ev(hub, vc),
         gamma_left_hz=gammas[..., 0],
         gamma_right_hz=gammas[..., 1],
@@ -221,6 +224,7 @@ class Session:
         self._t = 0.0
         self._v_last: np.ndarray | None = None
         self._states: np.ndarray | None = None
+        self._vectors: np.ndarray | None = None
         self._p: np.ndarray | None = None
 
     # --- the clock --------------------------------------------------------------------------------
@@ -239,41 +243,49 @@ class Session:
 
     def _start(self, v_carried: np.ndarray) -> None:
         """Equilibrium at the first point: the Boltzmann distribution (the rate equation's stationary
-        state, by detailed balance), or one state drawn from it."""
-        states, p = self._sensed.charge.occupation_probabilities(v_carried)
-        keep = p > PROBABILITY_FLOOR
-        states, p = states[keep], p[keep] / p[keep].sum()
+        state, by detailed balance), or one state drawn from it; with an interdot coupling, over the
+        eigenstates of the window (#58)."""
+        if self._sensed.charge.coupling is not None:
+            states = self._rates.window_states(v_carried)
+            e, vectors, _ = self._rates.eigen_rate_matrix(v_carried, states)
+            p = boltzmann(e, self._rates.kt_ev)
+        else:
+            states, p = self._sensed.charge.occupation_probabilities(v_carried)
+            keep = p > PROBABILITY_FLOOR
+            states, p = states[keep], p[keep] / p[keep].sum()
+            vectors = np.eye(len(p))
         if self.charge == "sampled":
             i = int(np.searchsorted(np.cumsum(p), self._charge_rng.random() * p.sum(), side="right"))
             i = min(i, len(p) - 1)
-            states, p = states[i : i + 1], np.ones(1)
-        self._states, self._p = np.asarray(states, dtype=int), p
+            vectors, p = vectors[:, i : i + 1], np.ones(1)
+        self._states, self._vectors, self._p = np.asarray(states, dtype=int), vectors, p
+
+    def _charge_now(self) -> np.ndarray:
+        """⟨N⟩ (2,) of the present distribution."""
+        return ((self._vectors * self._vectors) @ self._p) @ self._states
 
     def _propagate(self, v_carried: np.ndarray, dt_s: float, level_shift_ev: np.ndarray | None = None) -> np.ndarray:
         """Evolve the charge for `dt_s` at `v_carried` (gates,), each dot's levels shifted by
-        `level_shift_ev` (2,) per electron; return what enters the sensor (2,)."""
+        `level_shift_ev` (2,) per electron; return what enters the sensor (2,). The distribution lives on
+        the eigenstates of the window (the charge states without a coupling) and is projected onto the
+        new ones when the gates move (`readout.master_equation.project`, #58)."""
         if self._states is None:
             self._start(v_carried)
-        states, p = self._states, self._p
-        keep = states[p > PROBABILITY_FLOOR]
-        active = np.unique(np.concatenate([self._rates.window_states(v_carried), keep], axis=0), axis=0)
-        index = {tuple(s): i for i, s in enumerate(active.tolist())}
-        q = np.zeros(len(active))
-        for s, prob in zip(states.tolist(), p, strict=True):
-            if prob > PROBABILITY_FLOOR:
-                q[index[tuple(s)]] += prob
-        q /= q.sum()
+        states, vectors, p = self._states, self._vectors, self._p
+        active = np.unique(np.concatenate([self._rates.window_states(v_carried), carried_states(states, vectors, p)], axis=0), axis=0)
+        _, c, w = self._rates.eigen_rate_matrix(v_carried, active, level_shift_ev)
+        q = project(states, vectors, p, active, c)
         if dt_s > 0:
-            _, w = self._rates.rate_matrix(v_carried, active, level_shift_ev)
             q = np.maximum(expm(w * dt_s) @ q, 0.0)
             q /= q.sum()
+        charge = (c * c).T @ active  # each eigenstate's ⟨N⟩
         if self.charge == "sampled":
             i = int(np.searchsorted(np.cumsum(q), self._charge_rng.random(), side="right"))
             i = min(i, len(q) - 1)
-            self._states, self._p = active[i : i + 1], np.ones(1)
-            return active[i].astype(float)
-        self._states, self._p = active, q
-        return q @ active
+            self._states, self._vectors, self._p = active, c[:, i : i + 1], np.ones(1)
+            return charge[i]
+        self._states, self._vectors, self._p = active, c, q
+        return q @ charge
 
     # --- the sensor dot's charge (ADR 0028) -----------------------------------------------------------
 
@@ -285,8 +297,7 @@ class Session:
         if not self._sensor_dynamics or self._m_states is None or self._states is None:
             return None
         sensor = self._sensed.sensor
-        n = self._p @ self._states
-        phi = float(sensor.potential(v_carried, n, delta_phi_v))
+        phi = float(sensor.potential(v_carried, self._charge_now(), delta_phi_v))
         lo, hi = sensor_dynamics.window_states(sensor, phi, self._bias_last)
         c = sensor_dynamics.chain(sensor, phi, v_carried, self._bias_last, lo, hi)
         m_bar = float(sensor_dynamics.stationary(c) @ c.states)
@@ -336,6 +347,12 @@ class Session:
         ci = self._sensed.charge
         if self.charge == "mean":
             return ci.mean_occupation(v_carried)
+        if ci.coupling is not None:  # one eigenstate per point, read at its ⟨N⟩ (#58)
+            eig = ci.eigenstates(v_carried)
+            p = boltzmann(eig.energies_ev, self._rates.kt_ev)
+            u = self._charge_rng.random(len(v_carried))
+            idx = np.minimum((np.cumsum(p, axis=-1) <= u[:, None]).sum(axis=-1), p.shape[-1] - 1)
+            return np.take_along_axis(eig.charge(), idx[:, None, None], axis=-2)[:, 0, :]
         states, p = ci.occupation_probabilities(v_carried)
         u = self._charge_rng.random(len(v_carried))
         idx = (np.cumsum(p, axis=-1) <= u[:, None]).sum(axis=-1)

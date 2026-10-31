@@ -1,7 +1,9 @@
 """P0 for the qubit dots' gate-dependent rates (#53, ADR 0027): the runtime rates against the compile tier
 at and near the operating point, each barrier gate controlling its own rate, detailed balance far from the
-anchor, and a session whose dynamics telegraph and latch once a barrier is closed and reduce to independent
-Boltzmann draws when every rate is fast. Analytic limits and invariants only."""
+anchor, and a session whose dynamics telegraph and latch once dot 1 is isolated and reduce to independent
+Boltzmann draws when every rate is fast. With the interdot coupling (#58) dot 1 is isolated only when B_M
+closes too: with B_L closed alone it loads through dot 2's lead at Γ_R (t/Δ)². Analytic limits and
+invariants only."""
 
 import math
 
@@ -14,6 +16,10 @@ from phantom.electrostatics.dots import DerivedDot, barrier_action
 
 CLOSED_B_L_V = -0.1
 """B_L below the programmed point that slows the left lead into the 10 kHz range on the reference device."""
+CLOSED = {"B_L": -0.12, "B_M": -0.05}
+"""B_L and B_M below the programmed point: dot 1 isolated, its lead in the 10 kHz range and t below
+1 µeV, so nothing reaches it through dot 2 (#58). Closing B_M also opens the left lead a little (#48),
+so B_L closes further than `CLOSED_B_L_V`."""
 
 
 @pytest.fixture(scope="module")
@@ -51,7 +57,7 @@ def _dot1_degeneracy(device: Device, v0: np.ndarray) -> np.ndarray:
     grid = v0 + np.linspace(-0.04, 0.04, 4001)[:, None] * np.eye(len(v0))[j]
     n = device.at(grid).n_mean
     frac = n[:, 0] - np.floor(n[:, 0])
-    flat2 = np.abs(n[:, 1] - np.rint(n[:, 1])) < 1e-6
+    flat2 = np.abs(n[:, 1] - np.rint(n[:, 1])) < 1e-2  # dot 2 settled, up to its interdot admixture (#58)
     k = int(np.argmin(np.where(flat2, np.abs(frac - 0.5), np.inf)))
     assert abs(frac[k] - 0.5) < 0.05
     return grid[k]
@@ -119,20 +125,49 @@ def test_detailed_balance_holds_far_from_the_anchor(device: Device):
     assert np.abs(w @ boltzmann).max() <= 1e-9 * np.abs(w).max() * boltzmann.max()
 
 
+def _pair_switching_hz(device: Device, v: np.ndarray) -> float:
+    """The total rate between the two lowest eigenstates at programmed `v`, Hz."""
+    rates = device.runtime_rates()
+    vc = device.effective_voltages(v)
+    e, _, w = rates.eigen_rate_matrix(vc, rates.window_states(vc))
+    a, b = np.argsort(e)[:2]
+    return float(w[a, b] + w[b, a])
+
+
 @pytest.mark.parametrize("gamma_dwell", [0.02, 0.5])
-def test_a_closed_barrier_gives_the_two_state_switching_statistics(device: Device, gamma_dwell: float):
-    """B_L closed puts Γ_L in the 10 kHz range at dot 1's transition: the charge is a two-state Markov
-    process with total rate Γ_L, changing between samples with probability 2p(1−p)(1 − e^{−Γ_L·dwell})."""
-    v = _dot1_degeneracy(device, _point(device, B_L=CLOSED_B_L_V))
+def test_an_isolated_dot_gives_the_two_state_switching_statistics(device: Device, gamma_dwell: float):
+    """B_L and B_M closed put Γ_L in the 10 kHz range at dot 1's transition and leave no path through
+    dot 2: the charge is a two-state Markov process with total rate Γ_L, changing between samples with
+    probability 2p(1−p)(1 − e^{−Γ_L·dwell})."""
+    v = _dot1_degeneracy(device, _point(device, **CLOSED))
     s = device.at(v)
     gamma = float(s.gamma_left_hz)
-    assert 1e3 < gamma < 1e5 and gamma < 1e-2 * float(s.gamma_interdot_hz)
-    n = device.session(noise=False).sense(v, gamma_dwell / gamma, samples=6000).n_present[:, 0]
+    assert 1e3 < gamma < 1e5
+    assert _pair_switching_hz(device, v) == pytest.approx(gamma, rel=0.02), "nothing but the left lead"
+    n = np.rint(device.session(noise=False).sense(v, gamma_dwell / gamma, samples=6000).n_present[:, 0])
     p = float(np.mean(n > n.min()))
     changes = float(np.mean(n[1:] != n[:-1]))
     expected = 2 * p * (1 - p) * (1 - math.exp(-gamma_dwell))
     assert set(np.unique(n)) <= {n.min(), n.min() + 1}
     assert abs(changes - expected) < 6 * math.sqrt(expected / 6000) + 0.002
+
+
+def test_with_b_l_closed_alone_dot_1_loads_through_dot_2(device: Device):
+    """With B_L closed and B_M open, dot 2's lead loads dot 1 in second order in t, as elastic
+    cotunnelling: the electron-like path through (N₁, N₂+1), Δ above (N₁+1, N₂), and the hole-like one
+    through (N₁+1, N₂−1), Δ' above (N₁, N₂), add in amplitude. The pair switches at
+    Γ_L + Γ_R t²(1/Δ + 1/Δ')², orders of magnitude faster than Γ_L alone (#58)."""
+    v = _dot1_degeneracy(device, _point(device, B_L=CLOSED_B_L_V))
+    s = device.at(v)
+    vc = s.v_carried_v
+    n1, n2 = (int(x) for x in np.floor(s.n_mean))
+    u = device.runtime_ci().state_energies_ev(vc, np.array([[n1, n2], [n1 + 1, n2], [n1, n2 + 1], [n1 + 1, n2 - 1]]))
+    t = float(s.tunnel_coupling_ev)
+    delta, delta_h = float(u[2] - u[1]), float(u[3] - u[0])
+    assert min(delta, delta_h) > 50 * t
+    expected = float(s.gamma_left_hz) + float(s.gamma_right_hz) * t**2 * (1 / delta + 1 / delta_h) ** 2
+    assert expected > 30 * float(s.gamma_left_hz)
+    assert _pair_switching_hz(device, v) == pytest.approx(expected, rel=0.02)
 
 
 def test_with_every_rate_fast_the_session_reduces_to_independent_boltzmann_draws(device: Device):
@@ -142,7 +177,7 @@ def test_with_every_rate_fast_the_session_reduces_to_independent_boltzmann_draws
     p = float(s.n_mean[0] - np.floor(s.n_mean[0]))
     for dynamics in (True, False):
         n = device.session(noise=False, dynamics=dynamics).sense(v, 50.0 / slowest, samples=6000).n_present[:, 0]
-        upper = n > np.floor(s.n_mean[0])
+        upper = np.rint(n) > np.floor(s.n_mean[0])
         assert abs(upper.mean() - p) < 5 * math.sqrt(p * (1 - p) / 6000)
         changes = float(np.mean(upper[1:] != upper[:-1]))
         assert abs(changes - 2 * p * (1 - p)) < 6 * math.sqrt(2 * p * (1 - p) / 6000), "uncorrelated samples"
@@ -155,10 +190,11 @@ def _crossing_v(p1: np.ndarray, n1: np.ndarray, level: float) -> float:
 
 @pytest.mark.parametrize("closed", [False, True], ids=["open", "closed"])
 def test_a_closed_barrier_latches_the_charge_along_a_sweep(device: Device, closed: bool):
-    """A P1 sweep across dot 1's transition at 3 µs per point, up then down, in `mean` mode: with B_L
-    closed (Γ_L about 10⁴ Hz there) the charge lags the gate and the transition opens into a hysteresis
-    loop a few mV wide; with it open (Γ_L about 10¹¹ Hz) the two directions agree."""
-    centre = _dot1_degeneracy(device, _point(device, B_L=CLOSED_B_L_V if closed else 0.0))
+    """A P1 sweep across dot 1's transition at 3 µs per point, up then down, in `mean` mode: with dot 1
+    isolated (B_L and B_M closed, Γ_L about 10⁴ Hz there) the charge lags the gate and the transition
+    opens into a hysteresis loop a few mV wide; with the barriers open (Γ_L about 10¹¹ Hz) the two
+    directions agree."""
+    centre = _dot1_degeneracy(device, _point(device, **(CLOSED if closed else {})))
     j = device.gate_names.index("P1")
     p1 = centre[j] + np.linspace(-0.01, 0.01, 201)
     up = np.broadcast_to(centre, p1.shape + centre.shape).copy()

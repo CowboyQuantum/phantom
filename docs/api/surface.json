@@ -408,6 +408,10 @@
      "kind": "method",
      "signature": "(self) -> 'ConstantInteractionParams'"
     },
+    "runtime_coupling": {
+     "kind": "method",
+     "signature": "(self) -> 'InterdotCoupling | None'"
+    },
     "runtime_hubbard": {
      "kind": "method",
      "signature": "(self) -> 'HubbardParams'"
@@ -1285,7 +1289,7 @@
   "__version__": {
    "kind": "value",
    "type": "str",
-   "value": "0.3.0"
+   "value": "0.4.0"
   },
   "compile_device": {
    "kind": "function",
