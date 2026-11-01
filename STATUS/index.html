@@ -259,24 +259,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Status
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -293,69 +275,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -570,58 +489,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#done-this-session" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done this session
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next action
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -641,18 +508,19 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>), <code>v0.3.0</code> (on <code>6920f19</code>) and <code>v0.4.0</code>
-(on <code>ae8d5db</code>). 0.5.0 (#70, ADR 0034) is merged on <code>main</code> at <code>cf9e1b2</code>, untagged. Steps 1–7 are built; their
-open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
-<strong>Branch:</strong> <code>issue-72/puddles</code> (#72) from <code>main</code> at <code>cf9e1b2</code>; its pull request #73 is open for review. It carries
-0.6.0 (untagged, breaking: <code>CHANGELOG.md</code>).
+<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>), <code>v0.3.0</code> (on <code>6920f19</code>), <code>v0.4.0</code>
+(on <code>ae8d5db</code>), <code>v0.5.0</code> (on <code>cf9e1b2</code>, #70, ADR 0034) and <code>v0.6.0</code> (on <code>9b1c059</code>, #72, ADR 0035). Steps 1–7
+are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32,</p>
+<h1 id="34-and-37">34 and #37.</h1>
+<p><strong>Branch:</strong> <code>issue-72/release-tags</code> (docs only: the changelog headings name the tags, and this file). <code>main</code> is
+at <code>9b1c059</code>, the merge of #73.
 <strong>Last session:</strong> 2026-11-01, two pieces of work for the owner.
 - <strong>#70 (merged as #71, ADR 0034, 0.5.0):</strong> the interdot barrier has one transmission, Kemble's of its top,
   shared by t, Γ_m and g; the gates' action on the top is screened by two placeholders (0.4 for B_M, times
   0.3 for every other gate); the top continues past the shape grid's merge node. The honeycomb-to-superdot
   transition spans 64 mV of B_M (was 30) and 126 mV of the plunger diagonal (was 15); a far-open B_M
   leaves one dot at every occupancy (#69 closed with it).
-- <strong>#72 (this branch, <a href="../adr/0035-the-dots-grow-with-their-occupancy/">ADR 0035</a>, 0.6.0):</strong> the owner then
+- <strong>#72 (merged as #73, <a href="../adr/0035-the-dots-grow-with-their-occupancy/">ADR 0035</a>, 0.6.0):</strong> the owner then
   asked for the dots' size against their occupancy, so that the triple-point width grows first at the
   highest cells and moves toward (1,1) as B_M opens. Each dot is now a classical puddle with R ∝ N^(1/3)
   anchored at the compiled dot (<code>charge.puddle</code>): its capacitances scale as √(n/N_ref) with the
@@ -672,19 +540,25 @@ open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #2
 <li>Tests: <code>tests/test_interdot_barrier.py</code> (6) and <code>tests/test_puddles.py</code> (6); 222 tests. Protocols:
   <code>honeycomb-vs-barrier</code> and <code>interdot-line-vs-barrier</code> at the new B_M offsets, new <code>honeycomb-vs-occupancy</code>;
   77 protocols within budget, all unsigned; the stored gallery device and <code>measured.json</code> re-recorded.</li>
-<li>Reference entry <code>shikin1991-parabolic-dot-classical-density</code> (<code>proposed</code>; the citation was checked against
-  the journal's listing, the density and the N ∝ R³ relation must be confirmed from the paper).</li>
+<li>
+<p>Reference entry <code>shikin1991-parabolic-dot-classical-density</code> (<code>proposed</code>; the citation was checked against
+  the journal's listing, the density and the N ∝ R³ relation must be confirmed from the paper).</p>
+</li>
+<li>
+<p><strong>Releases.</strong> The owner asked for the tags at the end of the day: <code>v0.5.0</code> is an annotated tag on
+  <code>cf9e1b2</code> and <code>v0.6.0</code> on <code>9b1c059</code>, each after every CI job passed there (the first Windows gallery
+  run of #73 failed on wall time, not agreement; the session protocols' per-sample cost was cut by
+  memoising the geometry and the barrier top), each with a GitHub Release carrying its changelog entry,
+  and noted on #69, #70 and #72.</p>
+</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>The pull request #73 for #72: CI's ubuntu run and the Windows gallery comparison (new closed forms: a square
-  root of the induced charge, scaled capacitances, a linear interpolation on the compiled cut), and the
-  preview at <code>/pr-&lt;n&gt;/</code>.</li>
+<li>This branch's pull request: the changelog headings name the tags, and this file.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>The owner reviews #72's pull request (ADR 0035, <code>honeycomb-vs-occupancy</code> in its preview, the anchor at the
-compiled dot), merges it, decides whether to tag <code>v0.6.0</code> (or <code>v0.5.0</code> first, on <code>cf9e1b2</code>; ADR 0025) and
-when qdt (CowboyQuantum/qdt #172) moves its pin. qdt's adapter must handle device format 7,
+<p>qdt moves its pin to <code>v0.6.0</code> when the owner decides; the handoff is CowboyQuantum/qdt #172 (from <code>v0.4.0</code>
+the adapter crosses 0.5.0 and 0.6.0 together). qdt's adapter must handle device format 7,
 <code>State.interdot_barrier_top_ev</code> and <code>puddle_radii_nm</code>, the merged region at about B_M +0.11 V from the
 tuned point, and charge maps whose period shrinks toward high occupancy.</p>
 <p>Open choices for later:
