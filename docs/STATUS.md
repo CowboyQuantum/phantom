@@ -2,18 +2,19 @@
 
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
-**Current step:** none in flight. Released: `v0.2.0` (on `f72daac`), `v0.3.0` (on `6920f19`) and `v0.4.0`
-(on `ae8d5db`). 0.5.0 (#70, ADR 0034) is merged on `main` at `cf9e1b2`, untagged. Steps 1–7 are built; their
-open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
-**Branch:** `issue-72/puddles` (#72) from `main` at `cf9e1b2`; its pull request #73 is open for review. It carries
-0.6.0 (untagged, breaking: `CHANGELOG.md`).
+**Current step:** none in flight. Released: `v0.2.0` (on `f72daac`), `v0.3.0` (on `6920f19`), `v0.4.0`
+(on `ae8d5db`), `v0.5.0` (on `cf9e1b2`, #70, ADR 0034) and `v0.6.0` (on `9b1c059`, #72, ADR 0035). Steps 1–7
+are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32,
+#34 and #37.
+**Branch:** `issue-72/release-tags` (docs only: the changelog headings name the tags, and this file). `main` is
+at `9b1c059`, the merge of #73.
 **Last session:** 2026-11-01, two pieces of work for the owner.
 - **#70 (merged as #71, ADR 0034, 0.5.0):** the interdot barrier has one transmission, Kemble's of its top,
   shared by t, Γ_m and g; the gates' action on the top is screened by two placeholders (0.4 for B_M, times
   0.3 for every other gate); the top continues past the shape grid's merge node. The honeycomb-to-superdot
   transition spans 64 mV of B_M (was 30) and 126 mV of the plunger diagonal (was 15); a far-open B_M
   leaves one dot at every occupancy (#69 closed with it).
-- **#72 (this branch, [ADR 0035](adr/0035-the-dots-grow-with-their-occupancy.md), 0.6.0):** the owner then
+- **#72 (merged as #73, [ADR 0035](adr/0035-the-dots-grow-with-their-occupancy.md), 0.6.0):** the owner then
   asked for the dots' size against their occupancy, so that the triple-point width grows first at the
   highest cells and moves toward (1,1) as B_M opens. Each dot is now a classical puddle with R ∝ N^(1/3)
   anchored at the compiled dot (`charge.puddle`): its capacitances scale as √(n/N_ref) with the
@@ -36,15 +37,18 @@ open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #2
 - Reference entry `shikin1991-parabolic-dot-classical-density` (`proposed`; the citation was checked against
   the journal's listing, the density and the N ∝ R³ relation must be confirmed from the paper).
 
+- **Releases.** The owner asked for the tags at the end of the day: `v0.5.0` is an annotated tag on
+  `cf9e1b2` and `v0.6.0` on `9b1c059`, each after every CI job passed there (the first Windows gallery
+  run of #73 failed on wall time, not agreement; the session protocols' per-sample cost was cut by
+  memoising the geometry and the barrier top), each with a GitHub Release carrying its changelog entry,
+  and noted on #69, #70 and #72.
+
 ## In flight
-- The pull request #73 for #72: CI's ubuntu run and the Windows gallery comparison (new closed forms: a square
-  root of the induced charge, scaled capacitances, a linear interpolation on the compiled cut), and the
-  preview at `/pr-<n>/`.
+- This branch's pull request: the changelog headings name the tags, and this file.
 
 ## Next action
-The owner reviews #72's pull request (ADR 0035, `honeycomb-vs-occupancy` in its preview, the anchor at the
-compiled dot), merges it, decides whether to tag `v0.6.0` (or `v0.5.0` first, on `cf9e1b2`; ADR 0025) and
-when qdt (CowboyQuantum/qdt #172) moves its pin. qdt's adapter must handle device format 7,
+qdt moves its pin to `v0.6.0` when the owner decides; the handoff is CowboyQuantum/qdt #172 (from `v0.4.0`
+the adapter crosses 0.5.0 and 0.6.0 together). qdt's adapter must handle device format 7,
 `State.interdot_barrier_top_ev` and `puddle_radii_nm`, the merged region at about B_M +0.11 V from the
 tuned point, and charge maps whose period shrinks toward high occupancy.
 

@@ -6,7 +6,7 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.6.0 — the dots grow with their occupancy: a grid near (1,1), hexagons, a superdot at high occupancy (#72)
+## 0.6.0 — the dots grow with their occupancy: a grid near (1,1), hexagons, a superdot at high occupancy (#72; `v0.6.0` at `9b1c059`)
 
 Each dot is a classical puddle whose radius scales as N^(1/3) with its electrons, anchored at the
 compiled dot (ADR 0035). Its capacitances follow its gate-induced charge, so the addition energy falls
@@ -47,7 +47,7 @@ device from (26,29) at 0.3 V to the first electrons at 1.0 V.
   `charge.hybrid` 4, `readout.rates` 3, `readout.master_equation` 4, `compile.device` 8, `device` 9,
   `device.session` 10.
 
-## 0.5.0 — the interdot barrier has one transmission: a wider honeycomb-to-superdot transition, and B_M acts past the merge (#70, #69)
+## 0.5.0 — the interdot barrier has one transmission: a wider honeycomb-to-superdot transition, and B_M acts past the merge (#70, #69; `v0.5.0` at `cf9e1b2`)
 
 The barrier between the dots has one transmission, Kemble's of its top at the gates, and the tunnel
 coupling t, the interdot rate Γ_m and the conductance g all follow it (ADR 0034). The top is moved by
