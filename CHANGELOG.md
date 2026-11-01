@@ -6,6 +6,44 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
+## 0.6.0 — the dots grow with their occupancy: a grid near (1,1), hexagons, a superdot at high occupancy (#72)
+
+Each dot is a classical puddle whose radius scales as N^(1/3) with its electrons, anchored at the
+compiled dot (ADR 0035). Its capacitances follow its gate-induced charge, so the addition energy falls
+as N^(−1/3) and the geometric triple-point splitting grows with occupancy, and the interdot barrier is
+seen from the puddles' edges, so at fixed gates it is tens of meV higher at the first electrons than at
+the compiled occupancy. The superdot front now moves across occupancy with B_M: on the reference
+device from (26,29) at 0.3 V to the first electrons at 1.0 V.
+
+### Breaking
+- Every quantity of the runtime CI model away from the operating point changes with the occupancy:
+  the capacitances and the induced charge scale as √(n/N_ref) per dot (the mutual capacitance as the
+  product), so `State.addition_energies_ev` falls from 32 meV at (1,1) to 6 meV at (28,35) on the
+  reference device (fixed at 9.4 before), the honeycomb's period shrinks toward high occupancy (the
+  classical N ∝ φ^(3/2)), `State.n_mean` and every charge map move away from the operating point, and
+  the geometric splitting grows from 0.06 at (1,1) to 0.16 at the programmed point.
+- `State.tunnel_coupling_ev`, `gamma_interdot_hz`, `interdot_conductance`, `interdot_splitting` and
+  `interdot_barrier_top_ev` see the barrier from the puddles' edges: at the programmed gates the top is
+  42 meV above the level at (1,1) against 4.4 meV at (23,28), and t is 10⁻¹⁰ µeV there against 56.
+- `DEVICE_FORMAT_VERSION` 7: `Device.puddle` (the anchor occupancy, the puddle radii, the compiled cut).
+  Files from 0.5.0 do not load; recompile them from their seed. The stored gallery device is re-recorded.
+- At the operating point nothing changes, bit for bit.
+
+### Added
+- `charge.puddle`: `PuddleGrowth` (the scale, the scaled capacitances, the radii, the barrier shift).
+- `ConstantInteractionParams.puddle`, `occupancy_scale`; `InterdotBarrier.puddle` and a `scale` argument
+  on its methods and on `InterdotSplitting`, `InterdotCoupling.tunnel_coupling_ev` and
+  `GateRates.rates_hz`.
+- `State.puddle_radii_nm`; `CompileParams.puddles` (True; False keeps the dots at their compiled size).
+- `compile.device.interdot_cut`, `puddle_turning_points_nm`.
+- Protocol `honeycomb-vs-occupancy`; reference entry `shikin1991-parabolic-dot-classical-density`
+  (`proposed`). Tests: `tests/test_puddles.py`, 6 P0.
+
+### Changed
+- Model versions: `charge.puddle` 1, `charge.ci` 3, `charge.barrier` 2, `charge.splitting` 3,
+  `charge.hybrid` 4, `readout.rates` 3, `readout.master_equation` 4, `compile.device` 8, `device` 9,
+  `device.session` 10.
+
 ## 0.5.0 — the interdot barrier has one transmission: a wider honeycomb-to-superdot transition, and B_M acts past the merge (#70, #69)
 
 The barrier between the dots has one transmission, Kemble's of its top at the gates, and the tunnel
