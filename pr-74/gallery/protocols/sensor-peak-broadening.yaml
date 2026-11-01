@@ -1,0 +1,26 @@
+id: sensor-peak-broadening
+name: A sensor Coulomb peak as its barriers open
+step: 7
+description: On the seed-2 compiled device, one sensor Coulomb peak against the sensor plunger, centred on the peak, with both sensor barriers moved together by -20, -10, 0, +10 and +20 mV from the compiled operating point. Closed barriers give a low peak whose width is thermal (3.5 kT); opening them raises it until the lifetime width hbar(Gamma_S + Gamma_D) passes kT, after which the peak broadens and its height stops growing, bounded by the conductance quantum e^2/h for symmetric rates (the Breit-Wigner level convolved with the Fermi window, readout.broadening). Per offset, the linear-response peak conductance in units of e^2/h and the ratio of the lifetime to the thermal width (ADR 0026).
+layers: [readout, device, compile]
+runner: step7c:sensor_peak_broadening
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  operating_point_v: {B_L: 0.15, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.15, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  temperature_k: 0.15
+  severity: 1.0
+  seed: 2
+  barrier_offsets_v: [-0.02, -0.01, 0.0, 0.01, 0.02]
+sweep:
+  - {gate: SG, from: -0.004, to: 0.004, points: 801, unit: V, relative_to: each_peak}
+readout: {channel: sensor_conductance, unit: A}
+render:
+  panels:
+    - {kind: line, x: sg_from_peak_v, y: [current_offset0_a, current_offset1_a, current_offset2_a, current_offset3_a, current_offset4_a], xlabel: "SG from the peak (V)", ylabel: "sensor current (A)", title: "the peak as both barriers open"}
+    - {kind: line, x: barrier_offset_v, y: [peak_conductance_quanta, lifetime_over_thermal_width], markers: true, log_y: true, xlabel: "barrier offset (V)", ylabel: "G/(e^2/h); lifetime/thermal width", title: "height and broadening"}
+budget:
+  compile: {wall_s: 2.0, solver_calls: 0}
+  run: {wall_ms_per_point: 0.1, points: 4005, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

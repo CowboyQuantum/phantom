@@ -1,0 +1,702 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>0032 — The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden & Halperin's f(g), an effective interdot capacitance in the CI model - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#0032-the-interdot-conductance-sets-the-triple-point-splitting-kembles-transmission-of-the-interdot-barrier-golden-halperins-fg-an-effective-interdot-capacitance-in-the-ci-model" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0032 — The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden &amp; Halperin's f(g), an effective interdot capacitance in the CI model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="0032-the-interdot-conductance-sets-the-triple-point-splitting-kembles-transmission-of-the-interdot-barrier-golden-halperins-fg-an-effective-interdot-capacitance-in-the-ci-model">0032 — The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden &amp; Halperin's f(g), an effective interdot capacitance in the CI model</h1>
+<p><strong>Status:</strong> Accepted
+<strong>Date:</strong> 2026-10-31
+<strong>Step:</strong> 8 follow-up (issue #66; after ADR 0029–0031)</p>
+<h2 id="context">Context</h2>
+<p>After #58–#60 the owner still did not see the behaviour they were tuning for: "if I increase the barrier
+gate between plunger gates, the interdot width (in anti-detuning) should get bigger until I form a
+superdot underneath the barrier gate. The opposite should also be true, a lower barrier gate voltage should
+shrink the interdot width until all I see is a grid" (2026-10-31). That width is the triple points'
+separation. On the reference device, the fractional splitting f = 2C_m/(C_t + C_m) moved only from 0.14
+to 0.16 over ±0.2 V of B_M:</p>
+<ul>
+<li><strong>Geometry.</strong> C_m came from the sphere formula of ADR 0013, which B_M changed by about 0.7 aF.</li>
+<li><strong>Hybridization.</strong> ADR 0029's coupling rounds the interdot line but shifts the triple points by at most
+  2t/E_add ≈ 0.15.</li>
+<li><strong>No superdot.</strong> A single tunnelling level cannot produce the merged dot at all.</li>
+</ul>
+<p>In double-dot transport the splitting follows the interdot conductance through quantum charge
+fluctuations (Waugh et al. 1995; review: van der Wiel et al. 2003, the honeycomb from a grid to one dot).
+Golden &amp; Halperin give f(g) for N_ch channels of conductance g each, with a weak and a strong limit that
+do not interpolate reliably for N_ch = 2.</p>
+<p>The owner chose (2026-10-31):
+- a conductance-driven splitting entering the CI model as an effective interdot capacitance;
+- a smooth interpolation between the published limits;
+- folding it into 0.4.0.</p>
+<p>Four forces shaped the design:</p>
+<ul>
+<li><strong>Continuity to the merge.</strong> The conductance has to reach 1 continuously as the dots merge. WKB's
+  e^(−2S) stops at S = 0, and the rates' logistic halves it.</li>
+<li><strong>Bit-exact limit.</strong> Without conductance nothing may change.</li>
+<li><strong>Gate charge.</strong> The tunnelling relaxes charge quantization. It must not move the gates' induced charge.</li>
+<li><strong>References.</strong> Every published curve enters as a <code>proposed</code> reference entry (ADR 0007).</li>
+</ul>
+<h2 id="decision">Decision</h2>
+<p>The interdot conductance per channel is Kemble's transmission of the interdot barrier, and Golden &amp;
+Halperin's f(g) sets an effective interdot capacitance in the CI model. Specifically:</p>
+<ul>
+<li><strong>The barrier.</strong></li>
+<li>Compile records the top ΔU of the interdot barrier above its fixed tunnelling level (ADR 0027),
+    negative below it: the highest U on the straight cut between the dots, sampled bilinearly.</li>
+<li>It also records ΔU's slopes against every gate, with the dots held, and its curvature ħω_b (a
+    parabola fitted ±4 nm around the top). The shape grid gains a <code>barrier_top_ev</code> column, the top with
+    the dots moved.</li>
+<li>Device fields <code>interdot_barrier_top_ev</code>, <code>interdot_barrier_top_slopes_ev_per_v</code> and
+    <code>interdot_barrier_hbar_omega_ev</code>; <code>DEVICE_FORMAT_VERSION</code> 5.</li>
+<li><strong>The conductance.</strong> g = 1/(1 + exp(2πΔU/ħω_b)) (Kemble), with N_ch = 2 (spin). It is ½ when the
+  level reaches the top, and it goes continuously towards 1 as the barrier sinks to the merge.</li>
+<li><strong>The splitting.</strong></li>
+<li>f_GH(g) joins (2 ln 2/π²)·N_ch·g (g ≤ 0.15) and 1 + (16e^γ/π³)(1 − g)·ln(1 − g) (g ≥ 0.85) with a
+    monotone cubic (<code>calibration: none</code>).</li>
+<li>The total is f = f_C + (F_max − f_C)·f_GH(g), with f_C = 2C_m/(C_t + C_m) of the geometric
+    capacitances and F_max = 0.98.</li>
+<li><strong>The CI model.</strong></li>
+<li><code>ConstantInteractionParams.splitting</code> adds ΔC_m·[[1, −1], [−1, 1]] to the capacitances in the
+    energies, with ΔC_m = (F_max − f_C)·f_GH·(C_t + C_m)/(2(1 − f)). That is exactly zero at g = 0.</li>
+<li>The gate-induced charge keeps the geometric capacitances.</li>
+<li>The CI model's measured splitting along the symmetric axis is f (P0).</li>
+<li><strong>The consumer surface.</strong> <code>State.interdot_conductance</code> and <code>State.interdot_splitting</code>;
+  <code>Device.runtime_splitting()</code>.</li>
+<li><strong>References.</strong> <code>golden1996-peak-splitting</code>, <code>waugh1995-tunable-coupling</code> and <code>kemble1935-wkb-barrier</code>
+  as <code>proposed</code> entries, and the honeycomb evolution as an item of <code>vanderwiel2003-double-dot-transport</code>.</li>
+<li><strong>Release.</strong> 0.4.0. Model versions: <code>charge.splitting</code> 1, <code>charge.shape</code> 2, <code>compile.device</code> 6,
+  <code>device</code> 7, <code>device.session</code> 8.</li>
+</ul>
+<h2 id="consequences">Consequences</h2>
+<ul>
+<li>Easier:</li>
+<li>Opening B_M takes the honeycomb from small hexagons, through elongated hexagons, to the diagonal lines
+    of one superdot, and closing it shrinks the segments back (<code>honeycomb-vs-barrier</code>).</li>
+<li>On the reference device g rises from 0.002 at the operating point to 0.99 at B_M +50 mV, and f from
+    0.16 to 0.94. Where the dots merge, f holds at 0.98.</li>
+<li>The exchange (ADR 0031) and every other CI quantity see the same capacitances.</li>
+<li>Harder:</li>
+<li><strong>No exact grid.</strong> Closing B_M shrinks f only to the geometric f_C ≈ 0.14. The sphere-formula C_m has no
+    screening by the barrier gate (#48), so the "grid" is small hexagons, not a grid.</li>
+<li><strong>Steep rise.</strong> f rises within about 40 mV of B_M. Kemble's transmission changes by e for every
+    ħω_b/2π ≈ 0.7 meV of barrier height, and the unscreened barrier moves fast with the gates (#48).</li>
+<li><strong>The f(g) curve.</strong> Between g = 0.15 and 0.85 it is an interpolation, which the authors themselves
+    call unreliable for N_ch = 2. A digitised measurement (Waugh et al.) would replace it as a P1 row.</li>
+<li><strong>Mixed models.</strong> The splitting is the metallic-dot theory (many levels) applied to semiconductor dots
+    of about 23 electrons. It sits on top of ADR 0029's single-level hybridization, and the two overlap by
+    at most 2t/E_add.</li>
+<li><strong>Asymmetry.</strong> For unequal dots f uses the mean total capacitance (the symmetric-equivalent
+    definition).</li>
+<li>Must now:</li>
+<li>Device files from earlier 0.4.0 commits do not load (format 5).</li>
+<li>A test that checks the shape's own capacitances turns the splitting off.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered</h2>
+<ul>
+<li><strong>A better electrostatic C_m from the potential (overlapping charge densities).</strong> Rejected by the owner.
+  It is closer to the geometry, but it cannot reach the superdot without a solver, and it moves f little.</li>
+<li><strong>Fitting measured f(g) (Waugh, Livermore) now.</strong> Deferred. The curve has to be digitised and confirmed by
+  a human before it can be the standard (ADR 0007).</li>
+<li><strong>The WKB transmission e^(−2S), or the rates' logistic, as the conductance.</strong> Rejected. Either stops at a
+  half (or at one, abruptly) when the barrier falls below the level, so f would jump at the merge.</li>
+<li><strong>Raising t's ceiling, or several levels per dot.</strong> Rejected. The single-level splitting is 2t, and
+  the merged dot needs the many-level charge-fluctuation physics that f(g) summarises.</li>
+<li><strong>Moving the induced charge with the effective capacitance.</strong> Rejected. Tunnelling relaxes charge
+  quantization and does not change how much charge the gates induce.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
