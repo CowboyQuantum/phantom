@@ -6,6 +6,50 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
+## 0.5.0 — the interdot barrier has one transmission: a wider honeycomb-to-superdot transition, and B_M acts past the merge (#70, #69)
+
+The barrier between the dots has one transmission, Kemble's of its top at the gates, and the tunnel
+coupling t, the interdot rate Γ_m and the conductance g all follow it (ADR 0034). The top is moved by
+every gate through placeholder screening factors, and along the barrier gates through the shape grid
+continued linearly past the merge. On the reference device the honeycomb goes from hexagons to a
+superdot over about 65 mV of B_M (was about 30) and about 125 mV of the plunger diagonal (was 15), and
+a far-open B_M leaves one dot at every occupancy.
+
+### Breaking
+- `State.tunnel_coupling_ev`, `gamma_interdot_hz`, `interdot_conductance` and `interdot_splitting` share
+  the interdot barrier's transmission: t = (ħω₀/π)·√T, Γ_m = f_a·T, g = T. t no longer holds at about half
+  its ceiling once the barrier sinks below the tunnelling level; it reaches ħω₀/π where g reaches 1.
+- The gates' action on the interdot barrier's top is screened: `CompileParams.interdot_barrier_screening`
+  (0.4) for the barrier gate and that times `interdot_cross_screening` (0.3) for every other gate
+  (`calibration: none`; 1 and 1 is the bare potential of 0.4.0). On the reference device t changes by a
+  factor e every 23 mV of B_M (was 9), and a plunger acts about four times more weakly than B_M on the
+  barrier (before, nearly as strongly). Every map that crosses the honeycomb-to-superdot transition
+  changes; the merged region sits at about B_M +0.11 V instead of +30 mV.
+- Past the shape grid's end the interdot barrier's top keeps following the gates (the shape is still held
+  and `State.dots_merged` still flags it): with B_M far open the dots stay one at every occupancy, and
+  below the compiled plungers opening B_M raises t, g and f (#69).
+- `Device.tunnel_coupling_ev` is (ħω₀/π)·√T of Kemble's transmission at the operating point (57 µeV on the
+  reference device, against the WKB action's 46); the interdot `CompiledBarrier` carries f_a·T and the
+  screened Kemble slopes −2πσ·dΔU/dV/ħω_b, and `barrier_v_scale_v` is 2 over the barrier gate's slope.
+- `DEVICE_FORMAT_VERSION` 6: `Device.interdot_barrier_screening`, σ per gate. Files from 0.4.0 do not
+  load; recompile them from their seed. The stored gallery device is re-recorded.
+
+### Added
+- `charge.barrier`: `InterdotBarrier`, the interdot barrier's top at the carried voltages (screened slopes,
+  the shape grid continued past its ends) and its transmission; `kemble_transmission` lives here.
+- `ShapeGrid.quantity_along`: one quantity's summed changes, weighted per gate and held or continued
+  linearly beyond the grid's ends.
+- `InterdotCoupling.barrier`, `GateRates.interdot`, `Device.runtime_interdot_barrier()`.
+- `State.interdot_barrier_top_ev`: the top above the interdot tunnelling level at the carried voltages.
+- `CompileParams.interdot_barrier_screening`, `interdot_cross_screening`.
+- Tests: `tests/test_interdot_barrier.py`, 6 P0.
+
+### Changed
+- `InterdotSplitting` takes an `InterdotBarrier` instead of the top, slopes and curvature.
+- `honeycomb-vs-barrier` and `interdot-line-vs-barrier` sweep and map at B_M offsets matching the wider
+  transition. Model versions: `charge.barrier` 1, `charge.shape` 3, `charge.splitting` 2, `charge.hybrid` 3,
+  `readout.rates` 2, `compile.device` 7, `device` 8, `device.session` 9.
+
 ## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape, the exchange and the honeycomb (#58, #59, #60, #66; `v0.4.0` at `ae8d5db`)
 
 The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge

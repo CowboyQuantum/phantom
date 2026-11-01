@@ -119,8 +119,8 @@ against every gate and capped at the attempt rate. A session's dynamics use the 
 voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
 `Truth` states the rates at the operating point.
 
-The interdot tunnel coupling follows every gate as well (ADR 0029): `State.tunnel_coupling_ev` is the
-compiled t moved by half the slopes of ln Γ_m and capped at ħω₀/π, and the charge states of one total
+The interdot tunnel coupling follows every gate as well (ADR 0029, 0034): `State.tunnel_coupling_ev` is
+(ħω₀/π)·√T, with T the interdot barrier's one transmission (below), and the charge states of one total
 charge hybridize through it. An interdot line is then the two-level polarization ½(1 − ε/Ω·tanh(Ω/2kT)),
 Ω = √(ε² + 4t²), so opening the barrier gate widens it; `State.n_mean` and the sensor read the
 eigenstates, and a session's dynamics run over them. A dot is isolated only when its own barrier and the
@@ -132,8 +132,9 @@ each barrier gate, and at runtime the capacitances, lever arms and offsets at th
 follow it. `State.dot_positions_nm`, `dot_radii_nm` and `addition_energies_ev` report the shape, and
 `State.dots_merged` flags a point where a barrier gate is opened past the last point at which the
 potential forms two dots; the shape there is held at that point, and the charge model is not meant to
-describe it. Because the dots' charge is counted absolutely, a barrier gate moves the plunger lines by more
-than its cross-capacitance.
+describe it, but the interdot barrier's top keeps following the gates there (ADR 0034), so a far-open
+B_M leaves one dot at every occupancy. Because the dots' charge is counted absolutely, a barrier gate
+moves the plunger lines by more than its cross-capacitance.
 
 The exchange follows them as well (ADR 0031). `State.exchange_ev` is the singlet–triplet splitting of the
 last electron on each dot in the ground charge state, at the gated t and the shaped dots, and
@@ -141,11 +142,20 @@ last electron on each dot in the ground charge state, at the gated t and the sha
 electrons (read the parity from `n_ground`), and it jumps where the ground charge state changes.
 `Session.spin_readout` reads at the interdot coupling of the last point the session was given.
 
+The interdot barrier has one transmission (ADR 0034): Kemble's, of its top above the interdot tunnelling
+level, `State.interdot_barrier_top_ev`. The top is moved by every gate through two placeholder screening
+factors (`CompileParams.interdot_barrier_screening` for the barrier gate, times `interdot_cross_screening`
+for every other gate; 1 and 1 is the bare potential), and along the barrier gates through the shape
+grid, continued past the merge. t, `gamma_interdot_hz` = f_a·T and the conductance all follow it: on the
+reference device t changes by a factor e every 23 mV of B_M, and a plunger acts about four times more
+weakly than B_M.
+
 The interdot conductance sets the honeycomb's triple-point splitting (ADR 0032).
-`State.interdot_conductance` is Kemble's transmission of the interdot barrier per channel, and
-`State.interdot_splitting` is the fractional splitting f, the interdot segment's length as a fraction of
-the cell along anti-detuning. Opening the barrier gate between the dots takes f from its geometric value
-(small hexagons) towards one (the diagonal lines of a superdot); closing it shrinks the segments back.
+`State.interdot_conductance` is that transmission per channel, and `State.interdot_splitting` is the
+fractional splitting f, the interdot segment's length as a fraction of the cell along anti-detuning.
+Opening the barrier gate between the dots takes f from its geometric value (small hexagons) towards one
+(the diagonal lines of a superdot) over about 65 mV of B_M on the reference device; closing it shrinks
+the segments back.
 
 With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its

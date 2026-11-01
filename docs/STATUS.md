@@ -3,100 +3,82 @@
 > Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.
 
 **Current step:** none in flight. Released: `v0.2.0` (on `f72daac`), `v0.3.0` (on `6920f19`) and `v0.4.0`
-(on `ae8d5db`, carrying #58, #59, #60 and #66). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver)
-are on #16, #17, #25, #28, #32, #34 and #37.
-**Branch:** `issue-66/release-v0.4.0` (docs only: the changelog heading and this file). `main` is at
-`ae8d5db`, the merge of #67.
-**Last session:** 2026-10-31. The owner asked for the barrier gates to set the interdot coupling, the dots'
-shape and the exchange (#58–#60). They then found the tune-up behaviour they wanted still missing: the
-interdot width (anti-detuning) should grow with B_M until the dots form a superdot, and shrink to a grid as
-it closes. Decisions taken that day:
-- **t in the signal:** hybridize the charge states, in the statics and the dynamics.
-- **Dot shape:** a grid compiled along the barrier gates and interpolated at runtime.
-- **Splitting:** conductance-driven, as an effective interdot capacitance, with a smooth interpolation
-  between Golden & Halperin's limits.
-- **Release:** all of it folded into 0.4.0.
-- **Tag:** at the end of the day the owner asked for `v0.4.0` and a GitHub Release made as for the earlier
-  versions.
+(on `ae8d5db`). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on
+#16, #17, #25, #28, #32, #34 and #37.
+**Branch:** `issue-70/barrier-transition-width` (#70, with #69) from `main` at `ad0d3fa`; its pull request is
+open for review. It carries 0.5.0 (untagged, breaking: `CHANGELOG.md`).
+**Last session:** 2026-11-01. The owner, running qdt on `v0.4.0`, saw the honeycomb turn into a superdot
+"basically instantly" along the plungers at a place that did not move with B_M, and asked for the transition
+to happen "over a larger space" (#70). The measurements behind it: the barrier top moved at −152 meV/V with
+B_M and −128/−110 meV/V with the plungers (nothing screens them, #48), so f went from 0.2 to 0.9 within 15 mV
+of the plungers; and the shape grid held the top past the merge node while the plungers' part kept growing,
+so above B_M ≈ 0.35 V every map was the same and the double dot re-formed at low occupancy (also #69).
 
 ## Done this session
-- **#58 (ADR 0029, #61):** t follows every gate and hybridizes the charge states.
-- **#59 (ADR 0030, #62):** the barrier gates move and reshape the dots through a compiled grid. Also
-  fixed: the hybridized window's seam, and a propagator that keeps every entry's relative digits.
-- **#60 (ADR 0031, #63):** J of the valence electrons at the gated t and the shaped dots;
-  `State.exchange_frequency_hz`; the Pauli readout at the gated t.
-- **#66 ([ADR 0032](adr/0032-the-interdot-conductance-sets-the-triple-point-splitting.md), #67):** the interdot conductance sets the triple-point splitting.
-  - g is Kemble's transmission of the interdot barrier. Its top ΔU above the fixed tunnelling level
-    follows every gate through compiled slopes and the shape grid's new `barrier_top_ev` column.
-  - f = f_C + (F_max − f_C)·f_GH(g), where f_GH joins Golden & Halperin's weak and strong limits
-    monotonically.
-  - f enters the CI energies as an effective interdot capacitance ΔC_m·[[1, −1], [−1, 1]]; the induced
-    charge keeps the geometric capacitances.
-  - `charge.splitting`; `State.interdot_conductance`, `interdot_splitting`; device format 5.
-  - On the reference device g goes from 0.002 at the operating point to 0.99 at B_M +50 mV, and f from
-    0.16 to 0.94, reaching 0.98 at the merge.
-  - New protocol `honeycomb-vs-barrier`. Tests: `tests/test_interdot_splitting.py`, 9 P0.
-  - Reference entries `golden1996-peak-splitting`, `waugh1995-tunable-coupling` and
-    `kemble1935-wkb-barrier` (`proposed`), plus the item `honeycomb-vs-interdot-coupling` of
-    `vanderwiel2003-double-dot-transport`.
-- **Cross-platform (ADR 0033, #67).** `session-closing-barrier` failed the Windows comparison at
-  1.1–2.2e-9. The Windows arrays (CI now keeps them on failure) showed compile's own numbers differing by
-  about 1e-12 between platforms, amplified about a thousand-fold by a latched transition read on the
-  sensor's flank. The runtime protocols now run on a device compiled once and stored under
-  `docs/gallery/devices/` (`--record-devices`); a P0 test checks it against a fresh compile within 1e-9.
-- **Releases.** `v0.3.0` was tagged and released as for `v0.2.0` (PR #57). `v0.4.0` is an annotated tag on
-  `ae8d5db` after every CI job passed there, including the Windows gallery comparison. Its GitHub Release
-  has the changelog entry as notes, and the tag is noted on #58, #59, #60 and #66.
-- **Totals:** 210 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.
+- **#70 ([ADR 0034](adr/0034-the-interdot-barrier-has-one-transmission.md)):** the interdot barrier has one
+  transmission, Kemble's of its top ΔU(V), and t = (ħω₀/π)·√T, Γ_m = f_a·T and g = T all follow it.
+  - `charge.barrier.InterdotBarrier`: ΔU(V) = ΔU_ref + Σ σ_g·δ_g, screened compiled slopes for every gate and,
+    along the barrier gates, the shape grid's top continued linearly past each end
+    (`ShapeGrid.quantity_along`). The shape itself is still held and flagged past the merge.
+  - Placeholders (`calibration: none`): `CompileParams.interdot_barrier_screening` 0.4 (the barrier gate) and
+    `interdot_cross_screening` 0.3 (every other gate, times the first); 1 and 1 is the bare potential.
+    `Device.interdot_barrier_screening` records σ per gate; device format 6.
+  - The compiled record is the same transmission: `tunnel_coupling_ev` = (ħω₀/π)√T_ref (57 µeV on the
+    reference device, was 46 from the WKB action), the interdot `CompiledBarrier`'s rate and screened Kemble
+    slopes, `barrier_v_scale_v` = 2/slope (23 mV). `State.interdot_barrier_top_ev`.
+  - On the reference device: f 0.2 → 0.9 over 64 mV of B_M (was ~30) and 126 mV of the plunger diagonal (was
+    15); each plunger a quarter of B_M's action; t by e every 23 mV of B_M (was 9); nothing merges within
+    ±0.15 V of the programmed plungers at the programmed B_M; with B_M at 5 V one dot at every occupancy; below
+    the compiled plungers B_M opens t and f again (#69).
+  - Tests: `tests/test_interdot_barrier.py` (6 P0); the isolated-dot tests close B_M by 0.12 V now (t falls
+    more slowly), the session's two-state test uses the pair's total rate (the path through dot 2 counts
+    where P1 has slowed the left lead, #48). 216 tests.
+  - Protocols `honeycomb-vs-barrier` and `interdot-line-vs-barrier` map at the new B_M offsets; the stored
+    gallery device and `measured.json` re-recorded; 76 protocols within budget, all unsigned; contract OK.
+- Model versions: `charge.barrier` 1, `charge.shape` 3, `charge.splitting` 2, `charge.hybrid` 3,
+  `readout.rates` 2, `compile.device` 7, `device` 8, `device.session` 9; `charge` 5, `readout` 5.
 
 ## In flight
-- This branch's PR: the changelog heading names the tag, and this file.
+- The pull request for #70: CI's ubuntu run and the Windows gallery comparison (new closed forms: a weighted
+  PCHIP sum, a linear continuation, Kemble's logistic), and the preview at `/pr-<n>/`.
+- The measured ledger was recorded on a slow machine (compile 0.63 s against 0.32 before, the old code
+  itself 1.7× slower here): the session protocols read 5 ms/pt, within 3× of budget but not by much.
 
 ## Next action
-qdt moves its pin to `v0.4.0` when the owner decides; the handoff is CowboyQuantum/qdt #172. Its adapter must handle:
-- device format 5;
-- the eigenstate charge in `n_present` (round it to label charge states);
-- the new `State` fields (rates, coupling, shape, exchange frequency, interdot conductance and splitting);
-- J per point.
-
-The owner should also confirm or correct the four `proposed` reference entries and items from #66 (the
-DOIs are from memory).
+The owner reviews #70's pull request (ADR 0034, the two changed protocols in its preview, the screening
+defaults), merges it, decides whether to tag `v0.5.0` (ADR 0025) and when qdt (CowboyQuantum/qdt #172) moves
+its pin. qdt's adapter must handle device format 6, `State.interdot_barrier_top_ev`, and the merged region
+sitting at about B_M +0.11 V instead of +30 mV.
 
 Open choices for later:
-- digitise Waugh et al.'s f(g) for a P1 row;
+- extend the two screening factors to the lead and sensor barriers (#48): a plunger still moves a lead rate
+  by e every 5 mV while it moves t by e every 90 mV;
+- digitise a measured f(V_B) or t(V_B) curve to replace the hand-set screening by a P1 row;
 - screening of C_m by the barrier gate, so a closed B_M gives a true grid (#48);
-- the compile-level platform noise (about 1e-12) itself, which ADR 0033 sidesteps for the runtime
-  protocols.
+- compile's own last digits across platforms (ADR 0033).
 
 ## Open issues
-#48 the unscreened sensitivity of the rates, t and J, and now the geometric splitting floor; #49
-per-device sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin driven by voltages.
-Candidates for new issues:
-- the spin layer's sweet spot on the device's local sector (ADR 0031);
-- the plungers and the sensor's β on the shape grid (ADR 0030);
-- charge dephasing and Landau–Zener steps (ADR 0029);
-- compile's own last digits across platforms (ADR 0033).
+#48 unscreened lead, sensor and geometric sensitivities; #49 per-device sensor-barrier tune; #50 gate 1/f
+placeholder; #51 cp1252 console; #41 spin driven by voltages; #64 a dot that must lose two electrons loses
+one; #65 recompiling at the sensor set point moves it. #69 is addressed by this branch (closed with #70).
 
 Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.
 
 ## Known gaps
-- **Owner-dependent, never blocking:** sign-offs for all 76 protocols; catalog entries #1–#14;
-  confirming the thirteen `proposed` reference entries.
-- **Splitting (ADR 0032):**
-  - A closed B_M stops at the geometric f_C ≈ 0.14 (small hexagons, not a grid).
-  - f rises within about 40 mV of B_M.
-  - f(g) between g = 0.15 and 0.85 is an interpolation.
-  - The metallic-dot theory is applied on top of the single-level hybridization.
-- **Exchange (ADR 0031):** J jumps where the ground charge state changes; spinless, one valley; the spin
-  layer's Hubbard models keep their few-electron J.
-- **Shape (ADR 0030):** the gates' changes add; C_m comes from the sphere formula; about 1 % pixel noise;
-  β, the attempt rates and the plungers are not on the grid.
-- **Hybridization (ADR 0029):** the projection assumes a dwell long against ħ/Ω, with no charge
-  dephasing; spinless.
-- **Rates and t:** linear in the non-barrier gates; no screening until the FEM backend exists.
+- **Owner-dependent, never blocking:** sign-offs for all 76 protocols; catalog entries #1–#14; confirming the
+  thirteen `proposed` reference entries.
+- **Interdot barrier (ADR 0034):** the screening factors are set by hand to the owner's requirement; only the
+  interdot barrier is screened; t reaches ħω₀/π (1.3 meV) where the barrier is gone; the continued top past
+  the merge is a linear extrapolation, harmless because T is 1 there.
+- **Splitting (ADR 0032):** a closed B_M stops at the geometric f_C ≈ 0.14; f(g) between g = 0.15 and 0.85 is
+  an interpolation; the metallic-dot theory sits on the single-level hybridization.
+- **Exchange (ADR 0031):** J jumps where the ground charge state changes; spinless, one valley.
+- **Shape (ADR 0030):** the gates' changes add; C_m from the sphere formula; about 1 % pixel noise; β, the
+  attempt rates and the plungers are not on the grid.
+- **Hybridization (ADR 0029):** the projection assumes a dwell long against ħ/Ω; spinless.
+- **Rates:** the lead rates are linear in the non-barrier gates with the bare potential's slopes (#48).
 - **Sensor process:** first-order split; sequential noise; no joint dot–sensor energy (ADR 0028).
-- **Placeholders** (`calibration: none`): as listed in the step files and ADRs 0019–0032.
+- **Placeholders** (`calibration: none`): as listed in the step files and ADRs 0019–0034.
 - **Cross-platform (ADR 0014):** condition diagonalisations; sum charges relative to a centre; keep window
-  truncation far below 1e-9 at rint ties; propagate generators with non-negative steps; form gaps from
-  N − n_g.
+  truncation far below 1e-9 at rint ties; propagate generators with non-negative steps; form gaps from N − n_g.
 - **Pages:** the source is `gh-pages` (root); per-PR previews are under `/pr-<n>/`.
