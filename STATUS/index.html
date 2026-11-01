@@ -641,11 +641,11 @@
 <blockquote>
 <p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
 </blockquote>
-<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>) and <code>v0.3.0</code> (on <code>6920f19</code>). 0.4.0 is
-untagged and complete once this branch (#66) merges. It carries #58 (merged as #61), #59 (merged as #62)
-and #60 (merged as #63). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver)
+<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>), <code>v0.3.0</code> (on <code>6920f19</code>) and <code>v0.4.0</code>
+(on <code>ae8d5db</code>, carrying #58, #59, #60 and #66). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver)
 are on #16, #17, #25, #28, #32, #34 and #37.
-<strong>Branch:</strong> <code>issue-66/interdot-splitting</code> (PR #67 against <code>main</code>). <code>main</code> is at <code>2f9f2d6</code>, the merge of #63.
+<strong>Branch:</strong> <code>issue-66/release-v0.4.0</code> (docs only: the changelog heading and this file). <code>main</code> is at
+<code>ae8d5db</code>, the merge of #67.
 <strong>Last session:</strong> 2026-10-31. The owner asked for the barrier gates to set the interdot coupling, the dots'
 shape and the exchange (#58–#60). They then found the tune-up behaviour they wanted still missing: the
 interdot width (anti-detuning) should grow with B_M until the dots form a superdot, and shrink to a grid as
@@ -654,7 +654,9 @@ it closes. Decisions taken that day:
 - <strong>Dot shape:</strong> a grid compiled along the barrier gates and interpolated at runtime.
 - <strong>Splitting:</strong> conductance-driven, as an effective interdot capacitance, with a smooth interpolation
   between Golden &amp; Halperin's limits.
-- <strong>Release:</strong> all of it folded into 0.4.0.</p>
+- <strong>Release:</strong> all of it folded into 0.4.0.
+- <strong>Tag:</strong> at the end of the day the owner asked for <code>v0.4.0</code> and a GitHub Release made as for the earlier
+  versions.</p>
 <h2 id="done-this-session">Done this session</h2>
 <ul>
 <li><strong>#58 (ADR 0029, #61):</strong> t follows every gate and hybridizes the charge states.</li>
@@ -662,8 +664,7 @@ it closes. Decisions taken that day:
   fixed: the hybridized window's seam, and a propagator that keeps every entry's relative digits.</li>
 <li><strong>#60 (ADR 0031, #63):</strong> J of the valence electrons at the gated t and the shaped dots;
   <code>State.exchange_frequency_hz</code>; the Pauli readout at the gated t.</li>
-<li><strong>#66 (<a href="../adr/0032-the-interdot-conductance-sets-the-triple-point-splitting/">ADR 0032</a>, this
-  branch):</strong> the interdot conductance sets the triple-point splitting.</li>
+<li><strong>#66 (<a href="../adr/0032-the-interdot-conductance-sets-the-triple-point-splitting/">ADR 0032</a>, #67):</strong> the interdot conductance sets the triple-point splitting.</li>
 <li>g is Kemble's transmission of the interdot barrier. Its top ΔU above the fixed tunnelling level
     follows every gate through compiled slopes and the shape grid's new <code>barrier_top_ev</code> column.</li>
 <li>f = f_C + (F_max − f_C)·f_GH(g), where f_GH joins Golden &amp; Halperin's weak and strong limits
@@ -677,27 +678,33 @@ it closes. Decisions taken that day:
 <li>Reference entries <code>golden1996-peak-splitting</code>, <code>waugh1995-tunable-coupling</code> and
     <code>kemble1935-wkb-barrier</code> (<code>proposed</code>), plus the item <code>honeycomb-vs-interdot-coupling</code> of
     <code>vanderwiel2003-double-dot-transport</code>.</li>
-<li><strong>Cross-platform (ADR 0033, this branch).</strong> <code>session-closing-barrier</code> failed the Windows comparison at
+<li><strong>Cross-platform (ADR 0033, #67).</strong> <code>session-closing-barrier</code> failed the Windows comparison at
   1.1–2.2e-9. The Windows arrays (CI now keeps them on failure) showed compile's own numbers differing by
   about 1e-12 between platforms, amplified about a thousand-fold by a latched transition read on the
   sensor's flank. The runtime protocols now run on a device compiled once and stored under
   <code>docs/gallery/devices/</code> (<code>--record-devices</code>); a P0 test checks it against a fresh compile within 1e-9.</li>
-<li><strong>Release <code>v0.3.0</code>:</strong> tagged and released as for <code>v0.2.0</code> (PR #57).</li>
+<li><strong>Releases.</strong> <code>v0.3.0</code> was tagged and released as for <code>v0.2.0</code> (PR #57). <code>v0.4.0</code> is an annotated tag on
+  <code>ae8d5db</code> after every CI job passed there, including the Windows gallery comparison. Its GitHub Release
+  has the changelog entry as notes, and the tag is noted on #58, #59, #60 and #66.</li>
 <li><strong>Totals:</strong> 210 tests; 76 protocols within budget, all unsigned; contract OK; ledger re-recorded.</li>
 </ul>
 <h2 id="in-flight">In flight</h2>
 <ul>
-<li>PR #67 (#66): waits for the owner's review of <code>honeycomb-vs-barrier</code>.</li>
+<li>This branch's PR: the changelog heading names the tag, and this file.</li>
 </ul>
 <h2 id="next-action">Next action</h2>
-<p>The owner reviews #67. After it merges, 0.4.0 is complete. Its tag and qdt's pin are the
-owner's decisions. The owner should also confirm or correct the four <code>proposed</code> reference entries and
-items (the DOIs are from memory).</p>
+<p>qdt moves its pin to <code>v0.4.0</code> when the owner decides; the handoff is CowboyQuantum/qdt #172. Its adapter must handle:
+- device format 5;
+- the eigenstate charge in <code>n_present</code> (round it to label charge states);
+- the new <code>State</code> fields (rates, coupling, shape, exchange frequency, interdot conductance and splitting);
+- J per point.</p>
+<p>The owner should also confirm or correct the four <code>proposed</code> reference entries and items from #66 (the
+DOIs are from memory).</p>
 <p>Open choices for later:
 - digitise Waugh et al.'s f(g) for a P1 row;
 - screening of C_m by the barrier gate, so a closed B_M gives a true grid (#48);
-- the sensor current's cross-platform margin on some Windows runners (≈1.1e-9 in
-  <code>session-closing-barrier</code>; macOS also misses 1e-9 in untouched sensor protocols).</p>
+- the compile-level platform noise (about 1e-12) itself, which ADR 0033 sidesteps for the runtime
+  protocols.</p>
 <h2 id="open-issues">Open issues</h2>
 <h1 id="48-the-unscreened-sensitivity-of-the-rates-t-and-j-and-now-the-geometric-splitting-floor-49">48 the unscreened sensitivity of the rates, t and J, and now the geometric splitting floor; #49</h1>
 <p>per-device sensor-barrier tune; #50 gate 1/f placeholder; #51 cp1252 console; #41 spin driven by voltages.
@@ -705,7 +712,7 @@ Candidates for new issues:
 - the spin layer's sweet spot on the device's local sector (ADR 0031);
 - the plungers and the sensor's β on the shape grid (ADR 0030);
 - charge dephasing and Landau–Zener steps (ADR 0029);
-- the sensor current's cross-platform margin.</p>
+- compile's own last digits across platforms (ADR 0033).</p>
 <p>Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.</p>
 <h2 id="known-gaps">Known gaps</h2>
 <ul>
