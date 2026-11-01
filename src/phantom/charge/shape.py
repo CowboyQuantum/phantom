@@ -8,7 +8,9 @@ node the change of each quantity from the operating point. At runtime each gate'
 interpolated (monotone cubic, PCHIP) at its carried voltage and the gates' changes are added: the
 effects of two barrier gates are taken as independent. Beyond a gate's last node the changes are held
 there. Where the grid ends because the potential no longer forms two dots (a dot merged with its
-neighbour or with its lead), a point beyond that end is flagged `merged`.
+neighbour or with its lead), a point beyond that end is flagged `merged`. One quantity is read
+differently: the interdot barrier's top is the potential on the cut between the held dots, which the
+gates keep moving, so `quantity_along` continues it linearly past the ends (`charge.barrier`, #70).
 
 The quantities (`QUANTITIES`, per dot where indexed):
 
@@ -34,8 +36,9 @@ from functools import cached_property
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 
-MODEL_VERSION = 2
-"""2: the interdot barrier's top on the grid (#66)."""
+MODEL_VERSION = 3
+"""2: the interdot barrier's top on the grid (#66). 3: `quantity_along`, a quantity weighted per gate
+and continued linearly past the grid's ends (#70); `change` and `merged` are unchanged."""
 
 
 def quantity_layout(n_gates: int) -> dict[str, slice]:
@@ -85,6 +88,15 @@ class ShapeGrid:
     def _interpolants(self) -> tuple[PchipInterpolator, ...]:
         return tuple(PchipInterpolator(np.asarray(n), np.asarray(c), axis=0, extrapolate=False) for n, c in zip(self.nodes_v, self.changes, strict=True))
 
+    @cached_property
+    def _end_slopes(self) -> tuple[tuple[np.ndarray, np.ndarray], ...]:
+        """Per barrier gate, each interpolant's derivative row at its first and its last node."""
+        out = []
+        for nodes, f in zip(self.nodes_v, self._interpolants, strict=True):
+            d = f.derivative()
+            out.append((np.asarray(d(nodes[0])), np.asarray(d(nodes[-1]))))
+        return tuple(out)
+
     @property
     def layout(self) -> dict[str, slice]:
         return quantity_layout(self.n_gates)
@@ -102,6 +114,27 @@ class ShapeGrid:
         """One quantity's changes (..., size) from a `change` row; `alpha` as (..., 2, gates)."""
         x = change[..., self.layout[name]]
         return x.reshape(x.shape[:-1] + (2, self.n_gates)) if name == "alpha" else x
+
+    def quantity_along(self, v: np.ndarray, name: str, weights: np.ndarray | None = None, beyond: str = "hold") -> np.ndarray:
+        """(..., size) one quantity's summed changes at carried voltages `v` (..., gates), each barrier
+        gate's change multiplied by `weights[j]` (indexed as the gate vector; None is 1). Beyond a gate's
+        end nodes its change is held (`beyond="hold"`, as `change`) or continued linearly with the
+        interpolant's slope at that end (`"linear"`): for a quantity the gates keep moving where the
+        dots are held, the potential at a point of the held dots' cut such as the interdot barrier's
+        top (#70, ADR 0034). Positions, capacitances and lever arms stay held."""
+        if beyond not in ("hold", "linear"):
+            raise ValueError("beyond is 'hold' or 'linear'")
+        v = np.asarray(v, dtype=float)
+        sl = self.layout[name]
+        out = np.zeros(v.shape[:-1] + (sl.stop - sl.start,))
+        for j, nodes, f, (low, high) in zip(self.gate_indices, self.nodes_v, self._interpolants, self._end_slopes, strict=True):
+            x = v[..., j]
+            clipped = np.clip(x, nodes[0], nodes[-1])
+            part = f(clipped)[..., sl]
+            if beyond == "linear":
+                part = part + np.where((x < nodes[0])[..., None], (x - nodes[0])[..., None] * low[sl], 0.0) + np.where((x > nodes[-1])[..., None], (x - nodes[-1])[..., None] * high[sl], 0.0)
+            out = out + (part if weights is None else weights[j] * part)
+        return out
 
     def merged(self, v: np.ndarray) -> np.ndarray:
         """(...) True where a barrier gate lies beyond an end of its grid at which the potential

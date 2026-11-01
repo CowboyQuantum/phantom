@@ -13,7 +13,10 @@ of the same height and width transmits more, by one to two decades at the layout
 gallery's dynamics protocols use it (ADR 0023), and the rectangular form remains as its bound and for
 the P0 limits. `GateRates` carries compiled rates to other gate voltages at runtime: the exponent
 moves with the action's compiled slopes and `saturating_rates_hz` caps the rate at the attempt rate
-(ADR 0026 for the sensor's leads, #53 for the qubit dots'). Screening waits for the FEM backend.
+(ADR 0026 for the sensor's leads, #53 for the qubit dots'). The interdot rate instead follows the
+interdot barrier's one transmission, Γ_m = f_a·T (`charge.barrier`, #70): Kemble's transmission of the
+barrier's screened top, the same T that sets t and the conductance. The lead barriers' screening waits
+for the FEM backend (#48).
 """
 
 from __future__ import annotations
@@ -23,10 +26,12 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.special import expit
 
+from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.shape import ShapeGrid
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2, HBAR_EV_S
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: with an `InterdotBarrier`, the interdot rate is f_a·T of the barrier's one transmission (#70)."""
 
 ATTEMPT_RATE_FLOOR_HZ = 1e9
 ATTEMPT_RATE_CEILING_HZ = 1e13
@@ -91,6 +96,10 @@ class GateRates:
     """When given (three barriers: left lead, right lead, interdot), the exponents along its barrier
     gates are the changes of the actions on its grid (#59, the dots moved and reshaped), and the slopes
     count for the other gates only."""
+    interdot: InterdotBarrier | None = None
+    """When given (three barriers), the third barrier's exponent is the barrier's `log_odds_change`, so
+    its rate is f_a·T of the one interdot transmission (#70); `gamma_ref_hz[2]` is then f_a·T at the
+    reference point."""
 
     def __post_init__(self) -> None:
         k, n = len(self.gamma_ref_hz), len(self.v_ref_v)
@@ -100,6 +109,8 @@ class GateRates:
             raise ValueError("slopes need one entry per gate")
         if not all(f > 0 for f in self.attempt_rate_hz) or not all(0 < g for g in self.gamma_ref_hz):
             raise ValueError("rates must be positive")
+        if self.interdot is not None and k != 3:
+            raise ValueError("an interdot barrier needs the three barriers: left lead, right lead, interdot")
 
     def rates_hz(self, v: np.ndarray) -> np.ndarray:
         """Γ of each barrier (..., k), Hz, at carried voltages `v` (..., gates)."""
@@ -107,7 +118,10 @@ class GateRates:
         dv = v - np.asarray(self.v_ref_v)
         slopes = np.array(self.log_rate_slopes_per_v)
         if self.shape is None:
-            return saturating_rates_hz(np.asarray(self.gamma_ref_hz), np.asarray(self.attempt_rate_hz), dv @ slopes.T)
-        slopes[:, list(self.shape.gate_indices)] = 0.0
-        along = self.shape.quantity(self.shape.change(v), "log_rate")
-        return saturating_rates_hz(np.asarray(self.gamma_ref_hz), np.asarray(self.attempt_rate_hz), dv @ slopes.T + along)
+            exponent = dv @ slopes.T
+        else:
+            slopes[:, list(self.shape.gate_indices)] = 0.0
+            exponent = dv @ slopes.T + self.shape.quantity(self.shape.change(v), "log_rate")
+        if self.interdot is not None:
+            exponent = np.concatenate([exponent[..., :2], self.interdot.log_odds_change(v)[..., None]], axis=-1)
+        return saturating_rates_hz(np.asarray(self.gamma_ref_hz), np.asarray(self.attempt_rate_hz), exponent)

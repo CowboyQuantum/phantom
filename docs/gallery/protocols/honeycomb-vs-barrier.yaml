@@ -1,7 +1,7 @@
 id: honeycomb-vs-barrier
 name: The barrier gate between the dots takes the honeycomb from a grid to a superdot
 step: 8
-description: In double-dot transport the interdot segment of the honeycomb, the triple points' separation along anti-detuning, grows with the interdot conductance until the two dots act as one (van der Wiel et al. 2002; Waugh et al. 1995). The conductance per channel is Kemble's transmission of the interdot barrier, whose top follows the gates through compiled slopes and the shape grid; Golden & Halperin's weak- and strong-coupling limits for the fractional splitting f, joined monotonically, set an effective interdot capacitance in the CI model (#66, ADR 0032). With the sensor gate tuned onto the optimum's flank, the first panels sweep B_M around the tuned point and show the conductance and f; the maps show dot charge (N₁ + ½N₂, every state its own shade) over P1 and P2 at six B_M, from closed (the geometric splitting, small hexagons) through hexagons to the parallel diagonal lines of a superdot. The geometric floor comes from the sphere-formula mutual capacitance without the barrier gate's screening (#48); f(g) between the limits is an interpolation (calibration none).
+description: In double-dot transport the interdot segment of the honeycomb, the triple points' separation along anti-detuning, grows with the interdot conductance until the two dots act as one (van der Wiel et al. 2002; Waugh et al. 1995). The conductance per channel is Kemble's transmission of the interdot barrier, whose top follows the gates through compiled slopes and the shape grid; Golden & Halperin's weak- and strong-coupling limits for the fractional splitting f, joined monotonically, set an effective interdot capacitance in the CI model (#66, ADR 0032). With the sensor gate tuned onto the optimum's flank, the first panels sweep B_M around the tuned point and show the conductance and f; the maps show dot charge (N₁ + ½N₂, every state its own shade) over P1 and P2 at six B_M, from closed (the geometric splitting, small hexagons) through hexagons to the parallel diagonal lines of a superdot. The barrier's top is moved by the gates through placeholder screening factors (#70, ADR 0034), so on this device f goes from 0.2 to 0.9 over about 65 mV of B_M, and a plunger acts about four times more weakly than B_M, so the transition is about twice as wide along the plunger diagonal. Past the shape grid's end the top keeps sinking, so a far-open B_M leaves one dot at every occupancy. The geometric floor comes from the sphere-formula mutual capacitance without the barrier gate's screening (#48); f(g) between the limits is an interpolation (calibration none).
 layers: [electrostatics, charge, device]
 runner: step8:honeycomb_vs_barrier
 instance:
@@ -13,8 +13,8 @@ instance:
   severity: 1.0
   seed: 2
 sweep:
-  - {gate: B_M, from: -0.15, to: 0.15, points: 121, unit: V, relative_to: tuned point}
-  - {gate: P1 and P2, half_span_v: 0.07, points: 91, unit: V, relative_to: tuned point, at: [-0.1, 0.0, 0.02, 0.03, 0.045, 0.14], axis_role: maps at B_M offsets}
+  - {gate: B_M, from: -0.15, to: 0.25, points: 121, unit: V, relative_to: tuned point}
+  - {gate: P1 and P2, half_span_v: 0.07, points: 91, unit: V, relative_to: tuned point, at: [-0.1, 0.0, 0.05, 0.08, 0.11, 0.2], axis_role: maps at B_M offsets}
 readout: {channel: dot_charge, unit: e}
 render:
   panels:
@@ -22,10 +22,10 @@ render:
     - {kind: line, x: v_b_m_v, y: [splitting], xlabel: "B_M (V)", ylabel: "f", title: "fractional triple-point splitting"}
     - {kind: map, x: dp_v, y: dp_v, z: charge_map0, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M −0.1 V: closed", cmap: magma}
     - {kind: map, x: dp_v, y: dp_v, z: charge_map1, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "tuned point", cmap: magma}
-    - {kind: map, x: dp_v, y: dp_v, z: charge_map2, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +20 mV", cmap: magma}
-    - {kind: map, x: dp_v, y: dp_v, z: charge_map3, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +30 mV", cmap: magma}
-    - {kind: map, x: dp_v, y: dp_v, z: charge_map4, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +45 mV", cmap: magma}
-    - {kind: map, x: dp_v, y: dp_v, z: charge_map5, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +0.14 V: merged", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map2, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +50 mV", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map3, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +80 mV", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map4, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +0.11 V", cmap: magma}
+    - {kind: map, x: dp_v, y: dp_v, z: charge_map5, xlabel: "P1 (V)", ylabel: "P2 (V)", zlabel: "N₁ + ½N₂", title: "B_M +0.2 V: merged", cmap: magma}
 budget:
   compile: {wall_s: 3.0, solver_calls: 0}
   run: {wall_ms_per_point: 0.2, points: 49807, model_evals_per_point: 1, solver_calls: 0}

@@ -14,12 +14,15 @@ The compile tier runs every draw and every derivation once per device instance:
    its slope against every gate at the compiled tunnelling level, and each bath's lever arms;
 5. the barriers to the leads and between the dots at the tunnelling level, their WKB transmissions
    from the action integral along the cut (`electrostatics.barrier_action`), the rates f_attempt·T
-   and their slopes against every gate at that level held fixed (#53, as the sensor's in 4a),
-   the interdot tunnel coupling estimate t ≈ ħω₀ √T / π, and the barrier gate's exponential scale
-   from two nearby evaluations;
+   and their slopes against every gate at that level held fixed (#53, as the sensor's in 4a);
 5a. the double dot re-derived on a grid along each barrier gate (`shape_gates`): its lever arms,
-   offsets, capacitances, positions, radii and barrier actions, as changes from the operating point
-   (#59, ADR 0030);
+   offsets, capacitances, positions, radii, barrier actions and the interdot barrier's top, as changes
+   from the operating point (#59, ADR 0030);
+5b. the interdot barrier's top ΔU above its tunnelling level, its slopes against every gate and its
+   curvature ħω_b (#66), and the screening factor per gate (#70, ADR 0034): Kemble's transmission of
+   the top is the barrier's one transmission, so the interdot rate is f_a·T, the tunnel coupling
+   t = (ħω₀/π)·√T, the interdot barrier's slopes are −2πσ·dΔU/dV/ħω_b and the barrier gate's e-fold
+   scale of t is 2 over its slope; without a top between the dots the WKB estimates stand;
 6. the valley splitting of each dot from its harmonic radius (`valley`), and the g-factors (`spin`).
 
 The `Device` (`phantom.device`) holds parameters only: the layout (as data), the scenario draw, the dots, the CI
@@ -39,9 +42,11 @@ from typing import Any
 import numpy as np
 
 import phantom
+from phantom.charge import barrier as charge_barrier
 from phantom.charge import ci as charge_ci
 from phantom.charge import derived as charge_derived
 from phantom.charge import shape as charge_shape
+from phantom.charge.barrier import kemble_transmission
 from phantom.charge.derived import capacitance_matrix_af, derive_double_dot
 from phantom.charge.shape import ShapeGrid, quantity_layout
 from phantom.compile.backends import Backend, basis_for
@@ -68,12 +73,14 @@ from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 6
+MODEL_VERSION = 7
 """2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
 3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026).
 4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027).
 5: the double dot's shape along the barrier gates, on a grid (`Device.shape`, #59, ADR 0030).
-6: the interdot barrier's top, its slopes and curvature, and its top on the shape grid (#66, ADR 0032)."""
+6: the interdot barrier's top, its slopes and curvature, and its top on the shape grid (#66, ADR 0032).
+7: the interdot barrier's screening per gate; t, the interdot rate, its slopes and the barrier gate's
+scale from Kemble's transmission of the top (#70, ADR 0034)."""
 
 SENSOR_SLOPE_STEP_V = 0.01
 """Half-step of the central differences that give the rates' slopes against each gate (the sensor's
@@ -118,6 +125,18 @@ class CompileParams:
     """Half-span of each shape grid around the operating point, V."""
     shape_points: int = 17
     """Nodes per shape grid (odd, so the operating point is one)."""
+    interdot_barrier_screening: float = 0.4
+    """The fraction of the barrier gate's action on the interdot barrier's top, in the bare closed-form
+    potential, that reaches it (#70, ADR 0034). A placeholder for the screening by the electrons that
+    the solver will add (`calibration: none`); 1 is the bare potential. At 0.4 the reference device's
+    honeycomb goes from hexagons to a superdot over about 50 mV of B_M, and t changes by a factor e
+    every 23 mV of it."""
+    interdot_cross_screening: float = 0.3
+    """The action of every other gate (the plungers above all) on the interdot barrier's top, relative
+    to the barrier gate's, after `interdot_barrier_screening` (the two multiply). A placeholder
+    (`calibration: none`); 1 is the bare potential, in which a plunger moves the interdot barrier
+    nearly as much as the barrier gate does (#48, #70). At 0.3 a plunger acts about four times more
+    weakly than B_M on the reference device."""
 
 
 # --- compile --------------------------------------------------------------------------------------
@@ -403,6 +422,7 @@ def compile_provenance() -> dict[str, Any]:
             "charge.ci": charge_ci.MODEL_VERSION,
             "charge.derived": charge_derived.MODEL_VERSION,
             "charge.shape": charge_shape.MODEL_VERSION,
+            "charge.barrier": charge_barrier.MODEL_VERSION,
             "readout.rates": readout_rates.MODEL_VERSION,
             "valley.splitting": valley_splitting.MODEL_VERSION,
             "spin.dynamics": spin_dynamics.MODEL_VERSION,
@@ -455,6 +475,18 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         vp[g] += SENSOR_SLOPE_STEP_V
         vm[g] -= SENSOR_SLOPE_STEP_V
         top_slopes.append((interdot_barrier_top(basis, vp, d1, d2, level_m, mass)[0] - interdot_barrier_top(basis, vm, d1, d2, level_m, mass)[0]) / (2 * SENSOR_SLOPE_STEP_V))
+    # the barrier's one transmission (#70, ADR 0034): Kemble's of the screened top. The interdot rate,
+    # t, the interdot barrier's slopes and the barrier gate's scale all come from it; the WKB estimates
+    # above stand only when the potential has no top between the dots
+    screening = tuple(float(params.interdot_barrier_screening * (1.0 if g == params.barrier_gate else params.interdot_cross_screening)) for g in layout.gate_names)
+    if np.isfinite(hbar_omega_b):
+        transmission = float(kemble_transmission(top, hbar_omega_b))
+        hbar_omega_0 = np.sqrt(2 * HBAR2_OVER_2ME_EV_NM2 * max(d1.curvature_ev_per_nm2, 1e-12) / mass)
+        t = float(hbar_omega_0 / np.pi * np.sqrt(transmission))
+        kemble_slopes = tuple(float(-2 * np.pi * s * ds / hbar_omega_b) for s, ds in zip(screening, top_slopes, strict=True))
+        inter = barriers[2]
+        barriers = (barriers[0], barriers[1], dataclasses.replace(inter, rate_hz=float(inter.attempt_rate_hz * transmission), log_rate_slopes_per_v=kemble_slopes))
+        v_scale = float(2.0 / kemble_slopes[jb]) if kemble_slopes[jb] > 0 else v_scale
     valley_params = params.valley or ValleyParams.for_material(material)
     radii = np.array([d1.radius_nm, d2.radius_nm] + ([sensor.sensor_dot.radius_nm] if sensor.sensor_dot else []))
     valleys = draw_valley_splitting_uev(valley_params, radii, np.random.default_rng(seed + 1))
@@ -493,6 +525,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         interdot_barrier_top_ev=top,
         interdot_barrier_top_slopes_ev_per_v=tuple(float(x) for x in top_slopes),
         interdot_barrier_hbar_omega_ev=None if not np.isfinite(hbar_omega_b) else hbar_omega_b,
+        interdot_barrier_screening=screening,
     )
 
 

@@ -16,10 +16,11 @@ from phantom.electrostatics.dots import DerivedDot, barrier_action
 
 CLOSED_B_L_V = -0.1
 """B_L below the programmed point that slows the left lead into the 10 kHz range on the reference device."""
-CLOSED = {"B_L": -0.11, "B_M": -0.05}
+CLOSED = {"B_L": -0.125, "B_M": -0.12}
 """B_L and B_M below the programmed point: dot 1 isolated, its lead in the 10 kHz range and t below
-1 µeV, so nothing reaches it through dot 2 (#58). Closing B_M also opens the left lead a little (#48),
-so B_L closes further than `CLOSED_B_L_V`."""
+1 µeV, so nothing reaches it through dot 2 (#58). With the screened interdot barrier (#70) t falls by a
+factor e every 23 mV of B_M, so B_M closes by 0.12 V; closing B_M also moves the left lead (#48), so
+B_L closes further than `CLOSED_B_L_V`."""
 
 
 @pytest.fixture(scope="module")
@@ -68,35 +69,59 @@ def _dot1_degeneracy(device: Device, v0: np.ndarray, n1_from: int | None = None)
     return grid[k]
 
 
+def _compile_tier_interdot_rate_hz(device: Device, v: np.ndarray) -> float:
+    """Γ_m recomputed as f_a·T, T Kemble's transmission of the interdot barrier's top from the potential
+    with the dots held, moved from the compiled top by each gate's screening factor (#70, ADR 0034)."""
+    from phantom.charge.barrier import kemble_transmission
+    from phantom.compile.device import interdot_barrier_top
+
+    _, basis = device.basis()
+    d1, d2 = (_derived(d) for d in device.dots)
+    inter = device.barriers[2]
+    top0 = device.interdot_barrier_top_ev
+    bare = interdot_barrier_top(basis, v, d1, d2, inter.tunnelling_level_ev, 0.19)[0] - top0
+    # one gate moves at a time here, so one factor applies: the one of the gate that moved
+    moved = np.flatnonzero(np.asarray(v) != device.operating_point())
+    sigma = device.interdot_barrier_screening[int(moved[0])] if len(moved) else 1.0
+    return inter.attempt_rate_hz * float(kemble_transmission(top0 + sigma * bare, device.interdot_barrier_hbar_omega_ev))
+
+
 def test_the_runtime_rates_are_the_compiled_ones_at_the_anchor_and_follow_the_compile_tier_nearby(device: Device):
     rates = device.runtime_rates()
     v0 = device.operating_point()
     compiled = [b.rate_hz for b in device.barriers]
     np.testing.assert_allclose(rates.rates_hz(v0), compiled, rtol=1e-12)
-    np.testing.assert_allclose(_compile_tier_rates_hz(device, v0), compiled, rtol=1e-12)
+    np.testing.assert_allclose(_compile_tier_rates_hz(device, v0)[:2], compiled[:2], rtol=1e-12), "the lead rates: the WKB action"
+    assert _compile_tier_interdot_rate_hz(device, v0) == pytest.approx(compiled[2], rel=1e-12), "the interdot rate: Kemble's transmission (#70)"
     for gate in ("P1", "P2", "R_L", "R_R"):  # the barrier gates move the dots: the shape grid (#59) below
         for dv in (-0.01, -0.003, 0.003, 0.01):
             v = v0.copy()
             v[device.gate_names.index(gate)] += dv
             # up to a factor e every 4 mV on these gates: the linearised exponent is within 20 % of the
             # action's change, plus the grid's step in the action (about 0.1 in ln Γ on the 2 nm grid)
-            change = np.log(_compile_tier_rates_hz(device, v) / compiled)
-            error = np.log(rates.rates_hz(v) / _compile_tier_rates_hz(device, v))
+            tier = _compile_tier_rates_hz(device, v)[:2]
+            change = np.log(tier / np.array(compiled[:2]))
+            error = np.log(rates.rates_hz(v)[:2] / tier)
             assert np.all(np.abs(error) <= 0.1 + 0.2 * np.abs(change)), f"{gate} {dv:+}: {error} against {change}"
-    # along a barrier gate the exponents are the shape grid's, the actions with the dots moved, at its nodes
+            # the interdot top is linear in the gates with the dots held: the screened slope reproduces it
+            assert rates.rates_hz(v)[2] == pytest.approx(_compile_tier_interdot_rate_hz(device, v), rel=0.05), f"{gate} {dv:+}"
+    # along a barrier gate the lead exponents are the shape grid's, the actions with the dots moved, at its
+    # nodes, and the interdot exponent is −2πσ·Δ(top)/ħω_b of the grid's barrier top (#70)
     g = device.shape
+    f_a = np.array([b.attempt_rate_hz for b in device.barriers])
     for gate in ("B_L", "B_M", "B_R"):
         j = device.gate_names.index(gate)
         k = g.gate_indices.index(j)
         for node, row in zip(g.nodes_v[k], g.changes[k], strict=True):
             v = v0.copy()
             v[j] = node
-            x = np.log(compiled) - np.log(np.array([b.attempt_rate_hz for b in device.barriers]) - compiled) + np.array(row)[g.layout["log_rate"]]
-            np.testing.assert_allclose(rates.rates_hz(v), [b.attempt_rate_hz for b in device.barriers] * (1 / (1 + np.exp(-x))), rtol=1e-12)
+            x = np.log(compiled) - np.log(f_a - compiled) + np.array(row)[g.layout["log_rate"]]
+            x[2] = np.log(compiled[2]) - np.log(f_a[2] - compiled[2]) - 2 * np.pi * device.interdot_barrier_screening[j] * np.array(row)[g.layout["barrier_top_ev"]][0] / device.interdot_barrier_hbar_omega_ev
+            np.testing.assert_allclose(rates.rates_hz(v), f_a * (1 / (1 + np.exp(-x))), rtol=1e-9)
 
 
 def test_the_state_carries_the_rates_at_its_voltages(device: Device):
-    v = np.stack([_point(device), _point(device, B_L=CLOSED_B_L_V), _point(device, B_M=-0.05)])
+    v = np.stack([_point(device), _point(device, B_L=CLOSED_B_L_V), _point(device, B_M=-0.15)])
     s = device.at(v)
     expected = device.runtime_rates().rates_hz(device.effective_voltages(v))
     for k, name in enumerate(("gamma_left_hz", "gamma_right_hz", "gamma_interdot_hz")):
@@ -136,7 +161,7 @@ def test_detailed_balance_holds_far_from_the_anchor(device: Device):
     """Only the prefactors move: W[j, i]·p_i = W[i, j]·p_j with the Boltzmann p, at a closed barrier
     where the rates span many decades."""
     rates = device.runtime_rates()
-    v = device.effective_voltages(_dot1_degeneracy(device, _point(device, B_L=CLOSED_B_L_V, B_M=-0.05)))
+    v = device.effective_voltages(_dot1_degeneracy(device, _point(device, B_L=CLOSED_B_L_V, B_M=-0.12)))
     states = rates.window_states(v)
     _, w = rates.rate_matrix(v, states)
     u = device.runtime_ci().state_energies_ev(v, states)

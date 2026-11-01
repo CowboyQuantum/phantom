@@ -40,7 +40,7 @@ from phantom.readout.transport import (
     pinch_off_current_a,
 )
 
-MODEL_VERSION = 4
+MODEL_VERSION = 5
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
 
 __all__ = [

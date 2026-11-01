@@ -13,10 +13,12 @@ interdot line at detuning ε, the polarization of the two states then follows
 ½(1 − ε/Ω · tanh(Ω/2kT)), Ω = √(ε² + 4t²), which is wider than the thermal 2kT once t ≳ kT. At t = 0 the
 eigenstates are the charge states and everything is the CI model (P0).
 
-`InterdotCoupling` gives t at the carried gate voltages: the exponent moves from its compiled value with
-half the slopes of ln Γ_m, since the interdot rate and t² come from the same transmission (Γ_m ∝ T,
-t ∝ √T, ADR 0027). It saturates at t_max = ħω₀/π, which is compile's estimate t = ħω₀√T/π at full
-transmission (the barrier between the dots gone).
+`InterdotCoupling` gives t at the carried gate voltages. With an `InterdotBarrier` (#70, ADR 0034) it
+is t = t_max·√T, T the barrier's one transmission (Kemble's, of its screened top continued past the
+merge), shared with the interdot rate and the conductance. Without one the exponent moves from its
+compiled value with half the slopes of ln Γ_m, since the interdot rate and t² come from the same
+transmission (Γ_m ∝ T, t ∝ √T, ADR 0027), and saturates at t_max. t_max = ħω₀/π is compile's estimate
+t = ħω₀√T/π at full transmission (the barrier between the dots gone).
 
 The window is a (2w+1)² grid around the gate-induced charge, its centre held at or above zero
 electrons. A state with a negative occupation is left out: its energy is +inf and it couples to nothing.
@@ -35,11 +37,13 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.special import expit
 
+from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.shape import ShapeGrid
 
-MODEL_VERSION = 2
+MODEL_VERSION = 3
 """2: the statics' window is ±4 and the dynamics' follows t (#59, ADR 0029): the truncation no longer
-shows at the middle of an interdot segment."""
+shows at the middle of an interdot segment. 3: with an `InterdotBarrier`, t = t_max·√T of the barrier's
+one transmission (#70, ADR 0034)."""
 
 STATIC_WINDOW = 4
 """Half-width of the hybridized window in the statics: chains of up to nine states."""
@@ -75,6 +79,9 @@ class InterdotCoupling:
     shape: ShapeGrid | None = None
     """When given, the exponent along its barrier gates is half the change of the interdot action on
     its grid (#59), and the slopes count for the other gates only."""
+    barrier: InterdotBarrier | None = None
+    """When given (#70), t = t_max·√T with T the barrier's transmission at the gates, and the slopes and
+    the shape grid's action are not used; `t_ref_ev` is then t_max·√T at the reference point."""
 
     def __post_init__(self) -> None:
         if not (self.t_ref_ev > 0 and self.t_max_ev > 0):
@@ -83,9 +90,12 @@ class InterdotCoupling:
             raise ValueError("slopes need one entry per gate")
 
     def tunnel_coupling_ev(self, v: np.ndarray) -> np.ndarray:
-        """t (...) in eV at carried voltages `v` (..., gates): t_max · σ(ln(t_ref/(t_max − t_ref)) + s·ΔV),
-        exactly t_ref at the reference point (the form of `readout.rates.saturating_rates_hz`)."""
+        """t (...) in eV at carried voltages `v` (..., gates). With a `barrier`, t_max·√T(V). Otherwise
+        t_max · σ(ln(t_ref/(t_max − t_ref)) + s·ΔV), exactly t_ref at the reference point (the form of
+        `readout.rates.saturating_rates_hz`)."""
         v = np.asarray(v, dtype=float)
+        if self.barrier is not None:
+            return self.t_max_ev * np.sqrt(self.barrier.transmission(v))
         dv = v - np.asarray(self.v_ref_v)
         anchor = np.log(self.t_ref_ev) - np.log(max(self.t_max_ev - self.t_ref_ev, 1e-12 * self.t_max_ev))
         if self.shape is None:

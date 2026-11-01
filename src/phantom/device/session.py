@@ -72,7 +72,7 @@ from phantom.spin.psb import psb_occupation
 if TYPE_CHECKING:
     from phantom.device import Device
 
-MODEL_VERSION = 8
+MODEL_VERSION = 9
 """Bumped whenever any output of `state_at` or `Session` changes for the same device, calls and seeds.
 2: the sensor reads its leads at the carried voltages; `State.sensor_gamma_hz`; the switchers in the
 sensor dot's units (ADR 0026). 3: the dots' rates follow the gates, in `State` and in the dynamics (#53).
@@ -83,7 +83,9 @@ rates follow their shape along the barrier gates; `State` reports their position
 energies and whether they merged (#59, ADR 0030). 7: J of the valence electrons at the gated t and
 shape, `State.exchange_frequency_hz`, and the Pauli readout at the last point's t (#60, ADR 0031). 8: the
 interdot conductance sets the triple-point splitting through an effective interdot capacitance;
-`State.interdot_conductance`, `interdot_splitting` (#66, ADR 0032)."""
+`State.interdot_conductance`, `interdot_splitting` (#66, ADR 0032). 9: t, the interdot rate and the
+conductance share the interdot barrier's one transmission, screened and continued past the merge;
+`State.interdot_barrier_top_ev` (#70, ADR 0034)."""
 
 SESSION_STREAM = 8
 """Key of the session's random streams under the device seed: [seed, 8, (noise_seed,) 0] samples the
@@ -147,7 +149,12 @@ class State:
     one (merged, a superdot) as the conductance rises (#66)."""
     dots_merged: np.ndarray | None = None
     """(...) True where a barrier gate is opened beyond the last point at which the potential forms two
-    dots (a dot merged with its neighbour or its lead): the shape there is held at that point (#59)."""
+    dots (a dot merged with its neighbour or its lead): the shape there is held at that point (#59),
+    while the interdot barrier's top keeps following the gates (#70)."""
+    interdot_barrier_top_ev: np.ndarray | None = None
+    """(...) the interdot barrier's top above the interdot tunnelling level at the carried voltages, eV
+    (#70): positive with a barrier between the dots, negative once it has sunk below the level; the one
+    transmission behind t, the interdot rate and the conductance is Kemble's of it."""
 
 
 @dataclass(frozen=True)
@@ -223,12 +230,14 @@ def _shape_at(device: Device, vc: np.ndarray) -> dict[str, np.ndarray]:
         pos = pos + np.stack([g.quantity(change, "x_nm"), g.quantity(change, "y_nm")], axis=-1)
         radii = radii + g.quantity(change, "radius_nm")
         merged = g.merged(vc)
+    barrier = device.runtime_interdot_barrier()
     return {
         "dot_positions_nm": np.broadcast_to(pos, lead + (2, 2)).copy(),
         "dot_radii_nm": np.broadcast_to(radii, lead + (2,)).copy(),
         "addition_energies_ev": device.runtime_ci().addition_energies_at_ev(vc),
         "dots_merged": merged,
         **dict(zip(("interdot_conductance", "interdot_splitting"), device.runtime_ci().interdot_splitting(vc), strict=True)),
+        "interdot_barrier_top_ev": None if barrier is None else barrier.barrier_top_ev(vc),
     }
 
 

@@ -43,12 +43,25 @@ def test_sampled_charge_without_dynamics_is_a_boltzmann_draw(device: Device):
     assert abs(upper - p) < 5 * math.sqrt(p * (1 - p) / 4000)
 
 
+def _pair_switching_hz(device: Device, v: np.ndarray) -> float:
+    """The total rate between the two lowest eigenstates at programmed `v`, Hz: dot 1's lead plus the
+    second-order path through dot 2 (#58), which with the screened interdot barrier (#70) keeps t near
+    its compiled value where P1 has already slowed the left lead by a decade or two (#48)."""
+    rates = device.runtime_rates()
+    vc = device.effective_voltages(v)
+    e, _, w = rates.eigen_rate_matrix(vc, rates.window_states(vc))
+    a, b = np.argsort(e)[:2]
+    return float(w[a, b] + w[b, a])
+
+
 @pytest.mark.parametrize("gamma_dwell", [0.02, 0.5, 50.0])
 def test_the_trajectory_switches_as_the_two_state_propagator(device: Device, gamma_dwell: float):
-    """At a dot-lead degeneracy the charge is a two-state Markov process with total rate Γ_L: between
-    consecutive samples it changes with probability 2p(1−p)(1 − e^{−Γ_L·dwell}) on average."""
+    """At a dot-lead degeneracy the charge is a two-state Markov process with the total rate Γ between
+    the two lowest eigenstates (the left lead, plus the path through dot 2): between consecutive
+    samples it changes with probability 2p(1−p)(1 − e^{−Γ·dwell}) on average."""
     v = _dot1_degeneracy(device)
-    gamma = device.at(v).gamma_left_hz
+    gamma = _pair_switching_hz(device, v)
+    assert gamma >= float(device.at(v).gamma_left_hz)
     dwell = gamma_dwell / gamma
     n = np.rint(device.session(noise=False).sense(v, dwell, samples=6000).n_present[:, 0])  # each eigenstate's charge state
     p = float(np.mean(n > n.min()))
