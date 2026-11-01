@@ -911,8 +911,8 @@ side.</p>
 against every gate and capped at the attempt rate. A session's dynamics use the rates at each sample's
 voltages: closing a barrier gate slows its lead until a sweep latches and a parked point telegraphs.
 <code>Truth</code> states the rates at the operating point.</p>
-<p>The interdot tunnel coupling follows every gate as well (ADR 0029): <code>State.tunnel_coupling_ev</code> is the
-compiled t moved by half the slopes of ln Γ_m and capped at ħω₀/π, and the charge states of one total
+<p>The interdot tunnel coupling follows every gate as well (ADR 0029, 0034): <code>State.tunnel_coupling_ev</code> is
+(ħω₀/π)·√T, with T the interdot barrier's one transmission (below), and the charge states of one total
 charge hybridize through it. An interdot line is then the two-level polarization ½(1 − ε/Ω·tanh(Ω/2kT)),
 Ω = √(ε² + 4t²), so opening the barrier gate widens it; <code>State.n_mean</code> and the sensor read the
 eigenstates, and a session's dynamics run over them. A dot is isolated only when its own barrier and the
@@ -923,18 +923,27 @@ each barrier gate, and at runtime the capacitances, lever arms and offsets at th
 follow it. <code>State.dot_positions_nm</code>, <code>dot_radii_nm</code> and <code>addition_energies_ev</code> report the shape, and
 <code>State.dots_merged</code> flags a point where a barrier gate is opened past the last point at which the
 potential forms two dots; the shape there is held at that point, and the charge model is not meant to
-describe it. Because the dots' charge is counted absolutely, a barrier gate moves the plunger lines by more
-than its cross-capacitance.</p>
+describe it, but the interdot barrier's top keeps following the gates there (ADR 0034), so a far-open
+B_M leaves one dot at every occupancy. Because the dots' charge is counted absolutely, a barrier gate
+moves the plunger lines by more than its cross-capacitance.</p>
 <p>The exchange follows them as well (ADR 0031). <code>State.exchange_ev</code> is the singlet–triplet splitting of the
 last electron on each dot in the ground charge state, at the gated t and the shaped dots, and
 <code>State.exchange_frequency_hz</code> is J/h. It is a qubit pair's exchange where both dots hold an odd number of
 electrons (read the parity from <code>n_ground</code>), and it jumps where the ground charge state changes.
 <code>Session.spin_readout</code> reads at the interdot coupling of the last point the session was given.</p>
+<p>The interdot barrier has one transmission (ADR 0034): Kemble's, of its top above the interdot tunnelling
+level, <code>State.interdot_barrier_top_ev</code>. The top is moved by every gate through two placeholder screening
+factors (<code>CompileParams.interdot_barrier_screening</code> for the barrier gate, times <code>interdot_cross_screening</code>
+for every other gate; 1 and 1 is the bare potential), and along the barrier gates through the shape
+grid, continued past the merge. t, <code>gamma_interdot_hz</code> = f_a·T and the conductance all follow it: on the
+reference device t changes by a factor e every 23 mV of B_M, and a plunger acts about four times more
+weakly than B_M.</p>
 <p>The interdot conductance sets the honeycomb's triple-point splitting (ADR 0032).
-<code>State.interdot_conductance</code> is Kemble's transmission of the interdot barrier per channel, and
-<code>State.interdot_splitting</code> is the fractional splitting f, the interdot segment's length as a fraction of
-the cell along anti-detuning. Opening the barrier gate between the dots takes f from its geometric value
-(small hexagons) towards one (the diagonal lines of a superdot); closing it shrinks the segments back.</p>
+<code>State.interdot_conductance</code> is that transmission per channel, and <code>State.interdot_splitting</code> is the
+fractional splitting f, the interdot segment's length as a fraction of the cell along anti-detuning.
+Opening the barrier gate between the dots takes f from its geometric value (small hexagons) towards one
+(the diagonal lines of a superdot) over about 65 mV of B_M on the reference device; closing it shrinks
+the segments back.</p>
 <p>With dynamics, the sensor dot's own charge is a process on the same clock (ADR 0028). Each sample's current
 is the charge that left to the drain during the dwell over the dwell, so a fast sensor reads its
 stationary current with shot noise shrinking as 1/√dwell, and a sensor slowed by its barriers or baths
