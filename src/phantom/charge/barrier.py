@@ -34,9 +34,11 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from phantom.charge.puddle import PuddleGrowth
 from phantom.charge.shape import ShapeGrid
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: with a `puddle` and the occupancy scale, the top is seen from the puddles' edges (#72, ADR 0035)."""
 
 
 def kemble_transmission(top_ev: np.ndarray, hbar_omega_b_ev: float) -> np.ndarray:
@@ -65,6 +67,9 @@ class InterdotBarrier:
     shape: ShapeGrid | None = None
     """When given, ΔU along its barrier gates follows its `barrier_top_ev` column, continued linearly
     past each end, and the slopes count for the other gates only."""
+    puddle: PuddleGrowth | None = None
+    """When given and a `scale` is passed, the top is raised by the puddles' `barrier_shift_ev` (#72):
+    higher as seen from smaller puddles, lower from larger ones."""
 
     def __post_init__(self) -> None:
         n = len(self.v_ref_v)
@@ -76,8 +81,9 @@ class InterdotBarrier:
     def _sigma(self) -> np.ndarray:
         return np.ones(len(self.v_ref_v)) if self.screening is None else np.asarray(self.screening, dtype=float)
 
-    def barrier_top_ev(self, v: np.ndarray) -> np.ndarray:
-        """ΔU (...) at carried voltages `v` (..., gates), eV."""
+    def barrier_top_ev(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
+        """ΔU (...) at carried voltages `v` (..., gates), eV; with the puddles' `scale` (..., 2), as seen
+        from their edges."""
         v = np.asarray(v, dtype=float)
         sigma = self._sigma()
         slopes = np.asarray(self.top_slopes_ev_per_v, dtype=float) * sigma
@@ -85,16 +91,17 @@ class InterdotBarrier:
         if self.shape is not None:
             slopes[list(self.shape.gate_indices)] = 0.0
             along = self.shape.quantity_along(v, "barrier_top_ev", weights=sigma, beyond="linear")[..., 0]
-        return self.top_ev + (v - np.asarray(self.v_ref_v)) @ slopes + along
+        shift = 0.0 if self.puddle is None or scale is None else self.puddle.barrier_shift_ev(scale)
+        return self.top_ev + (v - np.asarray(self.v_ref_v)) @ slopes + along + shift
 
-    def transmission(self, v: np.ndarray) -> np.ndarray:
+    def transmission(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
         """T (...) at carried voltages `v`: Kemble's transmission of the top there."""
-        return kemble_transmission(self.barrier_top_ev(v), self.hbar_omega_b_ev)
+        return kemble_transmission(self.barrier_top_ev(v, scale), self.hbar_omega_b_ev)
 
-    def log_odds_change(self, v: np.ndarray) -> np.ndarray:
+    def log_odds_change(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
         """ln(T/(1 − T)) − ln(T_ref/(1 − T_ref)) = −2π(ΔU(V) − ΔU_ref)/ħω_b (...): the exponent by which a
         rate f_a·T moves from its reference in `readout.rates.saturating_rates_hz`."""
-        return -2 * np.pi * (self.barrier_top_ev(v) - self.top_ev) / self.hbar_omega_b_ev
+        return -2 * np.pi * (self.barrier_top_ev(v, scale) - self.top_ev) / self.hbar_omega_b_ev
 
 
 __all__ = ["MODEL_VERSION", "InterdotBarrier", "kemble_transmission"]

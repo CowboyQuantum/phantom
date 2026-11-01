@@ -412,3 +412,40 @@ def honeycomb_vs_barrier(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
             out[f"splitting_map{k}"] = np.asarray(st.interdot_splitting[n // 2, n // 2])
         ctx.count(model_evals=len(db) + len(at) * n * n)
     return out
+
+
+def honeycomb_vs_occupancy(ctx: Context, p: Protocol) -> dict[str, np.ndarray]:
+    """The dots grow with their occupancy (#72, ADR 0035). Along the plunger diagonal from the first
+    electrons to beyond the compiled occupancy, `Device.at` gives the puddle radii, the addition
+    energies, the barrier top above the level, the splitting f and t. Charge maps over P1 and P2 at one
+    B_M and four occupancies show the honeycomb from a grid of large cells near (1,1), through hexagons,
+    to the diagonal lines of a superdot at high occupancy."""
+    line, maps = p.sweep
+    with ctx.compile():
+        dev = _compiled(p)
+        v0 = _tuned_point(dev)
+        jb, i1, i2 = (dev.gate_names.index(g) for g in ("B_M", "P1", "P2"))
+        v0[jb] += float(line["b_m_offset_v"])
+        dp = np.linspace(float(line["from"]), float(line["to"]), int(line["points"]))
+        half, n = float(maps["half_span_v"]), int(maps["points"])
+        x = np.linspace(-half, half, n)
+        at = [float(b) for b in maps["at"]]
+    out: dict[str, np.ndarray] = {"dp_v": dp, "x_v": x}
+    with ctx.run(len(dp) + len(at) * n * n):
+        diag = np.broadcast_to(v0, dp.shape + v0.shape).copy()
+        diag[:, i1] += dp
+        diag[:, i2] += dp
+        s = dev.at(diag)
+        out["n_total"] = s.n_mean.sum(axis=-1)
+        out["puddle_radius_1_nm"], out["puddle_radius_2_nm"] = s.puddle_radii_nm[:, 0], s.puddle_radii_nm[:, 1]
+        out["addition_energy_1_ev"], out["addition_energy_2_ev"] = s.addition_energies_ev[:, 0], s.addition_energies_ev[:, 1]
+        out["barrier_top_ev"], out["splitting"], out["tunnel_coupling_ev"] = s.interdot_barrier_top_ev, s.interdot_splitting, s.tunnel_coupling_ev
+        for k, d in enumerate(at):
+            grid = np.broadcast_to(v0, (n, n) + v0.shape).copy()
+            grid[..., i1] += d + x[:, None]
+            grid[..., i2] += d + x[None, :]
+            st = dev.at(grid)
+            out[f"charge_map{k}"] = st.n_mean[..., 0] + 0.5 * st.n_mean[..., 1]  # [P1, P2]: every state its own shade
+            out[f"occupancy{k}"] = np.asarray(st.n_mean[n // 2, n // 2].sum())
+        ctx.count(model_evals=len(dp) + len(at) * n * n)
+    return out

@@ -62,23 +62,28 @@ def test_far_from_the_anticrossings_it_is_second_order_in_t():
 
 def test_on_the_device_it_follows_b_m_as_t_squared_and_saturates(device: Device):
     """Along B_M in one charge cell of the reference device, J tracks 2t²(1/Δ_R + 1/Δ_L) while t ≪ Δ and
-    rises with t; once t passes a twentieth of the gaps the second-order form overestimates it."""
+    rises with t; once t passes a fortieth of the gaps the second-order form visibly overestimates it."""
     v0 = np.array(device.programmed_point_v)
     jb = device.gate_names.index("B_M")
-    db = np.linspace(-0.06, 0.06, 25)
+    db = np.linspace(-0.08, 0.06, 71)
     v = np.broadcast_to(v0, db.shape + v0.shape).copy()
     v[:, jb] += db
     s = device.at(v)
     ci = device.runtime_ci()
-    cell = np.all(s.n_ground == s.n_ground[len(db) // 2], axis=-1)
+    # B_M's cross-capacitance moves the cell's boundaries along the sweep (the puddles with it, #72): take
+    # the cell the programmed point sits in, wherever its boundaries fall
+    cell = np.all(s.n_ground == s.n_ground[np.argmin(np.abs(db))], axis=-1)
     second = np.array([2 * t**2 * (1 / dr + 1 / dl) for t, (dr, dl) in zip(s.tunnel_coupling_ev, (_gaps(ci, x, n) for x, n in zip(s.v_carried_v, s.n_ground, strict=True)), strict=True)])
     gaps = np.array([min(_gaps(ci, x, n)) for x, n in zip(s.v_carried_v, s.n_ground, strict=True)])
-    weak = cell & (s.tunnel_coupling_ev < 1e-2 * gaps)
-    strong = cell & (s.tunnel_coupling_ev > 0.05 * gaps)
-    assert weak.sum() >= 5 and strong.any()
+    weak = cell & (s.tunnel_coupling_ev < 1.5e-2 * gaps)
+    strong = cell & (s.tunnel_coupling_ev > 0.025 * gaps)
+    assert weak.sum() >= 3 and strong.any(), (weak.sum(), strong.sum(), cell.sum())
     np.testing.assert_allclose(s.exchange_ev[weak], second[weak], rtol=1e-3)
     assert np.all(s.exchange_ev[strong] < second[strong]), "saturating below the second-order form"
-    assert np.all(np.diff(s.exchange_ev[cell]) > 0), "opening B_M raises J"
+    # near a cell boundary the shrinking gaps raise J faster than t² lowers it; away from the boundaries
+    # (gaps above half their largest) opening B_M raises J
+    middle = cell & (gaps > 0.5 * gaps[cell].max())
+    assert middle.sum() >= 5 and np.all(np.diff(s.exchange_ev[middle]) > 0), "opening B_M raises J"
     np.testing.assert_array_equal(s.exchange_frequency_hz, s.exchange_ev / (2 * np.pi * HBAR_EV_S))
 
 

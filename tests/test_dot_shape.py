@@ -23,8 +23,9 @@ def device() -> Device:
 
 
 def _geometric_ci(device: Device):
-    """The runtime CI model without the interdot splitting (#66): the shape's own capacitances."""
-    return dataclasses.replace(device.runtime_ci(), splitting=None)
+    """The runtime CI model without the interdot splitting (#66) and without the puddles (#72): the
+    shape's own capacitances."""
+    return dataclasses.replace(device.runtime_ci(), splitting=None, puddle=None)
 
 
 def _along(device: Device, gate: str, dv: np.ndarray) -> np.ndarray:
@@ -136,7 +137,7 @@ def test_the_rates_follow_the_moved_dots(device: Device):
     t's is half of it, so below saturation Γ_m/t² stays fixed while Γ_m moves by decades."""
     v = _along(device, "B_M", np.linspace(-0.15, 0.0, 7))
     rates = device.runtime_rates().rates_hz(v)
-    t = device.runtime_coupling().tunnel_coupling_ev(v)
+    t = device.runtime_ci().tunnel_coupling_ev(v)  # the barrier seen from the puddles' edges, as the rates see it (#72)
     ratio = np.log(rates[:, 2]) - 2 * np.log(t)
     np.testing.assert_allclose(ratio, ratio[-1], atol=0.1), "up to the logistic's saturation"
     assert np.all(np.diff(rates[:, 2]) > 0) and rates[-1, 2] > 1e3 * rates[0, 2]

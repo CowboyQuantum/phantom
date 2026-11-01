@@ -29,6 +29,12 @@ fields `c_dot_af` and `c_gate_af` and the derived quantities above are those at 
 With a `splitting` (#66, ADR 0032) the interdot conductance adds an effective interdot capacitance
 ΔC_m(V)·[[1, −1], [−1, 1]] to the energies (`charge.splitting`), so the triple points separate from a
 grid towards a superdot as the barrier opens; the gate-induced charge keeps the geometric capacitances.
+
+With a `puddle` (#72, ADR 0035) each dot's capacitances scale with its gate-induced charge
+(`charge.puddle`): the self-capacitance by s_i = √(n_i/N_ref,i), the mutual one by s₁s₂, and the induced
+charge is that of the scaled capacitances, so the addition energy falls as N^(−1/3) and the cells shrink
+towards high occupancy. The same scale is handed to the interdot barrier, whose top the puddles' edges
+see higher at low occupancy and lower at high.
 """
 
 from __future__ import annotations
@@ -45,14 +51,16 @@ from phantom.charge.hybrid import (
     boltzmann,
     window_eigenstates,
 )
+from phantom.charge.puddle import PuddleGrowth
 from phantom.charge.shape import ShapeGrid
 from phantom.charge.splitting import InterdotSplitting
 from phantom.constants import E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
-MODEL_VERSION = 2
+MODEL_VERSION = 3
 """Bumped whenever any output of this module changes for the same parameters (ADR 0003). 2: duplicated
-clipped states near the empty corner carry no weight (qdt-sim over-counted them). Without a `coupling`
-the output is that of version 2."""
+clipped states near the empty corner carry no weight (qdt-sim over-counted them). 3: with a `puddle`
+the capacitances and the induced charge scale with the occupancy, and the occupancy scale reaches the
+coupling and the splitting (#72, ADR 0035). Without a `puddle` the output is that of version 2."""
 
 
 @dataclass(frozen=True)
@@ -83,6 +91,9 @@ class ConstantInteractionParams:
     splitting: InterdotSplitting | None = None
     """The interdot conductance and the triple-point splitting it sets (#66): an effective interdot
     capacitance added to the energies; None keeps the geometric capacitances."""
+    puddle: PuddleGrowth | None = None
+    """The dots' growth with their occupancy (#72): the capacitances scale with the gate-induced charge
+    and the interdot barrier is seen from the puddles' edges; None keeps the dots' size fixed."""
 
     def __post_init__(self) -> None:
         n_g = len(self.gate_names)
@@ -103,30 +114,59 @@ class ConstantInteractionParams:
 
     def local(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """(C_dot (..., 2, 2) in aF, n_g (..., 2) in electrons) at gate voltages `v` (..., gates): with a
-        `shape`, the capacitances and the induced charge of the dots as the barrier gates have shaped them."""
+        `shape`, the capacitances and the induced charge of the dots as the barrier gates have shaped them;
+        with a `puddle`, scaled with the occupancy; with a `splitting`, the effective interdot capacitance
+        added."""
         v = np.asarray(v, dtype=float)
-        c, n_g = self._geometric(v)
+        c, n_g, s = self._geometry(v)
         if self.splitting is not None:
-            _, extra = self.splitting.splitting(v, c)
+            _, extra = self.splitting.splitting(v, c, s)
             c = c + extra[..., None, None] * np.array([[1.0, -1.0], [-1.0, 1.0]])
         return c, n_g
 
-    def _geometric(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """(C_dot (..., 2, 2), n_g (..., 2)) from the geometry alone: the shape grid, no splitting."""
+    def _bare(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """(C_dot (..., 2, 2) in aF, φ (..., 2) in V) of the compiled dots, the potential at each dot from
+        the lever arms; with a `shape`, as the barrier gates have shaped them."""
         if self.shape is None:
-            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), v @ self.c_gate_af.T / E_UNIT_V_PER_E_AF
+            alpha = np.linalg.solve(self.c_dot_af, self.c_gate_af)
+            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), v @ alpha.T
         g = self.shape
         change = g.change(v)
         c11, c22, cm = (g.quantity(change, k)[..., 0] for k in ("c11_af", "c22_af", "cm_af"))
         c = self.c_dot_af + np.stack([np.stack([c11, -cm], axis=-1), np.stack([-cm, c22], axis=-1)], axis=-2)
         alpha = np.linalg.solve(self.c_dot_af, self.c_gate_af) + g.quantity(change, "alpha")
-        phi = np.einsum("...ig,...g->...i", alpha, v) - g.quantity(change, "offset_ev")
-        return c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF
+        return c, np.einsum("...ig,...g->...i", alpha, v) - g.quantity(change, "offset_ev")
+
+    def _geometry(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+        """(C_dot (..., 2, 2), n_g (..., 2), the puddles' scale (..., 2) or None) from the geometry alone:
+        the shape grid and the puddles, no splitting."""
+        if self.shape is None and self.puddle is None:
+            return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), v @ self.c_gate_af.T / E_UNIT_V_PER_E_AF, None
+        c, phi = self._bare(v)
+        n_g = np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF
+        if self.puddle is None:
+            return c, n_g, None
+        s = self.puddle.scale(n_g)
+        c = self.puddle.capacitances_af(c, s)
+        return c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF, s
+
+    def _geometric(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """(C_dot (..., 2, 2), n_g (..., 2)) from the geometry alone: the shape grid and the puddles, no splitting."""
+        c, n_g, _ = self._geometry(v)
+        return c, n_g
+
+    def occupancy_scale(self, v: np.ndarray) -> np.ndarray:
+        """s (..., 2) at gate voltages `v`: each puddle's √(n/N_ref) (`charge.puddle`), the scale the
+        interdot barrier takes; ones without a `puddle`."""
+        v = np.asarray(v, dtype=float)
+        if self.puddle is None:
+            return np.ones(v.shape[:-1] + (2,))
+        return self._geometry(v)[2]
 
     @property
     def varies(self) -> bool:
-        """Whether the capacitances depend on the gate voltages (a `shape` or a `splitting`)."""
-        return self.shape is not None or self.splitting is not None
+        """Whether the capacitances depend on the gate voltages (a `shape`, a `puddle` or a `splitting`)."""
+        return self.shape is not None or self.puddle is not None or self.splitting is not None
 
     def _c_inv(self, v: np.ndarray) -> np.ndarray:
         """C_dot⁻¹: (2, 2) when the capacitances are fixed, (..., 2, 2) at gate voltages `v` otherwise."""
@@ -138,12 +178,12 @@ class ConstantInteractionParams:
         """(g, f) (...) at gate voltages `v`: the interdot conductance per channel and the fractional
         triple-point splitting; without a `splitting`, (0, the geometric f_C = 2C_m/(C_t + C_m))."""
         v = np.asarray(v, dtype=float)
-        c, _ = self._geometric(v)
+        c, _, s = self._geometry(v)
         if self.splitting is None:
             c_t, c_m = 0.5 * (c[..., 0, 0] + c[..., 1, 1]), -c[..., 0, 1]
             return np.zeros(v.shape[:-1]), 2 * c_m / (c_t + c_m)
-        f, _ = self.splitting.splitting(v, c)
-        return self.splitting.conductance(v), f
+        f, _ = self.splitting.splitting(v, c, s)
+        return self.splitting.conductance(v, s), f
 
     def addition_energies_at_ev(self, v: np.ndarray) -> np.ndarray:
         """(..., 2) each dot's addition energy E_UNIT·(C_dot⁻¹)_ii at gate voltages `v`, eV."""
@@ -242,7 +282,7 @@ class ConstantInteractionParams:
         v = np.asarray(v, dtype=float)
         if self.coupling is None:
             return np.zeros(v.shape[:-1])
-        return self.coupling.tunnel_coupling_ev(v)
+        return self.coupling.tunnel_coupling_ev(v, None if self.puddle is None else self.occupancy_scale(v))
 
     def eigenstates(self, v: np.ndarray, level_shift_ev: np.ndarray | None = None) -> WindowEigenstates:
         """The window's hybridized eigenstates at gate voltages `v` (..., gates) (`charge.hybrid`). The last

@@ -40,10 +40,10 @@ from scipy.special import expit
 from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.shape import ShapeGrid
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """2: the statics' window is ±4 and the dynamics' follows t (#59, ADR 0029): the truncation no longer
 shows at the middle of an interdot segment. 3: with an `InterdotBarrier`, t = t_max·√T of the barrier's
-one transmission (#70, ADR 0034)."""
+one transmission (#70, ADR 0034). 4: the puddles' occupancy scale reaches the barrier (#72, ADR 0035)."""
 
 STATIC_WINDOW = 4
 """Half-width of the hybridized window in the statics: chains of up to nine states."""
@@ -89,13 +89,14 @@ class InterdotCoupling:
         if len(self.log_slopes_per_v) != len(self.v_ref_v):
             raise ValueError("slopes need one entry per gate")
 
-    def tunnel_coupling_ev(self, v: np.ndarray) -> np.ndarray:
-        """t (...) in eV at carried voltages `v` (..., gates). With a `barrier`, t_max·√T(V). Otherwise
+    def tunnel_coupling_ev(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
+        """t (...) in eV at carried voltages `v` (..., gates). With a `barrier`, t_max·√T(V), the barrier
+        seen from the puddles' edges when their `scale` (..., 2) is given (#72). Otherwise
         t_max · σ(ln(t_ref/(t_max − t_ref)) + s·ΔV), exactly t_ref at the reference point (the form of
         `readout.rates.saturating_rates_hz`)."""
         v = np.asarray(v, dtype=float)
         if self.barrier is not None:
-            return self.t_max_ev * np.sqrt(self.barrier.transmission(v))
+            return self.t_max_ev * np.sqrt(self.barrier.transmission(v, scale))
         dv = v - np.asarray(self.v_ref_v)
         anchor = np.log(self.t_ref_ev) - np.log(max(self.t_max_ev - self.t_ref_ev, 1e-12 * self.t_max_ev))
         if self.shape is None:

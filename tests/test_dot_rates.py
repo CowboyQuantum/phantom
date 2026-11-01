@@ -16,7 +16,7 @@ from phantom.electrostatics.dots import DerivedDot, barrier_action
 
 CLOSED_B_L_V = -0.1
 """B_L below the programmed point that slows the left lead into the 10 kHz range on the reference device."""
-CLOSED = {"B_L": -0.125, "B_M": -0.12}
+CLOSED = {"B_L": -0.165, "B_M": -0.12}
 """B_L and B_M below the programmed point: dot 1 isolated, its lead in the 10 kHz range and t below
 1 µeV, so nothing reaches it through dot 2 (#58). With the screened interdot barrier (#70) t falls by a
 factor e every 23 mV of B_M, so B_M closes by 0.12 V; closing B_M also moves the left lead (#48), so
@@ -57,7 +57,7 @@ def _dot1_degeneracy(device: Device, v0: np.ndarray, n1_from: int | None = None)
     with `n1_from`, the transition from that many electrons, searched farther: the barrier gates move
     dot 1's lines along P1 as they reshape the dots (#59)."""
     j = device.gate_names.index("P1")
-    half, points = (0.04, 4001) if n1_from is None else (0.06, 6001)
+    half, points = (0.04, 16001) if n1_from is None else (0.1, 40001)  # 5 µV steps: the thermal step is about 0.2 mV wide
     grid = v0 + np.linspace(-half, half, points)[:, None] * np.eye(len(v0))[j]
     n = device.at(grid).n_mean
     frac = n[:, 0] - np.floor(n[:, 0])
@@ -83,7 +83,9 @@ def _compile_tier_interdot_rate_hz(device: Device, v: np.ndarray) -> float:
     # one gate moves at a time here, so one factor applies: the one of the gate that moved
     moved = np.flatnonzero(np.asarray(v) != device.operating_point())
     sigma = device.interdot_barrier_screening[int(moved[0])] if len(moved) else 1.0
-    return inter.attempt_rate_hz * float(kemble_transmission(top0 + sigma * bare, device.interdot_barrier_hbar_omega_ev))
+    # the puddles' edges (#72): the occupancy's own shift of the top, from the stored cut
+    shift = 0.0 if device.puddle is None else float(device.puddle.barrier_shift_ev(device.runtime_ci().occupancy_scale(np.asarray(v, dtype=float))))
+    return inter.attempt_rate_hz * float(kemble_transmission(top0 + sigma * bare + shift, device.interdot_barrier_hbar_omega_ev))
 
 
 def test_the_runtime_rates_are_the_compiled_ones_at_the_anchor_and_follow_the_compile_tier_nearby(device: Device):
@@ -116,7 +118,8 @@ def test_the_runtime_rates_are_the_compiled_ones_at_the_anchor_and_follow_the_co
             v = v0.copy()
             v[j] = node
             x = np.log(compiled) - np.log(f_a - compiled) + np.array(row)[g.layout["log_rate"]]
-            x[2] = np.log(compiled[2]) - np.log(f_a[2] - compiled[2]) - 2 * np.pi * device.interdot_barrier_screening[j] * np.array(row)[g.layout["barrier_top_ev"]][0] / device.interdot_barrier_hbar_omega_ev
+            shift = 0.0 if device.puddle is None else float(device.puddle.barrier_shift_ev(device.runtime_ci().occupancy_scale(v)))  # the puddles' edges (#72)
+            x[2] = np.log(compiled[2]) - np.log(f_a[2] - compiled[2]) - 2 * np.pi * (device.interdot_barrier_screening[j] * np.array(row)[g.layout["barrier_top_ev"]][0] + shift) / device.interdot_barrier_hbar_omega_ev
             np.testing.assert_allclose(rates.rates_hz(v), f_a * (1 / (1 + np.exp(-x))), rtol=1e-9)
 
 

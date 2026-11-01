@@ -30,8 +30,9 @@ from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.shape import ShapeGrid
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2, HBAR_EV_S
 
-MODEL_VERSION = 2
-"""2: with an `InterdotBarrier`, the interdot rate is f_a·T of the barrier's one transmission (#70)."""
+MODEL_VERSION = 3
+"""2: with an `InterdotBarrier`, the interdot rate is f_a·T of the barrier's one transmission (#70).
+3: the interdot barrier is seen from the puddles' edges when their scale is given (#72)."""
 
 ATTEMPT_RATE_FLOOR_HZ = 1e9
 ATTEMPT_RATE_CEILING_HZ = 1e13
@@ -112,8 +113,9 @@ class GateRates:
         if self.interdot is not None and k != 3:
             raise ValueError("an interdot barrier needs the three barriers: left lead, right lead, interdot")
 
-    def rates_hz(self, v: np.ndarray) -> np.ndarray:
-        """Γ of each barrier (..., k), Hz, at carried voltages `v` (..., gates)."""
+    def rates_hz(self, v: np.ndarray, interdot_scale: np.ndarray | None = None) -> np.ndarray:
+        """Γ of each barrier (..., k), Hz, at carried voltages `v` (..., gates); `interdot_scale` (..., 2)
+        is the puddles' scale the interdot barrier is seen from (#72)."""
         v = np.asarray(v, dtype=float)
         dv = v - np.asarray(self.v_ref_v)
         slopes = np.array(self.log_rate_slopes_per_v)
@@ -123,5 +125,5 @@ class GateRates:
             slopes[:, list(self.shape.gate_indices)] = 0.0
             exponent = dv @ slopes.T + self.shape.quantity(self.shape.change(v), "log_rate")
         if self.interdot is not None:
-            exponent = np.concatenate([exponent[..., :2], self.interdot.log_odds_change(v)[..., None]], axis=-1)
+            exponent = np.concatenate([exponent[..., :2], self.interdot.log_odds_change(v, interdot_scale)[..., None]], axis=-1)
         return saturating_rates_hz(np.asarray(self.gamma_ref_hz), np.asarray(self.attempt_rate_hz), exponent)

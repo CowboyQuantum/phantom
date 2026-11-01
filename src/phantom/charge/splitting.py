@@ -44,8 +44,9 @@ from scipy.interpolate import PchipInterpolator
 
 from phantom.charge.barrier import InterdotBarrier, kemble_transmission
 
-MODEL_VERSION = 2
-"""2: ΔU and g come from the `InterdotBarrier`, screened and continued past the merge (#70, ADR 0034)."""
+MODEL_VERSION = 3
+"""2: ΔU and g come from the `InterdotBarrier`, screened and continued past the merge (#70, ADR 0034).
+3: the puddles' occupancy scale reaches the barrier (#72, ADR 0035)."""
 
 EULER_GAMMA = 0.5772156649015329
 F_MAX = 0.98
@@ -92,22 +93,23 @@ class InterdotSplitting:
     barrier: InterdotBarrier
     """The barrier between the dots: its top at the gates and its transmission (`charge.barrier`)."""
 
-    def barrier_top_ev(self, v: np.ndarray) -> np.ndarray:
-        """ΔU (...) at carried voltages `v` (..., gates), eV."""
-        return self.barrier.barrier_top_ev(v)
+    def barrier_top_ev(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
+        """ΔU (...) at carried voltages `v` (..., gates), eV; with the puddles' `scale` (..., 2) (#72)."""
+        return self.barrier.barrier_top_ev(v, scale)
 
-    def conductance(self, v: np.ndarray) -> np.ndarray:
+    def conductance(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
         """g (...) per channel at carried voltages `v`: the barrier's transmission."""
-        return self.barrier.transmission(v)
+        return self.barrier.transmission(v, scale)
 
-    def splitting(self, v: np.ndarray, c: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def splitting(self, v: np.ndarray, c: np.ndarray, scale: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
         """(f (...), ΔC_m (...) in aF): the total fractional splitting and the interdot capacitance that
-        sets it, given the geometric capacitances `c` (..., 2, 2) at carried voltages `v`."""
+        sets it, given the geometric capacitances `c` (..., 2, 2) at carried voltages `v` and the
+        puddles' `scale` (..., 2) when the dots grow with their occupancy (#72)."""
         c = np.asarray(c, dtype=float)
         c_t = 0.5 * (c[..., 0, 0] + c[..., 1, 1])
         c_m = -c[..., 0, 1]
         f_c = 2 * c_m / (c_t + c_m)
-        f_gh = golden_halperin_splitting(self.conductance(v))
+        f_gh = golden_halperin_splitting(self.conductance(v, scale))
         f = f_c + (F_MAX - f_c) * f_gh
         return f, (F_MAX - f_c) * f_gh * (c_t + c_m) / (2 * (1 - f))
 

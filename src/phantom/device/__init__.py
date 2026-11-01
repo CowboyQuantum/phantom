@@ -22,6 +22,7 @@ from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
 from phantom.charge.hybrid import InterdotCoupling
+from phantom.charge.puddle import PuddleGrowth
 from phantom.charge.shape import ShapeGrid
 from phantom.charge.splitting import InterdotSplitting
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2, K_B_EV_PER_K
@@ -36,7 +37,7 @@ from phantom.readout.rates import GateRates
 from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 8
+MODEL_VERSION = 9
 """2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
 3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026).
 4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027).
@@ -44,13 +45,15 @@ MODEL_VERSION = 8
 6: the runtime CI model, coupling and rates follow the dots' shape along the barrier gates (#59, ADR 0030).
 7: the runtime CI model carries the interdot splitting (`runtime_splitting`, #66, ADR 0032).
 8: t, the interdot rate and the conductance share the interdot barrier's one transmission
-(`runtime_interdot_barrier`: screened, continued past the merge; #70, ADR 0034)."""
-DEVICE_FORMAT_VERSION = 6
+(`runtime_interdot_barrier`: screened, continued past the merge; #70, ADR 0034).
+9: the dots grow with their occupancy (`puddle`): the runtime CI model's capacitances and induced charge
+scale with it and the interdot barrier is seen from the puddles' edges (#72, ADR 0035)."""
+DEVICE_FORMAT_VERSION = 7
 """Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
 energy, per-electron coupling and leads (ADR 0026). 3: each barrier's attempt rate, tunnelling level
 and gate slopes (#53). 4: the double dot's shape along the barrier gates (`shape`, #59). 5: the interdot barrier's top, slopes
 and curvature, and the top on the shape grid (#66). 6: the interdot barrier's screening factors per
-gate (#70)."""
+gate (#70). 7: the puddles' anchor occupancy, radii and the compiled cut (`puddle`, #72)."""
 
 
 def compiled_sensor(
@@ -175,6 +178,10 @@ class Device:
     """σ per gate, the fraction of each gate's bare action on the interdot barrier's top that reaches
     it (#70, `calibration: none`): the barrier gate's `CompileParams.interdot_barrier_screening`, every
     other gate that times `interdot_cross_screening`. None is the bare potential."""
+    puddle: PuddleGrowth | None = None
+    """The dots' growth with their occupancy (#72, ADR 0035): each dot's gate-induced charge at the
+    operating point, its puddle radius there (the bare turning point on the cut toward the other dot)
+    and the bare potential along that cut; None keeps the dots' size fixed."""
 
     # --- files -----------------------------------------------------------------------------------
 
@@ -218,6 +225,7 @@ class Device:
             interdot_barrier_top_slopes_ev_per_v=None if d.get("interdot_barrier_top_slopes_ev_per_v") is None else tuple(d["interdot_barrier_top_slopes_ev_per_v"]),
             interdot_barrier_hbar_omega_ev=d.get("interdot_barrier_hbar_omega_ev"),
             interdot_barrier_screening=None if d.get("interdot_barrier_screening") is None else tuple(float(x) for x in d["interdot_barrier_screening"]),
+            puddle=None if d.get("puddle") is None else PuddleGrowth.from_dict(d["puddle"]),
         )
 
     def to_json(self, path: str | pathlib.Path) -> None:
@@ -273,6 +281,7 @@ class Device:
             coupling=self.runtime_coupling(),
             shape=self.shape,
             splitting=self.runtime_splitting(),
+            puddle=self.puddle,
         )
 
     def runtime_interdot_barrier(self) -> InterdotBarrier | None:
@@ -290,6 +299,7 @@ class Device:
             hbar_omega_b_ev=float(self.interdot_barrier_hbar_omega_ev),
             screening=self.interdot_barrier_screening,
             shape=self.shape,
+            puddle=self.puddle,
         )
 
     def runtime_splitting(self) -> InterdotSplitting | None:

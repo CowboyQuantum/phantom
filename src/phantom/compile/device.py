@@ -23,6 +23,9 @@ The compile tier runs every draw and every derivation once per device instance:
    the top is the barrier's one transmission, so the interdot rate is f_a·T, the tunnel coupling
    t = (ħω₀/π)·√T, the interdot barrier's slopes are −2πσ·dΔU/dV/ħω_b and the barrier gate's e-fold
    scale of t is 2 over its slope; without a top between the dots the WKB estimates stand;
+5c. the puddles (#72, ADR 0035): the bare potential along the cut between the dots above the interdot
+   tunnelling level, each dot's turning point on it (its puddle radius at the operating point) and
+   each dot's gate-induced charge there, from which the runtime scales the dots with their occupancy;
 6. the valley splitting of each dot from its harmonic radius (`valley`), and the g-factors (`spin`).
 
 The `Device` (`phantom.device`) holds parameters only: the layout (as data), the scenario draw, the dots, the CI
@@ -45,9 +48,11 @@ import phantom
 from phantom.charge import barrier as charge_barrier
 from phantom.charge import ci as charge_ci
 from phantom.charge import derived as charge_derived
+from phantom.charge import puddle as charge_puddle
 from phantom.charge import shape as charge_shape
 from phantom.charge.barrier import kemble_transmission
 from phantom.charge.derived import capacitance_matrix_af, derive_double_dot
+from phantom.charge.puddle import PuddleGrowth
 from phantom.charge.shape import ShapeGrid, quantity_layout
 from phantom.compile.backends import Backend, basis_for
 from phantom.constants import HBAR2_OVER_2ME_EV_NM2
@@ -73,14 +78,16 @@ from phantom.spin.dynamics import SpinParams, draw_spin
 from phantom.valley import splitting as valley_splitting
 from phantom.valley.splitting import ValleyParams, draw_valley_splitting_uev
 
-MODEL_VERSION = 7
+MODEL_VERSION = 8
 """2: the sensor set point uses the sensor with the draw's coupling asymmetry (#43).
 3: the sensor dot's leads, charging energy and coupling; the set point on its broadened flank (ADR 0026).
 4: the qubit dots' barriers carry their attempt rate, tunnelling level and gate slopes (#53, ADR 0027).
 5: the double dot's shape along the barrier gates, on a grid (`Device.shape`, #59, ADR 0030).
 6: the interdot barrier's top, its slopes and curvature, and its top on the shape grid (#66, ADR 0032).
 7: the interdot barrier's screening per gate; t, the interdot rate, its slopes and the barrier gate's
-scale from Kemble's transmission of the top (#70, ADR 0034)."""
+scale from Kemble's transmission of the top (#70, ADR 0034).
+8: the puddles: the compiled cut between the dots, each dot's turning point on it and its gate-induced
+charge at the operating point (`Device.puddle`, #72, ADR 0035)."""
 
 SENSOR_SLOPE_STEP_V = 0.01
 """Half-step of the central differences that give the rates' slopes against each gate (the sensor's
@@ -137,6 +144,10 @@ class CompileParams:
     (`calibration: none`); 1 is the bare potential, in which a plunger moves the interdot barrier
     nearly as much as the barrier gate does (#48, #70). At 0.3 a plunger acts about four times more
     weakly than B_M on the reference device."""
+    puddles: bool = True
+    """Whether the dots grow with their occupancy (#72, ADR 0035): each dot's capacitances scale as
+    √(n/N_ref) with its gate-induced charge (the classical N ∝ R³ of a puddle in a parabolic well) and
+    the interdot barrier is seen from the puddles' edges. False keeps the dots at their compiled size."""
 
 
 # --- compile --------------------------------------------------------------------------------------
@@ -315,16 +326,37 @@ def _bilinear(u: np.ndarray, basis: GateBasis, xs: np.ndarray, ys: np.ndarray) -
     return u[iy, ix] * (1 - tx) * (1 - ty) + u[iy, ix + 1] * tx * (1 - ty) + u[iy + 1, ix] * (1 - tx) * ty + u[iy + 1, ix + 1] * tx * ty
 
 
+def interdot_cut(basis: GateBasis, v: np.ndarray, d1, d2, level_ev: float) -> tuple[np.ndarray, np.ndarray]:
+    """(distance from dot 1 (nm), U − `level_ev` (eV)) along the straight cut between the dots at carried
+    `v`, sampled bilinearly at `TOP_SAMPLES` points."""
+    u = basis.energy_ev(v)
+    t = np.linspace(0.0, 1.0, TOP_SAMPLES)
+    xs, ys = d1.x_nm + t * (d2.x_nm - d1.x_nm), d1.y_nm + t * (d2.y_nm - d1.y_nm)
+    return t * float(np.hypot(d2.x_nm - d1.x_nm, d2.y_nm - d1.y_nm)), _bilinear(u, basis, xs, ys) - level_ev
+
+
+def puddle_turning_points_nm(s: np.ndarray, cut: np.ndarray) -> tuple[float, float]:
+    """Each dot's turning point at the level on the cut (`interdot_cut`), measured from its own centre
+    toward the other dot: where U − level first rises through zero from dot 1's side and last falls
+    through it on dot 2's, by linear interpolation; the saddle's position when the cut never rises
+    above the level (#72)."""
+    above = np.flatnonzero(cut > 0)
+    k_top = int(np.argmax(cut))
+    if not len(above):
+        return float(s[k_top]), float(s[-1] - s[k_top])
+    k = int(above[0])
+    first = s[k] if k == 0 else float(s[k - 1] + (0.0 - cut[k - 1]) / (cut[k] - cut[k - 1]) * (s[k] - s[k - 1]))
+    k = int(above[-1])
+    last = s[k] if k == len(s) - 1 else float(s[k] + (0.0 - cut[k]) / (cut[k + 1] - cut[k]) * (s[k + 1] - s[k]))
+    return float(first), float(s[-1] - last)
+
+
 def interdot_barrier_top(basis: GateBasis, v: np.ndarray, d1, d2, level_ev: float, mass: float) -> tuple[float, float]:
     """(ΔU, ħω_b) of the barrier between the dots at carried `v` (#66): the highest U on the straight cut
     between them (bilinear, `TOP_SAMPLES` points) above the fixed tunnelling level `level_ev`, negative
     once the barrier falls below it; ħω_b = ħ√(|U''|/m*) from a parabola fitted ±`TOP_FIT_NM` around the
     top, NaN when the top sits at an end of the cut (no barrier between the dots)."""
-    u = basis.energy_ev(v)
-    t = np.linspace(0.0, 1.0, TOP_SAMPLES)
-    xs, ys = d1.x_nm + t * (d2.x_nm - d1.x_nm), d1.y_nm + t * (d2.y_nm - d1.y_nm)
-    cut = _bilinear(u, basis, xs, ys)
-    s = t * float(np.hypot(d2.x_nm - d1.x_nm, d2.y_nm - d1.y_nm))
+    s, cut = interdot_cut(basis, v, d1, d2, 0.0)
     k = int(np.argmax(cut))
     near = np.abs(s - s[k]) <= TOP_FIT_NM
     if k in (0, len(cut) - 1) or near.sum() < 5:
@@ -423,6 +455,7 @@ def compile_provenance() -> dict[str, Any]:
             "charge.derived": charge_derived.MODEL_VERSION,
             "charge.shape": charge_shape.MODEL_VERSION,
             "charge.barrier": charge_barrier.MODEL_VERSION,
+            "charge.puddle": charge_puddle.MODEL_VERSION,
             "readout.rates": readout_rates.MODEL_VERSION,
             "valley.splitting": valley_splitting.MODEL_VERSION,
             "spin.dynamics": spin_dynamics.MODEL_VERSION,
@@ -497,7 +530,7 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
 
     params_dict = {**asdict(params), "valley": asdict(valley_params), "spin": asdict(params.spin)}
     provenance = compile_provenance()
-    return Device(
+    device = Device(
         seed=seed,
         material=material,
         layout=asdict(layout),
@@ -527,6 +560,23 @@ def compile_device(layout: Layout, params: CompileParams, seed: int) -> Device:
         interdot_barrier_hbar_omega_ev=None if not np.isfinite(hbar_omega_b) else hbar_omega_b,
         interdot_barrier_screening=screening,
     )
+    # the puddles (#72, ADR 0035): the compiled cut, each dot's turning point on it, and each dot's
+    # gate-induced charge at the operating point, taken through the runtime CI model so that the runtime
+    # finds exactly these numbers there
+    if params.puddles and np.isfinite(hbar_omega_b):
+        s_cut, cut = interdot_cut(basis, v, d1, d2, level_m)
+        n_ref = device.runtime_ci().induced_charge(v)
+        if np.all(n_ref > 0):
+            device = dataclasses.replace(
+                device,
+                puddle=PuddleGrowth(
+                    n_ref=(float(n_ref[0]), float(n_ref[1])),
+                    turning_nm=puddle_turning_points_nm(s_cut, cut),
+                    cut_nm=tuple(float(x) for x in s_cut),
+                    cut_ev=tuple(float(x) for x in cut),
+                ),
+            )
+    return device
 
 
 def replace_params(params: CompileParams, **changes: Any) -> CompileParams:
