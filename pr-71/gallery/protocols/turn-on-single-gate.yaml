@@ -1,0 +1,15 @@
+id: turn-on-single-gate
+name: Channel turn-on under one gate
+step: 1
+description: Current through a channel as one accumulation gate is raised, all others fixed. A phenomenological shape in Step 1 (calibration none); Step 2 derives it from the layout potential.
+layers: [readout]
+runner: step1:turn_on_single_gate
+instance: {model: channel-turn-on, channel: {threshold_v: 0.6, width_v: 0.05, span_v: 0.5, i_sat_a: 5.0e-9}}
+sweep:
+  - {gate: P1, from: 0.0, to: 1.5, points: 601, unit: V}
+readout: {channel: current, unit: A}
+render: {kind: line, x: v_gate_v, y: current_a, xlabel: "gate voltage (V)", ylabel: "current (A)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.02, points: 601, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

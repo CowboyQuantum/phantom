@@ -1,0 +1,23 @@
+id: waugh1995-tunable-coupling
+title: Single-electron charging in double and triple quantum dots with tunable coupling
+authors: [F. R. Waugh, M. J. Berry, D. J. Mar, R. M. Westervelt, K. L. Campman, A. C. Gossard]
+year: 1995
+venue: Physical Review Letters 75, 705
+doi: 10.1103/PhysRevLett.75.705
+layers: [charge, readout]
+provides:
+  - label: peak-splitting-vs-interdot-conductance
+    kind: range
+    value: [0.0, 1.0]
+    tolerance: qualitative until the figure is digitised (then kind figure with data)
+    quantity: fractional_peak_splitting_against_interdot_conductance
+    conditions: GaAs/AlGaAs double dot, one interdot point contact, conductance tuned up to about 2e²/h, zero magnetic field, low temperature
+    notes: >
+      The Coulomb peaks split as the interdot conductance rises: near zero splitting for weak tunnelling,
+      saturating as the dots merge near 2e²/h. A P1 row (the measured splitting against conductance) needs
+      the figure digitised; until then honeycomb-vs-barrier is a qualitative comparison only.
+status: proposed
+notes: >
+  Written by a session on 2026-10-31 for #66 (ADR 0032). The citation was found in two sources; the DOI
+  is from memory and unverified. The longer account is Waugh et al., Phys. Rev. B 53, 1413 (1996). The
+  human must open the paper, confirm the DOI and the figure, and digitise it before a P1 row.

@@ -1,0 +1,23 @@
+id: potential-cut-along-channel
+name: Potential energy along the channel for several middle-barrier voltages
+step: 2
+description: The electron potential energy along the line through both dots (y = 0) of the textbook layout, for three voltages on the middle barrier B_M. The two wells and the barrier between them; the barrier top falls as B_M rises; the outer barriers B_L and B_R at the ends.
+layers: [layout, electrostatics]
+runner: step2:potential_cut_along_channel
+instance:
+  layout: two-dot-textbook
+  material: SiGe
+  pitch_nm: 80.0
+  grid_pitch_nm: 2.0
+  operating_point_v: {B_L: 0.2, P1: 0.6, B_M: 0.2, P2: 0.6, B_R: 0.2, SG: 0.6, R_L: 0.7, R_R: 0.7, SB_L: 0.4, SB_R: 0.3, SR_L: 0.7, SR_R: 0.7}
+  vary_gate: B_M
+  vary_values_v: [0.0, 0.2, 0.4]
+  x_range_nm: [-200.0, 200.0]
+sweep:
+  - {axis: x, from: -200.0, to: 200.0, points: 401, unit: nm}
+readout: {channel: potential_energy, unit: meV}
+render: {kind: line, x: x_nm, y: [u_B_M_0V_mev, u_B_M_0p2V_mev, u_B_M_0p4V_mev], xlabel: "x along the channel (nm)", ylabel: "U (meV)"}
+budget:
+  compile: {wall_s: 0.5, solver_calls: 0}
+  run: {wall_ms_per_point: 0.01, points: 1203, model_evals_per_point: 1, solver_calls: 0}
+must_show: []

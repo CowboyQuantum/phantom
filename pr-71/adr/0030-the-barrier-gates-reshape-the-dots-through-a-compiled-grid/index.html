@@ -1,0 +1,728 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>0030 — The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#0030-the-barrier-gates-reshape-the-dots-through-a-compiled-grid-the-double-dot-re-derived-along-each-barrier-gate-its-changes-interpolated-and-added-at-runtime-held-where-the-dots-merge" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0030 — The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="0030-the-barrier-gates-reshape-the-dots-through-a-compiled-grid-the-double-dot-re-derived-along-each-barrier-gate-its-changes-interpolated-and-added-at-runtime-held-where-the-dots-merge">0030 — The barrier gates reshape the dots through a compiled grid: the double dot re-derived along each barrier gate, its changes interpolated and added at runtime, held where the dots merge</h1>
+<p><strong>Status:</strong> Accepted
+<strong>Date:</strong> 2026-10-31
+<strong>Step:</strong> 8 follow-up (issue #59, the second of #58–#60; after ADR 0029)</p>
+<h2 id="context">Context</h2>
+<p>After ADR 0029 the interdot coupling followed the gates, but the dots themselves did not. Compile placed
+them once at the operating point. Their positions, sizes, lever arms, the disorder offsets at them, the
+capacitance matrix and the actions of the barriers around them then held at every gate point. A barrier
+gate only moved the dots' levels through a fixed cross-capacitance, and through the linear slopes of
+the rates and of t. The owner asked for the barrier gates to change the dots' "potential
+locations/shape" (2026-10-31), and decided on a grid compiled along the barrier gates and interpolated
+at runtime.</p>
+<p>Five forces shaped the design:</p>
+<ul>
+<li><strong>Compile once, run cheap (ADR 0001).</strong> A derivation of the double dot costs 1.5 ms plus three barrier
+  actions, so a runtime point cannot call one. A grid of 17 nodes per gate costs about 0.2 s of compile.</li>
+<li><strong>A nonlinear potential map.</strong> The closed-form potential is linear in the gates, but the minimum is
+  not. On the reference device, B_M at +0.15 V draws the dots 18 nm together, C_m grows by 40 % and
+  dot 1's addition energy falls by 1 meV. At +0.18 V the potential forms one dot. B_L and B_R move their
+  own dot by several nm and merge it with its lead when opened far enough.</li>
+<li><strong>Pixel steps.</strong> <code>find_dots</code> places a minimum on a 2 nm grid point. Taken directly, positions and lever
+  arms jump in steps.</li>
+<li><strong>Bit-exact anchor.</strong> At the operating point nothing may change: the compiled device and every test
+  there stay exact.</li>
+<li><strong>File size.</strong> The device file must stay small, and the basis is not stored.</li>
+</ul>
+<h2 id="decision">Decision</h2>
+<p>Compile re-derives the double dot along each barrier gate and records each quantity's change from the
+operating point. The runtime interpolates each gate's changes and adds them. Specifically:</p>
+<ul>
+<li><strong>The grid.</strong></li>
+<li><code>CompileParams.shape_gates</code> (B_L, B_M, B_R), <code>shape_span_v</code> (±0.2 V) and <code>shape_points</code> (17).</li>
+<li>At each node only that gate moves.</li>
+<li>Each dot's minimum is refined between grid points by a parabola (<code>refined_dot</code>). Its lever arms and
+    disorder offset are taken there.</li>
+<li>The capacitance matrix is the derivation's own formula (<code>capacitance_matrix_af</code>) at the refined
+    dots.</li>
+<li>The three barrier actions are taken at the tunnelling levels held fixed (ADR 0027), from the
+    refined dots.</li>
+<li>Each grid runs outward from the operating point until the potential stops forming two dots, or a
+    dot jumps by more than 12 nm. In that case it merged and another minimum took its place, and the
+    end is marked merged.</li>
+<li><code>charge.shape.ShapeGrid</code> holds the nodes and the changes. <code>Device.shape</code>, <code>DEVICE_FORMAT_VERSION</code> 4.</li>
+<li><strong>The runtime.</strong></li>
+<li>Each gate's changes are interpolated with PCHIP at its carried voltage and the gates' changes are
+    added.</li>
+<li>Beyond a grid's end the changes are held. <code>ShapeGrid.merged</code> flags a point beyond a merged end.</li>
+<li><code>ConstantInteractionParams.shape</code> gives C(V) and n_g = C(V)·(α(V)·V − Δo(V))/E_UNIT. This is the
+    potential at the moved minimum, by the envelope theorem, and it is exact to first order in the
+    plungers, which stay linear.</li>
+<li><code>InterdotCoupling.shape</code> and <code>GateRates.shape</code> take the exponents along the barrier gates from the
+    grid (t from half the interdot change). The compiled slopes still serve every other gate.</li>
+<li><strong>The consumer surface.</strong> <code>State</code> gains <code>dot_positions_nm</code>, <code>dot_radii_nm</code>, <code>addition_energies_ev</code> and
+  <code>dots_merged</code>. <code>optimum(device).coupling</code> inverts t along the barrier gate by Brent's method.</li>
+<li><strong>The hybridized window (amends ADR 0029).</strong></li>
+<li>The window centres on rint(n_g), which changes at the middle of every interdot segment
+    (n_g = N + ½), the very point a tune-up reads. With t near a meV the ±2 chains of ADR 0029 left a seam
+    of 2·10⁻⁵ e there. The first Windows comparison of this change differed by 1.8·10⁻⁵ when last-digit
+    rounding put a point on the other side.</li>
+<li>The statics now use a ±4 window. Its truncation, about (t/E_add)^(2w), stays below 10⁻¹² up to t's
+    ceiling, at about 25 µs per point instead of 7.</li>
+<li>The dynamics use the smallest window whose truncation is below 10⁻¹³ at each sample's t
+    (<code>dynamics_window</code>): ±2 below t/E_add = 10⁻³, ±3 below 1.5·10⁻², ±4 above.</li>
+<li><code>charge.hybrid</code> 2, <code>readout.master_equation</code> 3.</li>
+<li><strong>The session's propagator (ADR 0014).</strong></li>
+<li>With the dots shaped, a latching sweep reads its slow transition through entries of exp(W·dt) that
+    sit beside rates 10⁵ times faster. A general exponential keeps its error near ε‖W·dt‖ in absolute
+    terms. Over a hundred latched steps and the sensor's flank, <code>session-closing-barrier</code> differed by
+    1.1·10⁻⁹ on Windows and 5·10⁻⁹ on macOS.</li>
+<li><code>readout.master_equation.propagator</code> computes exp(W·dt) with every entry accurate relative to
+    itself. It takes the Taylor series of the non-negative W + aI over a step with a·h ≤ ½, then squares
+    a non-negative matrix, putting each column back to one. 10⁻¹⁶ relative noise in it now moves the
+    protocol by 7·10⁻¹³.</li>
+<li><code>Session</code> uses it. The Step 4 sweeps and the sensor's chain keep <code>expm</code>.</li>
+<li><strong>Release.</strong> 0.4.0. Model versions: <code>charge.shape</code> 1, <code>compile.device</code> 5, <code>device</code> 6,
+  <code>device.session</code> 6, <code>optimum.targets</code> 3.</li>
+</ul>
+<h2 id="consequences">Consequences</h2>
+<ul>
+<li>Easier:</li>
+<li>A barrier gate moves its dots, changes their size and their addition energies, couples them more
+    strongly and reshapes the honeycomb (<code>dot-shape-vs-barrier</code>).</li>
+<li>Opening B_M ends in a flagged merge instead of an unbounded extrapolation.</li>
+<li>The rates and t follow the moved dots. When a barrier falls below its tunnelling level, its action
+    is zero and the rate levels off at f_a/(2 − T₀), about half the attempt rate. Other gates' linear
+    slopes still take it towards f_a.</li>
+<li>Harder:</li>
+<li><strong>Separable changes.</strong> The gates' changes are added, so cross terms (B_L with B_M on dot 1) are left
+    out. Opening all three barriers together pushes the rates towards the attempt rate.</li>
+<li><strong>The model's own limits.</strong> The capacitances still come from the disk and sphere formulae of ADR<ol>
+<li>C_m grows only to about 2.1 aF before the merge, so a merged double dot does not become one dot
+in the CI model. Points beyond the merge hold the last two-dot shape and are flagged.</li>
+</ol>
+</li>
+<li><strong>Pixel noise.</strong> The compile tier takes a dot's curvature at a grid point, so the radius and the
+    capacitances move in steps of about 1 % as the minimum changes pixel. The interpolant runs through
+    them, and halfway between nodes it is within 2 % of a direct derivation.</li>
+<li><strong>Absolute charge.</strong> The CI model counts the charge absolutely (n_g = Cφ/E ≈ 23 e). A dot that grows
+    by 10 % takes about two more electrons at the same potential, so a barrier gate moves the lines
+    along the plungers by more than its cross-capacitance. Tests and protocols that follow one
+    transition name its electron count.</li>
+<li><strong>Cost and size.</strong> Compile takes 0.2 s more. The device file grows from 14 kB to 62 kB. A <code>State</code>
+    point costs about 25 µs, and a session sample a few interpolations more.</li>
+<li><strong>Exponent between nodes.</strong> An exponent that saturates within one 25 mV step is interpolated coarsely
+    there, by up to 1 in ln Γ.</li>
+<li><strong>Not yet shaped.</strong> The sensor's coupling to the dots (β) and the attempt rates stay at the operating
+    point.</li>
+<li>Must now:</li>
+<li>Device files from 0.3.0 and from earlier 0.4.0 commits do not load (format 4); recompile them from
+    their seed.</li>
+<li>A consumer that cached C_dot, the lever arms or t from the compiled device reads them per point.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered</h2>
+<ul>
+<li><strong>A tensor-product grid over the three barrier gates.</strong> Rejected for size and compile time: 17³
+  derivations and several MB. The cross terms it would capture are second order on the reference device.</li>
+<li><strong>Linear slopes of each quantity (first derivatives).</strong> Rejected by the owner. They cannot show the
+  merge or the saturation, and they drift within tens of mV.</li>
+<li><strong>Grid-point minima without refinement.</strong> Rejected: positions and lever arms would step by 2 nm and the
+  honeycomb would jump.</li>
+<li><strong>Including the plungers in the grid.</strong> Deferred. Their lever arms are the largest, but at the
+  operating point they move the minima less than the barriers do, and the envelope theorem keeps the
+  energies right to first order.</li>
+<li><strong>Crossing into a single-dot model past the merge.</strong> Deferred to the solver (plan §8 #1). The CI model
+  has no state for one dot of N₁ + N₂ electrons. Flagging the merge and holding the last two-dot shape
+  keeps the model honest about what it does not describe.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

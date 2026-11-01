@@ -1,0 +1,646 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../DEVELOPMENT_PLAN/">
+      
+      
+        <link rel="next" href="../steps/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Status - phantom</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#status" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="phantom" class="md-header__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phantom
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Status
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="phantom" class="md-nav__button md-logo" aria-label="phantom" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    phantom
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEVELOPMENT_PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MODELS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRACT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADRs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="status">STATUS</h1>
+<blockquote>
+<p>Rewritten at the end of every session. Never appended. A fresh session continues from this file alone.</p>
+</blockquote>
+<p><strong>Current step:</strong> none in flight. Released: <code>v0.2.0</code> (on <code>f72daac</code>), <code>v0.3.0</code> (on <code>6920f19</code>) and <code>v0.4.0</code>
+(on <code>ae8d5db</code>). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on</p>
+<h1 id="16-17-25-28-32-34-and-37">16, #17, #25, #28, #32, #34 and #37.</h1>
+<p><strong>Branch:</strong> <code>issue-70/barrier-transition-width</code> (#70, with #69) from <code>main</code> at <code>ad0d3fa</code>; its pull request #71 is
+open for review. It carries 0.5.0 (untagged, breaking: <code>CHANGELOG.md</code>).
+<strong>Last session:</strong> 2026-11-01. The owner, running qdt on <code>v0.4.0</code>, saw the honeycomb turn into a superdot
+"basically instantly" along the plungers at a place that did not move with B_M, and asked for the transition
+to happen "over a larger space" (#70). The measurements behind it: the barrier top moved at −152 meV/V with
+B_M and −128/−110 meV/V with the plungers (nothing screens them, #48), so f went from 0.2 to 0.9 within 15 mV
+of the plungers; and the shape grid held the top past the merge node while the plungers' part kept growing,
+so above B_M ≈ 0.35 V every map was the same and the double dot re-formed at low occupancy (also #69).</p>
+<h2 id="done-this-session">Done this session</h2>
+<ul>
+<li><strong>#70 (<a href="../adr/0034-the-interdot-barrier-has-one-transmission/">ADR 0034</a>):</strong> the interdot barrier has one
+  transmission, Kemble's of its top ΔU(V), and t = (ħω₀/π)·√T, Γ_m = f_a·T and g = T all follow it.</li>
+<li><code>charge.barrier.InterdotBarrier</code>: ΔU(V) = ΔU_ref + Σ σ_g·δ_g, screened compiled slopes for every gate and,
+    along the barrier gates, the shape grid's top continued linearly past each end
+    (<code>ShapeGrid.quantity_along</code>). The shape itself is still held and flagged past the merge.</li>
+<li>Placeholders (<code>calibration: none</code>): <code>CompileParams.interdot_barrier_screening</code> 0.4 (the barrier gate) and
+    <code>interdot_cross_screening</code> 0.3 (every other gate, times the first); 1 and 1 is the bare potential.
+    <code>Device.interdot_barrier_screening</code> records σ per gate; device format 6.</li>
+<li>The compiled record is the same transmission: <code>tunnel_coupling_ev</code> = (ħω₀/π)√T_ref (57 µeV on the
+    reference device, was 46 from the WKB action), the interdot <code>CompiledBarrier</code>'s rate and screened Kemble
+    slopes, <code>barrier_v_scale_v</code> = 2/slope (23 mV). <code>State.interdot_barrier_top_ev</code>.</li>
+<li>On the reference device: f 0.2 → 0.9 over 64 mV of B_M (was ~30) and 126 mV of the plunger diagonal (was
+    15); each plunger a quarter of B_M's action; t by e every 23 mV of B_M (was 9); nothing merges within
+    ±0.15 V of the programmed plungers at the programmed B_M; with B_M at 5 V one dot at every occupancy; below
+    the compiled plungers B_M opens t and f again (#69).</li>
+<li>Tests: <code>tests/test_interdot_barrier.py</code> (6 P0); the isolated-dot tests close B_M by 0.12 V now (t falls
+    more slowly), the session's two-state test uses the pair's total rate (the path through dot 2 counts
+    where P1 has slowed the left lead, #48). 216 tests.</li>
+<li>Protocols <code>honeycomb-vs-barrier</code> and <code>interdot-line-vs-barrier</code> map at the new B_M offsets; the stored
+    gallery device and <code>measured.json</code> re-recorded; 76 protocols within budget, all unsigned; contract OK.</li>
+<li>Model versions: <code>charge.barrier</code> 1, <code>charge.shape</code> 3, <code>charge.splitting</code> 2, <code>charge.hybrid</code> 3,
+  <code>readout.rates</code> 2, <code>compile.device</code> 7, <code>device</code> 8, <code>device.session</code> 9; <code>charge</code> 5, <code>readout</code> 5.</li>
+</ul>
+<h2 id="in-flight">In flight</h2>
+<ul>
+<li>The pull request #71 for #70: CI's ubuntu run and the Windows gallery comparison (new closed forms: a weighted
+  PCHIP sum, a linear continuation, Kemble's logistic), and the preview at <code>/pr-&lt;n&gt;/</code>.</li>
+<li>The measured ledger was recorded on a slow machine (compile 0.63 s against 0.32 before, the old code
+  itself 1.7× slower here): the session protocols read 5 ms/pt, within 3× of budget but not by much.</li>
+</ul>
+<h2 id="next-action">Next action</h2>
+<p>The owner reviews #70's pull request (ADR 0034, the two changed protocols in its preview, the screening
+defaults), merges it, decides whether to tag <code>v0.5.0</code> (ADR 0025) and when qdt (CowboyQuantum/qdt #172) moves
+its pin. qdt's adapter must handle device format 6, <code>State.interdot_barrier_top_ev</code>, and the merged region
+sitting at about B_M +0.11 V instead of +30 mV.</p>
+<p>Open choices for later:
+- extend the two screening factors to the lead and sensor barriers (#48): a plunger still moves a lead rate
+  by e every 5 mV while it moves t by e every 90 mV;
+- digitise a measured f(V_B) or t(V_B) curve to replace the hand-set screening by a P1 row;
+- screening of C_m by the barrier gate, so a closed B_M gives a true grid (#48);
+- compile's own last digits across platforms (ADR 0033).</p>
+<h2 id="open-issues">Open issues</h2>
+<h1 id="48-unscreened-lead-sensor-and-geometric-sensitivities-49-per-device-sensor-barrier-tune-50-gate-1f">48 unscreened lead, sensor and geometric sensitivities; #49 per-device sensor-barrier tune; #50 gate 1/f</h1>
+<p>placeholder; #51 cp1252 console; #41 spin driven by voltages; #64 a dot that must lose two electrons loses
+one; #65 recompiling at the sensor set point moves it. #69 is addressed by this branch (closed with #70).</p>
+<p>Open blockers: none. Open decisions: plan §8 #1 (solver); release cadence against qdt's pins.</p>
+<h2 id="known-gaps">Known gaps</h2>
+<ul>
+<li><strong>Owner-dependent, never blocking:</strong> sign-offs for all 76 protocols; catalog entries #1–#14; confirming the
+  thirteen <code>proposed</code> reference entries.</li>
+<li><strong>Interdot barrier (ADR 0034):</strong> the screening factors are set by hand to the owner's requirement; only the
+  interdot barrier is screened; t reaches ħω₀/π (1.3 meV) where the barrier is gone; the continued top past
+  the merge is a linear extrapolation, harmless because T is 1 there.</li>
+<li><strong>Splitting (ADR 0032):</strong> a closed B_M stops at the geometric f_C ≈ 0.14; f(g) between g = 0.15 and 0.85 is
+  an interpolation; the metallic-dot theory sits on the single-level hybridization.</li>
+<li><strong>Exchange (ADR 0031):</strong> J jumps where the ground charge state changes; spinless, one valley.</li>
+<li><strong>Shape (ADR 0030):</strong> the gates' changes add; C_m from the sphere formula; about 1 % pixel noise; β, the
+  attempt rates and the plungers are not on the grid.</li>
+<li><strong>Hybridization (ADR 0029):</strong> the projection assumes a dwell long against ħ/Ω; spinless.</li>
+<li><strong>Rates:</strong> the lead rates are linear in the non-barrier gates with the bare potential's slopes (#48).</li>
+<li><strong>Sensor process:</strong> first-order split; sequential noise; no joint dot–sensor energy (ADR 0028).</li>
+<li><strong>Placeholders</strong> (<code>calibration: none</code>): as listed in the step files and ADRs 0019–0034.</li>
+<li><strong>Cross-platform (ADR 0014):</strong> condition diagonalisations; sum charges relative to a centre; keep window
+  truncation far below 1e-9 at rint ties; propagate generators with non-negative steps; form gaps from N − n_g.</li>
+<li><strong>Pages:</strong> the source is <code>gh-pages</code> (root); per-PR previews are under <code>/pr-&lt;n&gt;/</code>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
