@@ -5,7 +5,7 @@
 **Current step:** none in flight. Released: `v0.2.0` (on `f72daac`), `v0.3.0` (on `6920f19`) and `v0.4.0`
 (on `ae8d5db`). Steps 1–7 are built; their open items (sign-offs, catalog entries, P1 rows, the solver) are on
 #16, #17, #25, #28, #32, #34 and #37.
-**Branch:** `issue-70/barrier-transition-width` (#70, with #69) from `main` at `ad0d3fa`; its pull request is
+**Branch:** `issue-70/barrier-transition-width` (#70, with #69) from `main` at `ad0d3fa`; its pull request #71 is
 open for review. It carries 0.5.0 (untagged, breaking: `CHANGELOG.md`).
 **Last session:** 2026-11-01. The owner, running qdt on `v0.4.0`, saw the honeycomb turn into a superdot
 "basically instantly" along the plungers at a place that did not move with B_M, and asked for the transition
@@ -39,7 +39,7 @@ so above B_M ≈ 0.35 V every map was the same and the double dot re-formed at l
   `readout.rates` 2, `compile.device` 7, `device` 8, `device.session` 9; `charge` 5, `readout` 5.
 
 ## In flight
-- The pull request for #70: CI's ubuntu run and the Windows gallery comparison (new closed forms: a weighted
+- The pull request #71 for #70: CI's ubuntu run and the Windows gallery comparison (new closed forms: a weighted
   PCHIP sum, a linear continuation, Kemble's logistic), and the preview at `/pr-<n>/`.
 - The measured ledger was recorded on a slow machine (compile 0.63 s against 0.32 before, the old code
   itself 1.7× slower here): the session protocols read 5 ms/pt, within 3× of budget but not by much.
