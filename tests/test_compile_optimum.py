@@ -185,17 +185,26 @@ def test_action_rate_is_never_below_the_rectangular_bound():
 
 
 def test_coupling_optimum_agrees_with_the_compile_tier_near_the_operating_point(device: Device):
-    from phantom.compile import interdot_tunnel_coupling_ev
+    """The optimum's B_M, put back through the compile tier, gives the target: t = (ħω₀/π)·√T with T
+    Kemble's transmission of the interdot barrier's top recomputed from the potential with the dots held,
+    moved from the compiled top by the barrier gate's screening factor (#70, ADR 0034). The runtime's top
+    along B_M is the shape grid's, with the dots moved, which differs by about 1 % in slope."""
+    from phantom.charge.barrier import kemble_transmission
+    from phantom.compile.device import interdot_barrier_top
 
     lay, basis = device.basis()
     v0 = device.operating_point()
     d1, d2 = derive_double_dot(lay, v0, basis=basis).dots
     jb = device.gate_names.index(device.barrier_gate)
+    level = device.barriers[2].tunnelling_level_ev
+    sigma = device.interdot_barrier_screening[jb]
+    t_max = device.runtime_coupling().t_max_ev
     for target in (10e-6, 30e-6, 100e-6):
         v = v0.copy()
         v[jb] = coupling_optimum(device, target).v_barrier_v
-        t = interdot_tunnel_coupling_ev(basis, v, d1, d2, 0.19)[0]
-        assert t == pytest.approx(target, rel=0.15), "the compiled exponential holds within a decade of the operating point"
+        top = device.interdot_barrier_top_ev + sigma * (interdot_barrier_top(basis, v, d1, d2, level, 0.19)[0] - device.interdot_barrier_top_ev)
+        t = t_max * np.sqrt(kemble_transmission(top, device.interdot_barrier_hbar_omega_ev))
+        assert t == pytest.approx(target, rel=0.15), "the compiled transmission holds within a decade of the operating point"
 
 
 def test_the_compiled_sensor_carries_the_coupling_asymmetry_and_sits_on_its_flank(device: Device):

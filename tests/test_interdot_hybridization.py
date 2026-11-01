@@ -124,13 +124,14 @@ def test_the_coupling_follows_the_gates_from_its_compiled_value(device: Device):
     j = device.gate_names.index(device.barrier_gate)
     along = v0 + np.linspace(-0.2, 1.0, 241)[:, None] * np.eye(len(v0))[j]
     t = c.tunnel_coupling_ev(along)
-    assert np.all(np.diff(t) >= 0) and t[-1] > 1e8 * t[0], "opening the barrier gate raises t"
-    # along the barrier gate t follows half the interdot action's change on the shape grid (#59): once the
-    # barrier falls below the tunnelling level the action is zero and t holds at t_max·σ(logit(t₀/t_max) −
-    # ln(t₀/t_max)), about half the ceiling; the ceiling itself bounds every gate
-    assert np.all(t < c.t_max_ev) and t[-1] > 0.3 * c.t_max_ev, "below ħω₀/π, within a factor of a few"
+    assert np.all(np.diff(t) >= 0) and t[-1] > 1e4 * t[0], "opening the barrier gate raises t"
+    # t = t_max·√T of the interdot barrier's one transmission (#70): along the barrier gate the top sinks
+    # through the tunnelling level and far below it, so T → 1 and t reaches the ceiling ħω₀/π, which
+    # bounds every gate
+    assert np.all(t <= c.t_max_ev) and t[-1] == pytest.approx(c.t_max_ev, rel=1e-9), "to ħω₀/π as the barrier sinks"
+    assert c.barrier is not None and np.all(t == c.t_max_ev * np.sqrt(c.barrier.transmission(along)))
     other = v0 + np.linspace(0.0, 3.0, 31)[:, None] * np.eye(len(v0))[device.gate_names.index("P1")]
-    assert c.tunnel_coupling_ev(other)[-1] == pytest.approx(c.t_max_ev, rel=1e-6), "a linear gate takes it to the ceiling"
+    assert c.tunnel_coupling_ev(other)[-1] == pytest.approx(c.t_max_ev, rel=1e-6), "a plunger far up takes it to the ceiling too"
     mass = 0.19
     hbar_omega = math.sqrt(2 * 0.0380998212 * device.dots[0].curvature_ev_per_nm2 / mass)
     assert c.t_max_ev == pytest.approx(hbar_omega / math.pi, rel=1e-6)
@@ -208,7 +209,7 @@ def test_the_middle_of_an_interdot_segment_has_no_seam(device: Device):
     the statics' ±4 window and the dynamics' window chosen by t keep it below 10⁻¹² (ADR 0014, 0029)."""
     jb = device.gate_names.index("B_M")
     v0 = np.array(device.programmed_point_v)
-    v0[jb] += 0.012
+    v0[jb] += 0.08  # with the screened barrier (#70) t passes 0.5 meV about 80 mV up
     centre, d = _interdot_point(device, v0)
     vc = device.effective_voltages(centre)
     ci = device.runtime_ci()

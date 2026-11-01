@@ -105,7 +105,7 @@ def test_the_pauli_readout_reads_at_the_gated_coupling(device: Device, monkeypat
     original = session.psb_occupation
     monkeypatch.setattr(session, "psb_occupation", lambda eps, e_v, t, kt: seen.append(t) or original(eps, e_v, t, kt))
     v = np.array(device.programmed_point_v)
-    v[device.gate_names.index("B_M")] -= 0.05
+    v[device.gate_names.index("B_M")] -= 0.15  # t falls by a factor e every 23 mV of B_M (#70)
     run = device.session(noise=False)
     run.hold(v, 1e-6)
     run.spin_readout(0.5, 50e-6, shots=10, t_integration_s=1e-6, t1_read_s=1e-3)

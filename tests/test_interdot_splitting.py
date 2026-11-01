@@ -9,6 +9,7 @@ import math
 import numpy as np
 import pytest
 
+from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.splitting import (
     F_MAX,
@@ -50,7 +51,7 @@ def test_kemble_transmission():
 
 def _symmetric(top_ev: float) -> ConstantInteractionParams:
     ci = ConstantInteractionParams(c_dot_af=np.array([[85.0, -20.0], [-20.0, 85.0]]), c_gate_af=np.array([[12.0, 2.5, 0.3], [2.5, 12.0, 0.3]]))
-    return dataclasses.replace(ci, splitting=InterdotSplitting(v_ref_v=(0.0,) * 3, top_ev=top_ev, top_slopes_ev_per_v=(0.0,) * 3, hbar_omega_b_ev=4e-3))
+    return dataclasses.replace(ci, splitting=InterdotSplitting(InterdotBarrier(v_ref_v=(0.0,) * 3, top_ev=top_ev, top_slopes_ev_per_v=(0.0,) * 3, hbar_omega_b_ev=4e-3)))
 
 
 @pytest.mark.parametrize("top_ev", [0.05, 2e-3, 0.0, -2e-3, -0.01])
@@ -81,14 +82,15 @@ def test_without_conductance_the_charge_model_is_unchanged():
 def test_opening_b_m_takes_the_reference_device_from_its_geometric_splitting_to_a_superdot(device: Device):
     v0 = device.operating_point()
     jb = device.gate_names.index("B_M")
-    v = v0 + np.linspace(-0.2, 0.2, 81)[:, None] * np.eye(len(v0))[jb]
+    v = v0 + np.linspace(-0.2, 0.3, 101)[:, None] * np.eye(len(v0))[jb]
     ci = device.runtime_ci()
     g, f = ci.interdot_splitting(v)
     _, f_c = dataclasses.replace(ci, splitting=None).interdot_splitting(v)
     assert np.all(np.diff(g) >= 0) and np.all(f >= f_c - 1e-12)
     rising = g > 1e-2  # with B_M closed f is the geometric splitting, which the shape moves a little
     assert np.all(np.diff(f[rising]) >= -1e-12)
-    assert g[0] < 1e-15 and f[0] == pytest.approx(f_c[0], abs=1e-12), "closed: the geometric splitting, a near-grid"
+    # 0.2 V below the operating point the screened barrier (#70) is about 16 meV above the level: g ≈ 10⁻¹⁰
+    assert g[0] < 1e-8 and f[0] == pytest.approx(f_c[0], abs=1e-8), "closed: the geometric splitting, a near-grid"
     assert f[-1] == pytest.approx(F_MAX, abs=1e-6) and f[-1] > 0.95, "open: a superdot"
     merged = device.shape.merged(v)
     assert np.all(f[merged] > 0.95)

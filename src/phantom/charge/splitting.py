@@ -17,9 +17,10 @@ with a monotone cubic (PCHIP) through points of each limit inside its range of v
 The conductance per channel is Kemble's transmission through a parabolic barrier,
 g = 1/(1 + exp(2πΔU/ħω_b)), with ΔU the barrier top above the tunnelling level held fixed (ADR 0027).
 ΔU turns negative once the barrier falls below the level, so g goes continuously from 0 (closed) through
-½ (the level at the top) towards 1 (the dots merging). `InterdotSplitting` moves ΔU from its compiled
-value with compiled slopes against every gate and, along the barrier gates, with the shape grid
-(ADR 0030).
+½ (the level at the top) towards 1 (the dots merging). `InterdotSplitting` reads ΔU and g from an
+`InterdotBarrier` (`charge.barrier`, #70): the compiled top moved by every gate through screened slopes
+and, along the barrier gates, the shape grid continued past the merge (ADR 0030, 0034). It is the same
+transmission that sets t and the interdot rate.
 
 The splitting enters the CI model as an effective interdot capacitance. For CI capacitances
 [[C_t, −C_m], [−C_m, C_t]] the classical fractional splitting is f_C = 2C_m/(C_t + C_m), taken here with
@@ -41,9 +42,10 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 
-from phantom.charge.shape import ShapeGrid
+from phantom.charge.barrier import InterdotBarrier, kemble_transmission
 
-MODEL_VERSION = 1
+MODEL_VERSION = 2
+"""2: ΔU and g come from the `InterdotBarrier`, screened and continued past the merge (#70, ADR 0034)."""
 
 EULER_GAMMA = 0.5772156649015329
 F_MAX = 0.98
@@ -83,42 +85,20 @@ def golden_halperin_splitting(g: np.ndarray) -> np.ndarray:
     return _CURVE(np.clip(np.asarray(g, dtype=float), 0.0, 1.0))
 
 
-def kemble_transmission(top_ev: np.ndarray, hbar_omega_b_ev: float) -> np.ndarray:
-    """1/(1 + exp(2πΔU/ħω_b)): transmission through a parabolic barrier whose top is ΔU above the
-    electron's energy (negative below it), ħω_b its curvature frequency."""
-    x = np.clip(2 * np.pi * np.asarray(top_ev, dtype=float) / hbar_omega_b_ev, -700, 700)
-    return 1.0 / (1.0 + np.exp(x))
-
-
 @dataclass(frozen=True)
 class InterdotSplitting:
-    """The interdot barrier's top at the gates, its conductance and the splitting it sets."""
+    """The interdot barrier's conductance at the gates and the splitting it sets."""
 
-    v_ref_v: tuple[float, ...]
-    """Carried gate voltages the barrier is compiled at, V."""
-    top_ev: float
-    """The barrier top above the interdot tunnelling level at `v_ref_v`, eV (negative below it)."""
-    top_slopes_ev_per_v: tuple[float, ...]
-    """dΔU/dV against every gate, eV/V."""
-    hbar_omega_b_ev: float
-    """ħω_b of the barrier top's curvature, eV."""
-    shape: ShapeGrid | None = None
-    """When given, ΔU along its barrier gates follows its grid (`barrier_top_ev`), and the slopes count
-    for the other gates only."""
+    barrier: InterdotBarrier
+    """The barrier between the dots: its top at the gates and its transmission (`charge.barrier`)."""
 
     def barrier_top_ev(self, v: np.ndarray) -> np.ndarray:
         """ΔU (...) at carried voltages `v` (..., gates), eV."""
-        v = np.asarray(v, dtype=float)
-        slopes = np.array(self.top_slopes_ev_per_v)
-        along = 0.0
-        if self.shape is not None:
-            slopes[list(self.shape.gate_indices)] = 0.0
-            along = self.shape.quantity(self.shape.change(v), "barrier_top_ev")[..., 0]
-        return self.top_ev + (v - np.asarray(self.v_ref_v)) @ slopes + along
+        return self.barrier.barrier_top_ev(v)
 
     def conductance(self, v: np.ndarray) -> np.ndarray:
-        """g (...) per channel at carried voltages `v`: Kemble's transmission of the barrier."""
-        return kemble_transmission(self.barrier_top_ev(v), self.hbar_omega_b_ev)
+        """g (...) per channel at carried voltages `v`: the barrier's transmission."""
+        return self.barrier.transmission(v)
 
     def splitting(self, v: np.ndarray, c: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """(f (...), ΔC_m (...) in aF): the total fractional splitting and the interdot capacitance that
@@ -135,6 +115,7 @@ class InterdotSplitting:
 __all__ = [
     "F_MAX",
     "MODEL_VERSION",
+    "InterdotBarrier",
     "InterdotSplitting",
     "golden_halperin_splitting",
     "kemble_transmission",

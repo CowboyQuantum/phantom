@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 
+from phantom.charge.barrier import InterdotBarrier
 from phantom.charge.ci import ConstantInteractionParams
 from phantom.charge.dot import Barrier
 from phantom.charge.hubbard import HubbardParams
@@ -35,18 +36,21 @@ from phantom.readout.rates import GateRates
 from phantom.readout.sensor import SensorLeads, SensorSETParams
 from phantom.spin.dynamics import SpinDraw
 
-MODEL_VERSION = 7
+MODEL_VERSION = 8
 """2: the compiled sensor carries the wiring draw's sensor-coupling asymmetry (`compiled_sensor`, #43).
 3: a sensor with leads is a dot like the qubit dots, read through its barriers and baths (ADR 0026).
 4: the dots' lead and interdot rates follow the gates at runtime (`runtime_rates`, #53, ADR 0027).
 5: the runtime CI model carries the interdot coupling at the gates (`runtime_coupling`, #58, ADR 0029).
 6: the runtime CI model, coupling and rates follow the dots' shape along the barrier gates (#59, ADR 0030).
-7: the runtime CI model carries the interdot splitting (`runtime_splitting`, #66, ADR 0032)."""
-DEVICE_FORMAT_VERSION = 5
+7: the runtime CI model carries the interdot splitting (`runtime_splitting`, #66, ADR 0032).
+8: t, the interdot rate and the conductance share the interdot barrier's one transmission
+(`runtime_interdot_barrier`: screened, continued past the merge; #70, ADR 0034)."""
+DEVICE_FORMAT_VERSION = 6
 """Bumped when the serialised layout of a `Device` changes incompatibly. 2: the sensor's charging
 energy, per-electron coupling and leads (ADR 0026). 3: each barrier's attempt rate, tunnelling level
 and gate slopes (#53). 4: the double dot's shape along the barrier gates (`shape`, #59). 5: the interdot barrier's top, slopes
-and curvature, and the top on the shape grid (#66)."""
+and curvature, and the top on the shape grid (#66). 6: the interdot barrier's screening factors per
+gate (#70)."""
 
 
 def compiled_sensor(
@@ -140,10 +144,11 @@ class Device:
     sensor_alpha_v_per_v: tuple[float, ...]
     barriers: tuple[CompiledBarrier, ...]
     tunnel_coupling_ev: float
-    """Interdot t at the operating point (estimate ħω₀√T/π)."""
+    """Interdot t at the operating point, (ħω₀/π)·√T: T Kemble's transmission of the interdot barrier's
+    top (#70), or the WKB transmission when the potential has no top between the dots."""
     barrier_gate: str
     barrier_v_scale_v: float
-    """Gate voltage that changes t by a factor e."""
+    """Gate voltage that changes t by a factor e while the barrier is closed."""
     g_factors: tuple[float, ...]
     params: dict[str, Any]
     """The `CompileParams` used, as data."""
@@ -166,6 +171,10 @@ class Device:
     """Its slopes against every gate, the dots held where they are, eV/V."""
     interdot_barrier_hbar_omega_ev: float | None = None
     """ħω_b of its curvature at the top, eV; None when the potential has no barrier between the dots."""
+    interdot_barrier_screening: tuple[float, ...] | None = None
+    """σ per gate, the fraction of each gate's bare action on the interdot barrier's top that reaches
+    it (#70, `calibration: none`): the barrier gate's `CompileParams.interdot_barrier_screening`, every
+    other gate that times `interdot_cross_screening`. None is the bare potential."""
 
     # --- files -----------------------------------------------------------------------------------
 
@@ -208,6 +217,7 @@ class Device:
             interdot_barrier_top_ev=d.get("interdot_barrier_top_ev"),
             interdot_barrier_top_slopes_ev_per_v=None if d.get("interdot_barrier_top_slopes_ev_per_v") is None else tuple(d["interdot_barrier_top_slopes_ev_per_v"]),
             interdot_barrier_hbar_omega_ev=d.get("interdot_barrier_hbar_omega_ev"),
+            interdot_barrier_screening=None if d.get("interdot_barrier_screening") is None else tuple(float(x) for x in d["interdot_barrier_screening"]),
         )
 
     def to_json(self, path: str | pathlib.Path) -> None:
@@ -265,24 +275,35 @@ class Device:
             splitting=self.runtime_splitting(),
         )
 
-    def runtime_splitting(self) -> InterdotSplitting | None:
-        """The interdot conductance and the triple-point splitting it sets (#66, ADR 0032); None when the
-        device has no barrier between its dots at the operating point."""
+    def runtime_interdot_barrier(self) -> InterdotBarrier | None:
+        """The barrier between the dots at the carried voltages (#70, ADR 0034): its top above the fixed
+        interdot tunnelling level, moved by every gate through the screened slopes and, along the barrier
+        gates, the shape grid continued past the merge; Kemble's transmission of it is the one
+        transmission t, the interdot rate and the conductance share. None when the potential has no
+        barrier top between the dots at the operating point."""
         if self.interdot_barrier_top_ev is None or self.interdot_barrier_hbar_omega_ev is None:
             return None
-        return InterdotSplitting(
+        return InterdotBarrier(
             v_ref_v=tuple(self.operating_point_v),
             top_ev=float(self.interdot_barrier_top_ev),
             top_slopes_ev_per_v=tuple(self.interdot_barrier_top_slopes_ev_per_v),
             hbar_omega_b_ev=float(self.interdot_barrier_hbar_omega_ev),
+            screening=self.interdot_barrier_screening,
             shape=self.shape,
         )
 
+    def runtime_splitting(self) -> InterdotSplitting | None:
+        """The interdot conductance and the triple-point splitting it sets (#66, ADR 0032); None when the
+        device has no barrier between its dots at the operating point."""
+        barrier = self.runtime_interdot_barrier()
+        return None if barrier is None else InterdotSplitting(barrier)
+
     def runtime_coupling(self) -> InterdotCoupling | None:
-        """Interdot t at the carried voltages (#58, ADR 0029): the compiled t at the operating point, its
-        exponent moving with half the slopes of ln Γ_m (Γ_m ∝ T, t ∝ √T), saturating at ħω₀/π, compile's
-        t at a transmission of one, with ω₀ from dot 1's curvature as compile takes it. None when the
-        compiled t is zero."""
+        """Interdot t at the carried voltages: t_max·√T of the interdot barrier's transmission (#70,
+        ADR 0034), with t_max = ħω₀/π, compile's t at a transmission of one, ω₀ from dot 1's curvature as
+        compile takes it. Without a barrier top between the dots (ADR 0029): the compiled t at the
+        operating point, its exponent moving with half the slopes of ln Γ_m (Γ_m ∝ T, t ∝ √T),
+        saturating at t_max. None when the compiled t is zero."""
         if not self.tunnel_coupling_ev > 0:
             return None
         inter = next(b for b in self.barriers if b.between == ("dot1", "dot2"))
@@ -294,6 +315,7 @@ class Device:
             t_max_ev=float(hbar_omega / np.pi),
             log_slopes_per_v=tuple(0.5 * s for s in inter.log_rate_slopes_per_v),
             shape=self.shape,
+            barrier=self.runtime_interdot_barrier(),
         )
 
     def sensor_beta_factors(self) -> tuple[float, float]:
@@ -324,7 +346,8 @@ class Device:
 
     def runtime_rates(self) -> RateEquation:
         """The dots' rate equation, its lead and interdot rates following the carried gate voltages
-        from their values at the operating point (#53)."""
+        from their values at the operating point (#53); the interdot rate is f_a·T of the interdot
+        barrier's transmission (#70)."""
         by = {b.between: b for b in self.barriers}
         left, right, inter = (by[k] for k in (("dot1", "lead_left"), ("dot2", "lead_right"), ("dot1", "dot2")))
         gated = GateRates(
@@ -333,6 +356,7 @@ class Device:
             attempt_rate_hz=(left.attempt_rate_hz, right.attempt_rate_hz, inter.attempt_rate_hz),
             log_rate_slopes_per_v=(left.log_rate_slopes_per_v, right.log_rate_slopes_per_v, inter.log_rate_slopes_per_v),
             shape=self.shape,
+            interdot=self.runtime_interdot_barrier(),
         )
         return RateEquation(self.runtime_ci(), left.rate_hz, right.rate_hz, inter.rate_hz, gated)
 

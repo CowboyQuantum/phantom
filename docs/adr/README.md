@@ -37,3 +37,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0031 | The exchange of the dots' valence electrons follows the gates: the singlet secular equation on the CI window's local sector at the gated coupling and the shaped dots; the Pauli readout at the gated coupling | Accepted |
 | 0032 | The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden & Halperin's f(g), an effective interdot capacitance in the CI model | Accepted |
 | 0033 | Runtime gallery protocols run on a stored device: compiled once, committed, checked against a fresh compile | Accepted |
+| 0034 | The interdot barrier has one transmission: its screened top, continued past the merge, sets t, the interdot rate and the conductance | Accepted |
