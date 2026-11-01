@@ -5,7 +5,7 @@
 **Current step:** none in flight. Released: `v0.2.0` (on `f72daac`), `v0.3.0` (on `6920f19`) and `v0.4.0`
 (on `ae8d5db`). 0.5.0 (#70, ADR 0034) is merged on `main` at `cf9e1b2`, untagged. Steps 1–7 are built; their
 open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #25, #28, #32, #34 and #37.
-**Branch:** `issue-72/puddles` (#72) from `main` at `cf9e1b2`; its pull request is open for review. It carries
+**Branch:** `issue-72/puddles` (#72) from `main` at `cf9e1b2`; its pull request #73 is open for review. It carries
 0.6.0 (untagged, breaking: `CHANGELOG.md`).
 **Last session:** 2026-11-01, two pieces of work for the owner.
 - **#70 (merged as #71, ADR 0034, 0.5.0):** the interdot barrier has one transmission, Kemble's of its top,
@@ -37,7 +37,7 @@ open items (sign-offs, catalog entries, P1 rows, the solver) are on #16, #17, #2
   the journal's listing, the density and the N ∝ R³ relation must be confirmed from the paper).
 
 ## In flight
-- The pull request for #72: CI's ubuntu run and the Windows gallery comparison (new closed forms: a square
+- The pull request #73 for #72: CI's ubuntu run and the Windows gallery comparison (new closed forms: a square
   root of the induced charge, scaled capacitances, a linear interpolation on the compiled cut), and the
   preview at `/pr-<n>/`.
 
