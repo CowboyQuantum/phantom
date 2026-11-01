@@ -40,6 +40,9 @@ device from (26,29) at 0.3 V to the first electrons at 1.0 V.
   (`proposed`). Tests: `tests/test_puddles.py`, 6 P0.
 
 ### Changed
+- `ConstantInteractionParams` keeps its last gate point's geometry and `InterdotBarrier` its last top, so
+  t, the rates and the splitting at one point evaluate the shape grid once: a session sample costs about
+  30 % less than in 0.5.0.
 - Model versions: `charge.puddle` 1, `charge.ci` 3, `charge.barrier` 2, `charge.splitting` 3,
   `charge.hybrid` 4, `readout.rates` 3, `readout.master_equation` 4, `compile.device` 8, `device` 9,
   `device.session` 10.

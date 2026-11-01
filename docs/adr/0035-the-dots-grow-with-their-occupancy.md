@@ -102,8 +102,11 @@ follow its gate-induced charge, and the interdot barrier is seen from the puddle
   - **Two placeholders act along the plungers.** The gates' screened cross-coupling (ADR 0034) and the
     puddles' growth both raise the barrier toward low occupancy; the transition along the plunger
     diagonal is 106 mV wide (was 126), along B_M 62 mV (was 64).
-  - **Cost.** A gate point evaluates the shape grid once more for the scale; a session sample about
-    10 % more.
+  - **Cost.** The scale needs the shape grid at every evaluation of t, the rates and the splitting, so
+    the CI model keeps its last gate point's geometry and the barrier its last top (as the eigenstates
+    were already kept): a session sample now costs about 30 % less than before this change rather than
+    40 % more. The first Windows CI run of the change, before that, put three session protocols at
+    3.3× their budget on a slow runner.
 - Must now:
   - Device files from 0.5.0 do not load (format 7); recompile them from their seed. The stored gallery
     device is re-recorded.

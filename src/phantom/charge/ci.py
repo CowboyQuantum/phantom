@@ -139,16 +139,24 @@ class ConstantInteractionParams:
 
     def _geometry(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
         """(C_dot (..., 2, 2), n_g (..., 2), the puddles' scale (..., 2) or None) from the geometry alone:
-        the shape grid and the puddles, no splitting."""
+        the shape grid and the puddles, no splitting. The last result is kept, so the capacitances, the
+        induced charge, t, the rates and the splitting at one gate point evaluate the shape grid once."""
         if self.shape is None and self.puddle is None:
             return np.broadcast_to(self.c_dot_af, v.shape[:-1] + (2, 2)), v @ self.c_gate_af.T / E_UNIT_V_PER_E_AF, None
+        v = np.asarray(v, dtype=float)
+        last = self.__dict__.get("_last_geometry")
+        if last is not None and last[0].shape == v.shape and np.array_equal(last[0], v):
+            return last[1]
         c, phi = self._bare(v)
         n_g = np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF
         if self.puddle is None:
-            return c, n_g, None
-        s = self.puddle.scale(n_g)
-        c = self.puddle.capacitances_af(c, s)
-        return c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF, s
+            result = (c, n_g, None)
+        else:
+            s = self.puddle.scale(n_g)
+            c = self.puddle.capacitances_af(c, s)
+            result = (c, np.einsum("...ij,...j->...i", c, phi) / E_UNIT_V_PER_E_AF, s)
+        object.__setattr__(self, "_last_geometry", (v.copy(), result))
+        return result
 
     def _geometric(self, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """(C_dot (..., 2, 2), n_g (..., 2)) from the geometry alone: the shape grid and the puddles, no splitting."""

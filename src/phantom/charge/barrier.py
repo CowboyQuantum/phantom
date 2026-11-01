@@ -83,8 +83,12 @@ class InterdotBarrier:
 
     def barrier_top_ev(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
         """ΔU (...) at carried voltages `v` (..., gates), eV; with the puddles' `scale` (..., 2), as seen
-        from their edges."""
+        from their edges. The last result is kept, so t, the interdot rate and the conductance at one
+        gate point evaluate the top once."""
         v = np.asarray(v, dtype=float)
+        last = self.__dict__.get("_last_top")
+        if last is not None and last[0].shape == v.shape and np.array_equal(last[0], v) and ((scale is None and last[1] is None) or (scale is not None and last[1] is not None and np.array_equal(last[1], scale))):
+            return last[2]
         sigma = self._sigma()
         slopes = np.asarray(self.top_slopes_ev_per_v, dtype=float) * sigma
         along = 0.0
@@ -92,7 +96,9 @@ class InterdotBarrier:
             slopes[list(self.shape.gate_indices)] = 0.0
             along = self.shape.quantity_along(v, "barrier_top_ev", weights=sigma, beyond="linear")[..., 0]
         shift = 0.0 if self.puddle is None or scale is None else self.puddle.barrier_shift_ev(scale)
-        return self.top_ev + (v - np.asarray(self.v_ref_v)) @ slopes + along + shift
+        top = self.top_ev + (v - np.asarray(self.v_ref_v)) @ slopes + along + shift
+        object.__setattr__(self, "_last_top", (v.copy(), None if scale is None else np.array(scale, dtype=float, copy=True), top))
+        return top
 
     def transmission(self, v: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
         """T (...) at carried voltages `v`: Kemble's transmission of the top there."""

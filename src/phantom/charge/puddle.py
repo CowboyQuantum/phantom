@@ -44,6 +44,7 @@ electrons.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 
 import numpy as np
 
@@ -74,14 +75,23 @@ class PuddleGrowth:
         if not (all(n > 0 for n in self.n_ref) and all(r > 0 for r in self.turning_nm) and self.n_floor > 0):
             raise ValueError("n_ref, turning_nm and n_floor must be positive")
 
+    @cached_property
+    def _arrays(self) -> tuple[np.ndarray, np.ndarray]:
+        return np.asarray(self.cut_nm, dtype=float), np.asarray(self.cut_ev, dtype=float)
+
     @property
     def length_nm(self) -> float:
         return float(self.cut_nm[-1])
 
-    @property
+    @cached_property
     def saddle_nm(self) -> float:
         """Where the cut is highest, from dot 1, nm."""
-        return float(self.cut_nm[int(np.argmax(self.cut_ev))])
+        return float(self.cut_nm[int(np.argmax(self._arrays[1]))])
+
+    @cached_property
+    def _reference_edges_ev(self) -> tuple[float, float]:
+        """The cut's energy at each dot's turning point: the edge the shift is measured from."""
+        return (float(self._edge_ev(0, np.asarray(self.turning_nm[0]))), float(self._edge_ev(1, np.asarray(self.turning_nm[1]))))
 
     def scale(self, n_fixed: np.ndarray) -> np.ndarray:
         """s (..., 2) = √(max(n, n_floor)/N_ref) from the geometric model's gate-induced charge (..., 2)."""
@@ -107,7 +117,7 @@ class PuddleGrowth:
 
     def _edge_ev(self, dot: int, radius_nm: np.ndarray) -> np.ndarray:
         """The cut's energy at `radius_nm` from dot `dot` toward the other, the radius clipped at the saddle."""
-        xs, ys = np.asarray(self.cut_nm), np.asarray(self.cut_ev)
+        xs, ys = self._arrays
         saddle = self.saddle_nm
         if dot == 0:
             r = np.clip(radius_nm, 0.0, saddle)
@@ -120,11 +130,8 @@ class PuddleGrowth:
         compiled turning points: the mean over the two dots of u(R_ref) − u(R), zero at the operating
         point, positive for smaller puddles, −ΔU_ref once both reach the saddle."""
         radii = self.radii_nm(scale)
-        out = 0.0
-        for dot in (0, 1):
-            ref = self._edge_ev(dot, np.full(radii.shape[:-1], self.turning_nm[dot]))
-            out = out + 0.5 * (ref - self._edge_ev(dot, radii[..., dot]))
-        return out
+        ref = self._reference_edges_ev
+        return 0.5 * ((ref[0] - self._edge_ev(0, radii[..., 0])) + (ref[1] - self._edge_ev(1, radii[..., 1])))
 
     def to_dict(self) -> dict:
         return {
