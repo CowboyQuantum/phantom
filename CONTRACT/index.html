@@ -938,6 +938,13 @@ for every other gate; 1 and 1 is the bare potential), and along the barrier gate
 grid, continued past the merge. t, <code>gamma_interdot_hz</code> = f_a·T and the conductance all follow it: on the
 reference device t changes by a factor e every 23 mV of B_M, and a plunger acts about four times more
 weakly than B_M.</p>
+<p>The dots grow with their occupancy (ADR 0035). Each dot is a classical puddle whose radius scales as
+N^(1/3), anchored at the compiled dot: <code>State.puddle_radii_nm</code>. Its capacitances follow its gate-induced
+charge, so <code>State.addition_energies_ev</code> falls as N^(−1/3) toward high occupancy and the honeycomb's
+period shrinks with it (more electrons per volt), and the interdot barrier is seen from the puddles'
+edges: at fixed gates it is tens of meV higher at the first electrons than at the compiled occupancy,
+so t, the interdot rate and the conductance fall toward (1,1). At the operating point nothing changes.
+<code>CompileParams.puddles=False</code> keeps the dots at their compiled size.</p>
 <p>The interdot conductance sets the honeycomb's triple-point splitting (ADR 0032).
 <code>State.interdot_conductance</code> is that transmission per channel, and <code>State.interdot_splitting</code> is the
 fractional splitting f, the interdot segment's length as a fraction of the cell along anti-detuning.

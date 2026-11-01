@@ -706,9 +706,10 @@ step replaces (the step is named).</p>
 
   subgraph charge
     DER["derived.derive_double_dot&lt;br/&gt;C_dot from radii, C_gate = C_dot·α → ConstantInteractionParams; sensor α from the basis; sensor E_c and β from the three-dot capacitance matrix (ADR 0026)"]
-    CI["ci.ConstantInteractionParams&lt;br/&gt;occupation N(V) at width kT; lever arms, triple points; with a coupling, the hybridized window's thermal ⟨N⟩ (ADR 0029); with a shape, C(V) and n_g = C(V)(α(V)·V − Δo(V))/E (ADR 0030)"]
+    CI["ci.ConstantInteractionParams&lt;br/&gt;occupation N(V) at width kT; lever arms, triple points; with a coupling, the hybridized window's thermal ⟨N⟩ (ADR 0029); with a shape, C(V) and n_g = C(V)(α(V)·V − Δo(V))/E (ADR 0030); with a puddle, both scaled with the occupancy (ADR 0035)"]
+    PUD["puddle.PuddleGrowth&lt;br/&gt;each dot a classical puddle, R ∝ N^(1/3): scale s = √(n/N_ref) from the gate-induced charge; self-capacitances × s_i, mutual × s₁s₂; the interdot barrier seen from the puddles' edges on the compiled cut (ADR 0035)"]
     HYB["hybrid.InterdotCoupling, window_eigenstates, eigenbasis&lt;br/&gt;t(V) = (ħω₀/π)·√T of the interdot barrier's one transmission (ADR 0034; without a barrier: compiled t moved by ½ the slopes of ln Γ_m, capped at ħω₀/π); the window's charge states of one total charge hybridize by −t, one chain per total charge (ADR 0029)"]
-    IDB["barrier.InterdotBarrier, kemble_transmission&lt;br/&gt;the interdot barrier's top ΔU(V) = ΔU_ref + Σ σ_g·δ_g: screened compiled slopes, the shape grid's top along the barrier gates continued linearly past the merge; T = 1/(1 + e^(2πΔU/ħω_b)), the one transmission behind t, Γ_m and g (ADR 0034)"]
+    IDB["barrier.InterdotBarrier, kemble_transmission&lt;br/&gt;the interdot barrier's top ΔU(V) = ΔU_ref + Σ σ_g·δ_g: screened compiled slopes, the shape grid's top along the barrier gates continued linearly past the merge; T = 1/(1 + e^(2πΔU/ħω_b)), the one transmission behind t, Γ_m and g (ADR 0034); with the puddles' scale, the top seen from their edges (ADR 0035)"]
     SPL["splitting.InterdotSplitting, golden_halperin_splitting&lt;br/&gt;interdot conductance g = the InterdotBarrier's transmission (ADR 0034); f = f_C + (F_max − f_C)·f_GH(g) as an effective interdot capacitance ΔC_m·[[1,−1],[−1,1]] in the energies (ADR 0032)"]
     SHP["shape.ShapeGrid&lt;br/&gt;per barrier gate, the double dot's changes on compiled nodes (lever arms, offsets, C₁, C₂, C_m, positions, radii, barrier exponents); PCHIP per gate, changes added, held beyond the ends, merged flag (ADR 0030); quantity_along continues the barrier top linearly past the ends (ADR 0034)"]
     HB["hubbard.HubbardParams&lt;br/&gt;N(V) with tunnel coupling; t → 0 gives CI"]
@@ -743,7 +744,7 @@ step replaces (the step is named).</p>
   end
 
   subgraph compile
-    CMP["compile.compile_device&lt;br/&gt;draw → basis (closed form | fem hook) → wiring → dots and CI → sensor flank (a last step with the sensor's leads) → sensor leads: WKB action through SB_L, SB_R at a fixed level, slopes on every gate, baths → WKB action barriers → shape grid along B_L, B_M, B_R (refined minima, ADR 0030) → interdot barrier top, curvature, slopes, screening; Kemble's T sets t, Γ_m and the interdot slopes (ADR 0034) → valley → g"]
+    CMP["compile.compile_device&lt;br/&gt;draw → basis (closed form | fem hook) → wiring → dots and CI → sensor flank (a last step with the sensor's leads) → sensor leads: WKB action through SB_L, SB_R at a fixed level, slopes on every gate, baths → WKB action barriers → shape grid along B_L, B_M, B_R (refined minima, ADR 0030) → interdot barrier top, curvature, slopes, screening; Kemble's T sets t, Γ_m and the interdot slopes (ADR 0034) → the puddles: the cut, the turning points, N_ref (ADR 0035) → valley → g"]
   end
 
   subgraph optimum
@@ -782,6 +783,9 @@ step replaces (the step is named).</p>
   SHP --&gt; CI
   SHP --&gt; IDB
   DEV --&gt; IDB
+  PUD --&gt; CI
+  PUD --&gt; IDB
+  DEV --&gt; PUD
   IDB --&gt; SPL
   IDB --&gt; HYB
   IDB --&gt; ME
@@ -1006,6 +1010,10 @@ step replaces (the step is named).</p>
 <td>Layout → WKB lead rate → RateEquation relaxation after a plunger step (Step 4)</td>
 </tr>
 <tr>
+<td><code>honeycomb-vs-occupancy</code></td>
+<td>Device → PuddleGrowth: s(n) → scaled C, E_add, f_C; the barrier top from the puddles' edges → State radii, E_add, ΔU, f, t along the plunger diagonal; charge maps over P1, P2 at four occupancies (#72)</td>
+</tr>
+<tr>
 <td><code>honeycomb-vs-barrier</code></td>
 <td>Device → InterdotBarrier: screened top ΔU(V), continued past the merge → Kemble g → Golden–Halperin f → effective C_m in the CI model → State g, f along B_M; charge maps over P1, P2 at six B_M (#66)</td>
 </tr>
@@ -1057,6 +1065,7 @@ step replaces (the step is named).</p>
     charge_dot["dot"]
     charge_hubbard["hubbard"]
     charge_hybrid["hybrid"]
+    charge_puddle["puddle"]
     charge_shape["shape"]
     charge_splitting["splitting"]
   end
@@ -1098,8 +1107,10 @@ step replaces (the step is named).</p>
   api --&gt; device_session
   api --&gt; device_truth
   api --&gt; readout_sensor
+  charge_barrier --&gt; charge_puddle
   charge_barrier --&gt; charge_shape
   charge_ci --&gt; charge_hybrid
+  charge_ci --&gt; charge_puddle
   charge_ci --&gt; charge_shape
   charge_ci --&gt; charge_splitting
   charge_ci --&gt; constants
@@ -1120,6 +1131,7 @@ step replaces (the step is named).</p>
   compile_backends --&gt; layout_geometry
   compile_device --&gt; charge_barrier
   compile_device --&gt; charge_derived
+  compile_device --&gt; charge_puddle
   compile_device --&gt; charge_shape
   compile_device --&gt; compile_backends
   compile_device --&gt; constants
@@ -1229,6 +1241,10 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>charge.hybrid</code></td>
 <td>Interdot tunnelling in the constant-interaction window: the charge states hybridize (#58, ADR 0029).</td>
+</tr>
+<tr>
+<td><code>charge.puddle</code></td>
+<td>The dots grow with their occupancy: each dot is a classical puddle whose radius scales as N^(1/3), so its capacitances follow the gate-induced charge and the interdot barrier is seen from its edge (ADR 0035).</td>
 </tr>
 <tr>
 <td><code>charge.shape</code></td>
@@ -1400,7 +1416,7 @@ step replaces (the step is named).</p>
 
 <h2 id="runtimes-generated-from-docsgallerymeasuredjson-and-the-protocol-files-do-not-edit-by-hand">Runtimes (generated from <code>docs/gallery/measured.json</code> and the protocol files; do not edit by hand)</h2>
 <!-- runtimes:start -->
-<p>Last recorded on 2026-11-01 at commit <code>ad0d3fa</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
+<p>Last recorded on 2026-11-01 at commit <code>e0acf4a</code> on Windows-11-10.0.26200-SP0 (python 3.12.10, numpy 2.5.4), by <code>scripts/gallery.py --record</code>. Wall times are machine-dependent; counts are exact. The reference platform's numbers are in the CI artifact <code>gallery-ubuntu-latest</code> (ADR 0010).</p>
 <h3 id="per-model-microseconds-per-point-or-sample">Per model (microseconds per point or sample)</h3>
 <table>
 <thead>
@@ -1416,61 +1432,61 @@ step replaces (the step is named).</p>
 <td><code>charge.ci.ConstantInteractionParams.mean_occupation</code></td>
 <td>thermal occupation per gate point</td>
 <td>10,000</td>
-<td>2.37</td>
+<td>2.054</td>
 </tr>
 <tr>
 <td><code>charge.hubbard.HubbardParams.mean_occupation</code></td>
 <td>16x16 diagonalisation per gate point</td>
 <td>10,000</td>
-<td>11.704</td>
+<td>9.756</td>
 </tr>
 <tr>
 <td><code>readout.sensor.SensorSETParams.current_a</code></td>
 <td>sensor current per point</td>
 <td>100,000</td>
-<td>0.095</td>
+<td>0.081</td>
 </tr>
 <tr>
 <td><code>readout.sensor.SensorSETParams.current_a (with leads)</code></td>
 <td>rates, bath occupations and 10 complex digammas per point</td>
 <td>100,000</td>
-<td>2.539</td>
+<td>2.012</td>
 </tr>
 <tr>
 <td><code>readout.noise.TelegraphNoise.trace</code></td>
 <td>one fluctuator per sample</td>
 <td>100,000</td>
-<td>1.181</td>
+<td>0.694</td>
 </tr>
 <tr>
 <td><code>readout.noise.OneOverFNoise.trace</code></td>
 <td>24 fluctuators per sample</td>
 <td>10,000</td>
-<td>24.378</td>
+<td>16.575</td>
 </tr>
 <tr>
 <td><code>readout.measure.SensedDoubleDot.sweep_a (noisy)</code></td>
 <td>occupation + sensor + three noise traces per point</td>
 <td>10,000</td>
-<td>31.313</td>
+<td>19.191</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_a_per_v</code></td>
 <td>8 evaluations per point, noisy</td>
 <td>2,500</td>
-<td>268.049</td>
+<td>154.53</td>
 </tr>
 <tr>
 <td><code>readout.lockin.lockin_sweep_dynamic_a_per_v</code></td>
 <td>8 evaluations + rate dynamics per point, noisy</td>
 <td>2,500</td>
-<td>246.806</td>
+<td>161.759</td>
 </tr>
 <tr>
 <td><code>readout.loading.latched_occupation</code></td>
 <td>per scan step</td>
 <td>100,000</td>
-<td>1.331</td>
+<td>0.931</td>
 </tr>
 </tbody>
 </table>
@@ -1489,141 +1505,141 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>charge-noise-spectroscopy-cpmg</code></td>
 <td>9</td>
-<td>0.5 / 0.0011</td>
-<td>50.0 / 4.94418</td>
+<td>0.5 / 0.0008</td>
+<td>50.0 / 4.41374</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>charge-noise-spectroscopy-j-vs-ramsey</code></td>
 <td>41</td>
 <td>0.5 / 0.0002</td>
-<td>30.0 / 2.70371</td>
+<td>30.0 / 2.32551</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>compiled-device-draws</code></td>
 <td>12</td>
-<td>6.0 / 6.0805</td>
-<td>100.0 / 46.89559</td>
+<td>6.0 / 4.302</td>
+<td>100.0 / 28.5979</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>compiled-device-roundtrip</code></td>
 <td>29,282</td>
-<td>2.0 / 0.7243</td>
-<td>0.1 / 0.04584</td>
+<td>2.0 / 0.476</td>
+<td>0.1 / 0.03395</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>coulomb-oscillations-single-dot</code></td>
 <td>1,201</td>
 <td>0.5 / 0.0</td>
-<td>0.05 / 0.00555</td>
+<td>0.05 / 0.00233</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>crosstalk-lines</code></td>
 <td>57,600</td>
-<td>0.5 / 0.5252</td>
-<td>0.05 / 0.00311</td>
+<td>0.5 / 0.4038</td>
+<td>0.05 / 0.00245</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>diamonds-single-dot</code></td>
 <td>64,521</td>
-<td>0.5 / 0.0001</td>
-<td>0.02 / 0.0002</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00011</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>dot-shape-vs-barrier</code></td>
 <td>11,406</td>
-<td>3.0 / 0.0724</td>
-<td>0.3 / 0.08108</td>
+<td>3.0 / 0.0326</td>
+<td>0.3 / 0.04924</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>drift-repeated-cuts</code></td>
 <td>24,000</td>
-<td>1.0 / 0.0017</td>
-<td>0.1 / 0.05485</td>
+<td>1.0 / 0.0005</td>
+<td>0.1 / 0.02773</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>elzerman-trace</code></td>
 <td>802,000</td>
 <td>0.5 / 0.0</td>
-<td>0.001 / 2e-05</td>
+<td>0.001 / 1e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>esr-line</code></td>
 <td>120,701</td>
-<td>0.5 / 0.0003</td>
-<td>0.002 / 4e-05</td>
+<td>0.5 / 0.0001</td>
+<td>0.002 / 2e-05</td>
 <td>2</td>
 </tr>
 <tr>
 <td><code>exchange-fingerprint</code></td>
 <td>60,501</td>
 <td>0.5 / 0.0002</td>
-<td>0.02 / 0.00096</td>
+<td>0.02 / 0.00065</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>exchange-frequency-vs-barrier</code></td>
 <td>1,244</td>
-<td>3.0 / 0.0549</td>
-<td>0.5 / 0.55556</td>
+<td>3.0 / 0.039</td>
+<td>0.5 / 0.23274</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>exchange-gate-fidelity</code></td>
 <td>41</td>
 <td>0.5 / 0.0003</td>
-<td>100.0 / 61.32304</td>
+<td>100.0 / 36.42434</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>exchange-house-cells</code></td>
 <td>22,801</td>
-<td>0.5 / 0.0005</td>
-<td>0.4 / 0.02472</td>
+<td>0.5 / 0.0002</td>
+<td>0.4 / 0.01685</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>exchange-vs-barrier</code></td>
 <td>251</td>
 <td>0.5 / 0.0004</td>
-<td>0.2 / 0.00864</td>
+<td>0.2 / 0.00894</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>exchange-vs-detuning</code></td>
 <td>401</td>
 <td>0.5 / 0.0002</td>
-<td>0.2 / 0.02036</td>
+<td>0.2 / 0.01996</td>
 <td>5</td>
 </tr>
 <tr>
 <td><code>fault-signatures-stability</code></td>
 <td>57,600</td>
-<td>2.0 / 0.3155</td>
-<td>0.1 / 0.02963</td>
+<td>2.0 / 0.2033</td>
+<td>0.1 / 0.02071</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis-trapping</code></td>
 <td>722</td>
-<td>0.5 / 0.2438</td>
-<td>1.0 / 0.36757</td>
+<td>0.5 / 0.1947</td>
+<td>1.0 / 0.23753</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>gate-hysteresis</code></td>
 <td>361</td>
-<td>0.5 / 0.265</td>
-<td>1.0 / 0.36686</td>
+<td>0.5 / 0.1904</td>
+<td>1.0 / 0.24225</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1636,50 +1652,57 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>gate-leakage-pair</code></td>
 <td>201</td>
-<td>0.5 / 0.0001</td>
-<td>0.02 / 0.00034</td>
+<td>0.5 / 0.0</td>
+<td>0.02 / 0.00029</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>honeycomb-vs-barrier</code></td>
 <td>49,807</td>
-<td>3.0 / 0.0417</td>
-<td>0.2 / 0.06922</td>
+<td>3.0 / 0.0323</td>
+<td>0.2 / 0.04828</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>honeycomb-vs-occupancy</code></td>
+<td>26,645</td>
+<td>3.0 / 0.0314</td>
+<td>0.2 / 0.04324</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>interdot-line-vs-barrier</code></td>
 <td>7,241</td>
-<td>3.0 / 0.0861</td>
-<td>0.2 / 0.16324</td>
+<td>3.0 / 0.0524</td>
+<td>0.2 / 0.07553</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>lead-rate-time-trace</code></td>
 <td>900</td>
-<td>1.0 / 0.3486</td>
-<td>2.0 / 1.04512</td>
+<td>1.0 / 0.1923</td>
+<td>2.0 / 0.48605</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>magnetospectroscopy-transition</code></td>
 <td>1,803</td>
-<td>0.5 / 0.0003</td>
-<td>0.01 / 6e-05</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 3e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-psd</code></td>
 <td>30,000</td>
-<td>0.5 / 0.0013</td>
-<td>0.1 / 0.02933</td>
+<td>0.5 / 0.0003</td>
+<td>0.1 / 0.0204</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>noise-time-trace</code></td>
 <td>30,000</td>
-<td>0.5 / 0.0004</td>
-<td>0.1 / 0.02067</td>
+<td>0.5 / 0.0006</td>
+<td>0.1 / 0.02012</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1692,29 +1715,29 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>optimum-coupling-target</code></td>
 <td>44</td>
-<td>2.0 / 0.2521</td>
-<td>0.1 / 0.19061</td>
+<td>2.0 / 0.2</td>
+<td>0.1 / 0.0756</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>optimum-readout-point</code></td>
 <td>1,202</td>
-<td>2.0 / 0.0011</td>
-<td>0.1 / 0.00019</td>
+<td>2.0 / 0.0013</td>
+<td>0.1 / 0.00018</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>optimum-sensor-flank</code></td>
 <td>1,601</td>
-<td>2.0 / 0.0373</td>
-<td>0.1 / 0.03741</td>
+<td>2.0 / 0.0326</td>
+<td>0.1 / 0.03004</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>optimum-sweet-spot</code></td>
 <td>41</td>
-<td>2.0 / 0.0279</td>
-<td>100.0 / 16.73914</td>
+<td>2.0 / 0.0155</td>
+<td>100.0 / 13.76639</td>
 <td>1</td>
 </tr>
 <tr>
@@ -1727,295 +1750,295 @@ step replaces (the step is named).</p>
 <tr>
 <td><code>pinch-off-crosstalk</code></td>
 <td>24,321</td>
-<td>0.5 / 0.1911</td>
-<td>0.01 / 2e-05</td>
+<td>0.5 / 0.1945</td>
+<td>0.01 / 4e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>plunger-vs-barrier-map</code></td>
 <td>12,000</td>
-<td>5.0 / 0.4489</td>
-<td>2.0 / 2.14153</td>
+<td>5.0 / 0.3376</td>
+<td>2.0 / 0.72424</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-cut-along-channel</code></td>
 <td>1,203</td>
-<td>0.5 / 0.2843</td>
-<td>0.01 / 0.00147</td>
+<td>0.5 / 0.1736</td>
+<td>0.01 / 0.00079</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-disorder</code></td>
 <td>344,424</td>
-<td>1.0 / 1.0252</td>
-<td>0.001 / 1e-05</td>
+<td>1.0 / 0.6511</td>
+<td>0.001 / 0.0</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>potential-map-layout</code></td>
 <td>86,106</td>
-<td>0.5 / 0.3223</td>
+<td>0.5 / 0.1696</td>
 <td>0.001 / 1e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>psb-bias-triangles</code></td>
 <td>25,921</td>
-<td>0.5 / 0.0004</td>
-<td>0.05 / 0.00122</td>
+<td>0.5 / 0.0002</td>
+<td>0.05 / 0.00073</td>
 <td>3</td>
 </tr>
 <tr>
 <td><code>psb-readout-window</code></td>
 <td>1,602</td>
-<td>0.5 / 0.0002</td>
-<td>0.01 / 0.00029</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 9e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>pulsed-gate-spectroscopy</code></td>
 <td>60,501</td>
-<td>0.5 / 0.0001</td>
-<td>0.01 / 4e-05</td>
+<td>0.5 / 0.0</td>
+<td>0.01 / 1e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>rabi-chevron</code></td>
 <td>20,301</td>
-<td>0.5 / 0.0003</td>
-<td>0.02 / 0.00517</td>
+<td>0.5 / 0.0001</td>
+<td>0.02 / 0.00224</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>ramsey-fringes</code></td>
 <td>1,202</td>
-<td>0.5 / 0.0003</td>
-<td>0.01 / 0.00019</td>
+<td>0.5 / 0.0001</td>
+<td>0.01 / 5e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>rf-resonance</code></td>
 <td>4,004</td>
 <td>0.5 / 0.0</td>
-<td>0.01 / 0.00011</td>
+<td>0.01 / 5e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>rf-sensor-flank</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00427</td>
+<td>0.02 / 0.00279</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-barrier-barrier-map</code></td>
 <td>14,641</td>
 <td>2.0 / 0.0016</td>
-<td>0.1 / 0.04903</td>
+<td>0.1 / 0.03314</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-barrier-rates</code></td>
 <td>41</td>
-<td>2.0 / 0.3227</td>
-<td>0.1 / 0.00348</td>
+<td>2.0 / 0.2812</td>
+<td>0.1 / 0.001</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-bath-turn-on</code></td>
 <td>1,602</td>
-<td>2.0 / 0.0019</td>
-<td>0.1 / 0.04329</td>
+<td>2.0 / 0.0017</td>
+<td>0.1 / 0.033</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-coulomb-peak</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 0.00387</td>
+<td>0.02 / 0.00256</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>sensor-peak-broadening</code></td>
 <td>4,005</td>
-<td>2.0 / 0.0051</td>
-<td>0.1 / 0.00296</td>
+<td>2.0 / 0.0035</td>
+<td>0.1 / 0.0023</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>session-charge-trace</code></td>
 <td>1,600</td>
-<td>2.0 / 0.3042</td>
-<td>2.0 / 8.1924</td>
+<td>2.0 / 0.235</td>
+<td>2.0 / 3.19142</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>session-closing-barrier</code></td>
 <td>2,067</td>
-<td>2.0 / 0.8959</td>
-<td>2.0 / 4.91497</td>
+<td>2.0 / 0.5212</td>
+<td>2.0 / 2.32447</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>session-hold-relaxation</code></td>
 <td>600</td>
-<td>2.0 / 0.4159</td>
-<td>2.0 / 3.75684</td>
+<td>2.0 / 0.2631</td>
+<td>2.0 / 1.99696</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>session-slow-sensor</code></td>
 <td>1,253</td>
-<td>2.0 / 0.6348</td>
-<td>2.0 / 6.39574</td>
+<td>2.0 / 0.3894</td>
+<td>2.0 / 2.53609</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>single-shot-histogram</code></td>
 <td>2,000</td>
-<td>0.5 / 0.0012</td>
-<td>0.5 / 0.61028</td>
+<td>0.5 / 0.0025</td>
+<td>0.5 / 0.35557</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>snr-vs-integration-time</code></td>
 <td>3,200</td>
-<td>0.5 / 0.0017</td>
-<td>5.0 / 2.06436</td>
+<td>0.5 / 0.0005</td>
+<td>5.0 / 1.19031</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>spin-funnel</code></td>
 <td>120,701</td>
-<td>0.5 / 0.0002</td>
+<td>0.5 / 0.0003</td>
 <td>0.01 / 4e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-disorder</code></td>
 <td>57,600</td>
-<td>2.0 / 1.0666</td>
-<td>0.1 / 0.02615</td>
+<td>2.0 / 0.7111</td>
+<td>0.1 / 0.01998</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot-layout</code></td>
 <td>22,500</td>
-<td>0.5 / 0.4126</td>
-<td>0.1 / 0.02971</td>
+<td>0.5 / 0.355</td>
+<td>0.1 / 0.02001</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-coarse-2dot</code></td>
 <td>40,000</td>
-<td>0.5 / 0.001</td>
-<td>0.1 / 0.03589</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.01963</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-direction</code></td>
 <td>12,800</td>
-<td>1.0 / 0.2723</td>
-<td>2.0 / 1.15355</td>
+<td>1.0 / 0.1782</td>
+<td>2.0 / 0.53242</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-fine-2dot</code></td>
 <td>22,500</td>
-<td>0.5 / 0.0007</td>
-<td>0.1 / 0.02635</td>
+<td>0.5 / 0.0004</td>
+<td>0.1 / 0.02085</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>stability-lockin-common</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0013</td>
-<td>0.5 / 0.22827</td>
+<td>0.5 / 0.0004</td>
+<td>0.5 / 0.17137</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-detuning</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0005</td>
-<td>0.5 / 0.23324</td>
+<td>0.5 / 0.0004</td>
+<td>0.5 / 0.17344</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p1</code></td>
 <td>40,000</td>
-<td>0.5 / 0.0006</td>
-<td>0.5 / 0.23057</td>
+<td>0.5 / 0.0005</td>
+<td>0.5 / 0.16999</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-lockin-p2</code></td>
 <td>40,000</td>
 <td>0.5 / 0.0004</td>
-<td>0.5 / 0.23906</td>
+<td>0.5 / 0.16962</td>
 <td>8</td>
 </tr>
 <tr>
 <td><code>stability-vs-sweep-rate</code></td>
 <td>19,200</td>
-<td>1.0 / 0.2507</td>
-<td>2.0 / 1.2451</td>
+<td>1.0 / 0.2151</td>
+<td>2.0 / 0.54891</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>switcher-histogram</code></td>
 <td>600,000</td>
 <td>1.0 / 0.0005</td>
-<td>0.05 / 0.03799</td>
+<td>0.05 / 0.0263</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>t1-hot-spot</code></td>
 <td>1,803</td>
 <td>0.5 / 0.0001</td>
-<td>0.01 / 2e-05</td>
+<td>0.01 / 4e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-global</code></td>
 <td>201</td>
-<td>0.5 / 0.2317</td>
-<td>1.0 / 0.34168</td>
+<td>0.5 / 0.1675</td>
+<td>1.0 / 0.21975</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate-layout</code></td>
 <td>361</td>
-<td>0.5 / 0.2431</td>
-<td>1.0 / 0.37538</td>
+<td>0.5 / 0.1499</td>
+<td>1.0 / 0.21238</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>turn-on-single-gate</code></td>
 <td>601</td>
 <td>0.5 / 0.0</td>
-<td>0.02 / 6e-05</td>
+<td>0.02 / 8e-05</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>unintentional-dots</code></td>
 <td>125</td>
 <td>1.0 / 0.0001</td>
-<td>1000.0 / 677.01089</td>
+<td>1000.0 / 484.14847</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>valley-splitting-draws</code></td>
 <td>108,000</td>
-<td>0.5 / 0.0001</td>
-<td>0.01 / 0.00088</td>
+<td>0.5 / 0.0</td>
+<td>0.01 / 0.00078</td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>virtual-gates-map</code></td>
 <td>29,282</td>
-<td>2.0 / 0.0022</td>
-<td>0.1 / 0.04175</td>
+<td>2.0 / 0.0023</td>
+<td>0.1 / 0.03261</td>
 <td>1</td>
 </tr>
 </tbody>
