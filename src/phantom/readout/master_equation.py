@@ -60,9 +60,10 @@ from phantom.charge.hybrid import dynamics_window, eigenbasis
 from phantom.constants import K_B_EV_PER_K
 from phantom.readout.rates import GateRates
 
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 """2: with an interdot coupling, the rate equation runs over the hybridized eigenstates (#58). 3: its
-window follows t (`dynamics_window`), and with a shape its energies use C(V) (#59)."""
+window follows t (`dynamics_window`), and with a shape its energies use C(V) (#59). 4: the interdot
+rate is seen from the puddles' edges at the occupancy there (#72)."""
 
 PROBABILITY_FLOOR = 1e-12
 """States below this probability are dropped from the active set between samples."""
@@ -163,9 +164,10 @@ class RateEquation:
     three constants above are its rates at the reference point; None keeps them constant."""
 
     def rates_hz(self, v: np.ndarray) -> np.ndarray:
-        """(Γ_L, Γ_R, Γ_m) (..., 3), Hz, at carried voltages `v` (..., gates)."""
+        """(Γ_L, Γ_R, Γ_m) (..., 3), Hz, at carried voltages `v` (..., gates); the interdot rate is seen
+        from the puddles' edges at the occupancy there (#72)."""
         if self.gate_rates is not None:
-            return self.gate_rates.rates_hz(v)
+            return self.gate_rates.rates_hz(v, None if self.charge.puddle is None else self.charge.occupancy_scale(v))
         v = np.asarray(v, dtype=float)
         return np.broadcast_to(np.array([self.gamma_left_hz, self.gamma_right_hz, self.gamma_interdot_hz]), v.shape[:-1] + (3,)).copy()
 
@@ -200,7 +202,7 @@ class RateEquation:
         if self.gate_rates is None:
             g_l, g_r, g_m = self.gamma_left_hz, self.gamma_right_hz, self.gamma_interdot_hz
         else:
-            g_l, g_r, g_m = (float(x) for x in self.gate_rates.rates_hz(v))
+            g_l, g_r, g_m = (float(x) for x in self.rates_hz(v))
         moves = (((1, 0), g_l), ((0, 1), g_r), ((1, -1), g_m))
         listed = states.tolist()
         for (dn1, dn2), gamma in moves:

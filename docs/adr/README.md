@@ -38,3 +38,4 @@ Immutable once merged (except a `Superseded by` status line). New decision = new
 | 0032 | The interdot conductance sets the triple-point splitting: Kemble's transmission of the interdot barrier, Golden & Halperin's f(g), an effective interdot capacitance in the CI model | Accepted |
 | 0033 | Runtime gallery protocols run on a stored device: compiled once, committed, checked against a fresh compile | Accepted |
 | 0034 | The interdot barrier has one transmission: its screened top, continued past the merge, sets t, the interdot rate and the conductance | Accepted |
+| 0035 | The dots grow with their occupancy: classical puddles whose radius scales as N^(1/3), their capacitances following the gate-induced charge and the interdot barrier seen from their edges | Accepted |

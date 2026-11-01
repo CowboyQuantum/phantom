@@ -5,8 +5,8 @@ Modules: `ci` (constant-interaction double dot and its exact derived quantities)
 interdot coupling at the gates and the CI window's hybridized eigenstates, #58), `shape` (the dots'
 shape along the barrier gates on a compiled grid, #59), `barrier` (the interdot barrier's top at the
 gates, screened and continued past the merge, and its one transmission, #70), `splitting` (the
-conductance-driven triple-point splitting, #66), `derived` (CI parameters from a layout through
-`electrostatics`, Step 2).
+conductance-driven triple-point splitting, #66), `puddle` (the dots' growth with their occupancy, #72),
+`derived` (CI parameters from a layout through `electrostatics`, Step 2).
 """
 
 from phantom.charge.barrier import InterdotBarrier
@@ -15,9 +15,10 @@ from phantom.charge.derived import DerivedDoubleDot, derive_double_dot, mutual_c
 from phantom.charge.dot import Barrier, Dot
 from phantom.charge.hubbard import HubbardParams
 from phantom.charge.hybrid import InterdotCoupling
+from phantom.charge.puddle import PuddleGrowth
 from phantom.constants import E_CHARGE_C, E_UNIT_V_PER_E_AF, K_B_EV_PER_K
 
-MODEL_VERSION = 5
+MODEL_VERSION = 6
 """Layer model version: bumped whenever any output of the layer changes for the same inputs (ADR 0003)."""
 
 __all__ = [
@@ -32,6 +33,7 @@ __all__ = [
     "HubbardParams",
     "InterdotBarrier",
     "InterdotCoupling",
+    "PuddleGrowth",
     "derive_double_dot",
     "mutual_capacitance_af",
 ]

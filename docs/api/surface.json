@@ -139,6 +139,11 @@
      "default": true,
      "name": "interdot_cross_screening",
      "type": "float"
+    },
+    {
+     "default": true,
+     "name": "puddles",
+     "type": "bool"
     }
    ],
    "frozen": true,
@@ -254,7 +259,7 @@
   "DEVICE_FORMAT_VERSION": {
    "kind": "value",
    "type": "int",
-   "value": 6
+   "value": 7
   },
   "Device": {
    "fields": [
@@ -397,6 +402,11 @@
      "default": true,
      "name": "interdot_barrier_screening",
      "type": "tuple[float, ...] | None"
+    },
+    {
+     "default": true,
+     "name": "puddle",
+     "type": "PuddleGrowth | None"
     }
    ],
    "frozen": true,
@@ -1202,6 +1212,11 @@
      "default": true,
      "name": "interdot_barrier_top_ev",
      "type": "np.ndarray | None"
+    },
+    {
+     "default": true,
+     "name": "puddle_radii_nm",
+     "type": "np.ndarray | None"
     }
    ],
    "frozen": true,
@@ -1387,7 +1402,7 @@
   "__version__": {
    "kind": "value",
    "type": "str",
-   "value": "0.5.0"
+   "value": "0.6.0"
   },
   "compile_device": {
    "kind": "function",

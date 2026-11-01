@@ -4,6 +4,7 @@ the eigenstates keeps detailed balance and relaxes a pair at Γ_m at every detun
 from its compiled value and saturates at ħω₀/π, the barrier gate widens the interdot line of the
 reference device, and a session reads eigenstates. Analytic limits and invariants only."""
 
+import dataclasses
 import math
 
 import numpy as np
@@ -136,7 +137,7 @@ def test_the_coupling_follows_the_gates_from_its_compiled_value(device: Device):
     hbar_omega = math.sqrt(2 * 0.0380998212 * device.dots[0].curvature_ev_per_nm2 / mass)
     assert c.t_max_ev == pytest.approx(hbar_omega / math.pi, rel=1e-6)
     s = device.at(np.array(device.programmed_point_v))
-    assert float(s.tunnel_coupling_ev) == pytest.approx(float(c.tunnel_coupling_ev(s.v_carried_v)), rel=1e-15)
+    assert float(s.tunnel_coupling_ev) == pytest.approx(float(device.runtime_ci().tunnel_coupling_ev(s.v_carried_v)), rel=1e-15), "the state's t sees the barrier from the puddles' edges (#72)"
 
 
 def _interdot_point(device: Device, v0: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -150,10 +151,19 @@ def _interdot_point(device: Device, v0: np.ndarray) -> tuple[np.ndarray, np.ndar
     def ng(v: np.ndarray) -> np.ndarray:
         return ci.induced_charge(device.effective_voltages(v))
 
-    jac = np.stack([ng(v0 + np.eye(len(v0))[k]) - ng(v0) for k in j], axis=1)  # electrons per volt, linear
-    tp1, tp2 = ci.triple_points_ng()
+    def triple_points(c: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        a = np.linalg.inv(c)
+        tp1 = np.linalg.solve(a, np.array([a[0, 0] / 2, a[1, 1] / 2]))
+        return tp1, tp1 + a[0, 1] * (c @ np.ones(2))
+
+    # the puddles (#72) scale the capacitances and the induced charge with the occupancy, so take the
+    # local matrix and a small-step Jacobian, and iterate once
     v = v0.copy()
-    v[j] += np.linalg.solve(jac, np.floor(ng(v0)) + 0.5 * (tp1 + tp2) - ng(v0))
+    for _ in range(2):
+        step = 1e-3
+        jac = np.stack([(ng(v + step * np.eye(len(v0))[k]) - ng(v - step * np.eye(len(v0))[k])) / (2 * step) for k in j], axis=1)
+        tp1, tp2 = triple_points(dataclasses.replace(ci, splitting=None).local(device.effective_voltages(v))[0])
+        v[j] += np.linalg.solve(jac, np.floor(ng(v0)) + 0.5 * (tp1 + tp2) - ng(v))
     d = np.zeros(len(v0))
     d[j] = np.linalg.solve(jac, np.array([0.5, -0.5]))
     return v, d / np.linalg.norm(d)
