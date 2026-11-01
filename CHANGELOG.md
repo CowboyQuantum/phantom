@@ -6,7 +6,7 @@ format, the patch version otherwise. A change of output for the same parameters,
 the `MODEL_VERSION` of the module that changed and is listed here. A release is tagged `vX.Y.Z` on a green
 `main` commit, by the owner or by a session the owner tells to (ADR 0025).
 
-## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape, the exchange and the honeycomb (#58, #59, #60, #66; untagged)
+## 0.4.0 — the barrier gates set the interdot coupling, the dots' shape, the exchange and the honeycomb (#58, #59, #60, #66; `v0.4.0` at `ae8d5db`)
 
 The interdot tunnel coupling t follows every gate at runtime, and the charge states of one total charge
 hybridize through it (ADR 0029): opening B_M widens an interdot line from the thermal step to the
